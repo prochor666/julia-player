@@ -1,0 +1,480 @@
+/* *****************************
+* FIX!
+* Hide default controls
+* in fullscreen mode
+***************************** */
+video::-webkit-media-controls {
+    display:none !important;
+}
+
+/* *****************************
+* FIX!
+* 4/5px gap bellow resizable
+* inline media elements
+***************************** */
+video, audio, canvas {
+    vertical-align: top;
+}
+
+/* *****************************
+* Julia player style
+* === CONTAINER ===
+***************************** */
+div.julia-player.julia-theme-default, div.julia-player.julia-theme-default * {
+    padding: 0;
+    margin: 0;
+}
+
+div.julia-player.julia-theme-default {
+    position: relative;
+    display: inline-block;
+    background: rgba(0,0,0,1);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.9);
+    /* *****************************
+    * Julia player style
+    * Keep UI unselectable
+    ***************************** */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* *****************************
+* === SHIELD ===
+***************************** */
+div.julia-player.julia-theme-default>div.julia-shield {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background: rgba(0,0,0,0);
+    z-index: 73;
+}
+
+/* *****************************
+* === SUGGEST ===
+***************************** */
+div.julia-player.julia-theme-default>div.julia-suggest {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background: rgba(0,0,0,1);
+    z-index: 77;
+    display: none;
+}
+
+div.julia-player.julia-theme-default>div.julia-suggest.on {
+    display: block;
+}
+
+/* *****************************
+* === REMOTE TOOLBAR ===
+***************************** */
+div.julia-player.julia-theme-default>div.julia-toolbar {
+    background: rgba(0,0,0,.7);
+    height: 50px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 70;
+    opacity: .0;
+}
+
+div.julia-player.julia-theme-default>div.julia-toolbar.live {
+    height: 38px;
+}
+
+/* *****************************
+* === PRELOADER ===
+***************************** */
+@-webkit-keyframes rotating {
+from {
+        -webkit-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotating {
+    from {
+        -ms-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    to {
+        -ms-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+div.julia-player.julia-theme-default>div.julia-shield>div.julia-preloader {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    background-color: rgba(0,0,0,.7);
+    z-index: 79;
+}
+
+div.julia-player.julia-theme-default>div.julia-shield>div.julia-preloader.on {
+    display: block;
+}
+
+div.julia-player.julia-theme-default>div.julia-shield>div.julia-preloader>i {
+    color: #777;
+    padding: 0;
+    margin: 0;
+    display: block;
+    width: 64px;
+    height: 64px;
+    line-height: 64px;
+    text-align: center;
+    font-size: 64px;
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    margin-left: -32px;
+    margin-bottom: -32px;
+    z-index: 80;
+    -webkit-animation: rotating 2s linear infinite;
+    -moz-animation: rotating 2s linear infinite;
+    -ms-animation: rotating 2s linear infinite;
+    -o-animation: rotating 2s linear infinite;
+    animation: rotating 2s linear infinite;
+}
+
+/* *****************************
+* === BUTTONS ===
+***************************** */
+div.julia-player.julia-theme-default button.julia-btn {
+    color: #F9F9F9;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font-size: 25px;
+    width: 30px;
+    height: 25px;
+    position: absolute;
+    bottom: 9px;
+}
+
+div.julia-player.julia-theme-default button.julia-btn:hover {
+    color: #FFCC00;
+}
+
+div.julia-player.julia-theme-default div.julia-toolbar>button.julia-btn.julia-playback {
+    left: 5px;
+}
+
+div.julia-player.julia-theme-default div.julia-toolbar>button.julia-btn.julia-sound {
+    right: 140px;
+}
+
+div.julia-player.julia-theme-default div.julia-toolbar>button.julia-btn.julia-fullscreen-toggle {
+    right: 5px;
+}
+
+div.julia-player.julia-theme-default>div.julia-shield>button.julia-btn.julia-big-play {
+    width: 72px;
+    height: 72px;
+    text-align: center;
+    bottom: 50%;
+    left: 50%;
+    padding: 4px 0 0 8px;
+    background-color: rgba(0,0,0,.7);
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    margin-left: -36px;
+    margin-bottom: -36px;
+    z-index: 74;
+}
+
+div.julia-player.julia-theme-default>div.julia-shield>button.julia-btn.julia-big-play>i {
+    display: inline-block;
+    height: 48px;
+    line-height: 48px;
+    font-size: 48px;
+}
+
+/* *****************************
+* === BARS ===
+***************************** */
+div.julia-player.julia-theme-default>div.julia-toolbar>div.julia-progress {
+    height: 12px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+}
+
+div.julia-player.julia-theme-default>div.julia-toolbar.live>div.julia-progress {
+    display: none;
+}
+
+div.julia-player.julia-theme-default>div.julia-toolbar>div.julia-volume {
+    width: 80px;
+    border: 0;
+    outline: 0;
+    height: 16px;
+    position: absolute;
+    right: 50px;
+    bottom: 5px;
+}
+
+/* *****************************
+* Julia player style
+* === PANELS ===
+***************************** */
+div.julia-player.julia-theme-default>div.julia-toolbar>div.julia-panel {
+    display: inline-block;
+    border: 0;
+    outline: 0;
+    height: 20px;
+    font-size: 12px;
+    color: #DDD;
+    position: absolute;
+    bottom: 6px;
+    font-family: sans-serif;
+}
+
+div.julia-player.julia-theme-default>div.julia-toolbar>div.julia-panel.julia-currentTime {
+    width: 60px;
+    left: 40px;
+    text-align: right;
+}
+
+div.julia-player.julia-theme-default>div.julia-toolbar>div.julia-panel.julia-live-indicator {
+    left: 50px;
+    text-align: left;
+    display: none;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+div.julia-player.julia-theme-default>div.julia-toolbar>div.julia-panel.julia-duration {
+    left: 105px;
+}
+
+div.julia-player.julia-theme-default>div.julia-toolbar.live>div.julia-currentTime,
+div.julia-player.julia-theme-default>div.julia-toolbar.live>div.julia-duration {
+    display: none;
+}
+
+div.julia-player.julia-theme-default>div.julia-toolbar.live>div.julia-panel.julia-live-indicator {
+    display: inline-block;
+}
+
+/* *****************************
+* Julia player style
+* === SUGGEST ITEMS ===
+***************************** */
+div.julia-player.julia-theme-default>div.julia-suggest>div.julia-suggest-item {
+    width: 42.5%;
+    height: 50%;
+    min-height: 80px;
+    font-size: 1.5em;
+    border: 1px solid #444;
+    color: #ABABAB;
+    background: rgba(0,0,0,1);
+    float: left;
+    margin: 5% 0 0 5%;
+    padding: 2%;
+    cursor: pointer;
+}
+
+div.julia-player.julia-theme-default>div.julia-suggest>div.julia-suggest-item:hover {
+    border: 1px solid #FFCC00;
+}
+
+div.julia-player.julia-theme-default>div.julia-suggest>div.julia-suggest-item>div.julia-suggest-item-title {
+
+}
+
+
+/* *****************************
+* === TOOLBAR VISIBLE MODE ===
+***************************** */
+div.julia-player.julia-theme-default>div.julia-toolbar.julia-toolbar-visible {
+    opacity: 1;
+    z-index: 80;
+}
+
+/* *****************************
+* === FULLSCREEN MODE ===
+****************************** */
+div.julia-player.julia-theme-default.julia-fullscreen-on {
+    position: relative;
+    min-width: 100%;
+    min-height: 100%;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    display: block;
+}
+
+/* *****************************
+* === VIDEO ELEMENT ===
+****************************** */
+div.julia-player.julia-theme-default>video {
+    min-width: 100%;
+    height: auto;
+    min-height: 100%;
+}
+
+/* *****************************
+* === TRANSITIONS ===
+****************************** */
+div.julia-player.julia-theme-default,
+div.julia-player.julia-theme-default>div.julia-toolbar,
+div.julia-player.julia-theme-default>div.julia-shield>button.julia-btn.julia-big-play,
+div.julia-player.julia-theme-default>div.julia-suggest>div.julia-suggest-item
+{
+    -webkit-transition: all 250ms;
+    -moz-transition: all 250ms;
+    -ms-transition: all 250ms;
+    -o-transition: all 250ms;
+    transition: all 250ms;
+}
+
+/* *****************************
+* === BACKDROP ===
+****************************** */
+::backdrop {
+    background-color: #000;
+}
+
+::-ms-backdrop {
+    background-color: #000;
+}
+
+
+
+
+
+
+/* *****************************
+* Rangeslider polyfill styles
+****************************** */
+div.julia-player.julia-theme-default .julia-rangeslider,
+div.julia-player.julia-theme-default .julia-rangeslider__fill {
+    display: block;
+}
+
+div.julia-player.julia-theme-default .julia-rangeslider {
+    background: #777;
+    position: relative;
+}
+
+div.julia-player.julia-theme-default .julia-rangeslider--horizontal {
+    height: 6px;
+    width: 100%;
+    cursor: pointer;
+}
+
+div.julia-player.julia-theme-default .julia-rangeslider--vertical {
+    width: 6px;
+    min-height: 150px;
+    max-height: 100%;
+    cursor: pointer;
+}
+
+div.julia-player.julia-theme-default .julia-rangeslider--disabled {
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+    opacity: 0.4;
+}
+
+div.julia-player.julia-theme-default .julia-rangeslider__fill {
+    background: #FFCC00;
+    position: absolute;
+}
+div.julia-player.julia-theme-default .julia-rangeslider--horizontal .julia-rangeslider__fill {
+    top: 0;
+    height: 100%;
+}
+div.julia-player.julia-theme-default .julia-rangeslider--vertical .julia-rangeslider__fill {
+    bottom: 0;
+    width: 100%;
+}
+
+div.julia-player.julia-theme-default .julia-rangeslider__handle {
+    background-color: #F9F9F9;
+    cursor: pointer;
+    display: inline-block;
+    width: 8px;
+    height: 17px;
+    position: absolute;
+    -moz-border-radius:0;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+}
+
+div.julia-player.julia-theme-default .julia-rangeslider__handle:after {
+    content: "";
+    display: block;
+    width:  8px;
+    height: 17px;
+    margin: auto;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    -moz-border-radius: 0;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+}
+div.julia-player.julia-theme-default .julia-rangeslider__handle:active {
+    /*background-color: #F00;*/
+}
+div.julia-player.julia-theme-default .julia-rangeslider--horizontal .julia-rangeslider__handle {
+  top: -6px;
+  touch-action: pan-y;
+  -ms-touch-action: pan-y;
+}
+div.julia-player.julia-theme-default .julia-rangeslider--vertical .julia-rangeslider__handle {
+  left: -6px;
+  touch-action: pan-x;
+  -ms-touch-action: pan-x;
+}
+
+input[type="range"]:focus + div.julia-player.julia-theme-default .julia-rangeslider .julia-rangeslider__handle {
+}
+
+/* **************
+* Progress bar
+************** */
+div.julia-player.julia-theme-default .julia-progress .julia-rangeslider--horizontal {
+    height: 12px;
+}
+
+div.julia-player.julia-theme-default .julia-progress .julia-rangeslider__handle {
+    width: 6px;
+    height: 12px;
+    top: 0;
+    background-color: #FFF;
+}
