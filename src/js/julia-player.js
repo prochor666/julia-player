@@ -2,7 +2,7 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.7.2
+* version: 0.8.2
 * build: 2015-12-06
 * since 11/2015
 * licensed under the MIT License
@@ -37,15 +37,15 @@ if(!window.jQuery)
     }catch(err)
     {
         /*! hls.js 0.3.10 */
-        // Missing lib, embed it first
+        // Handle error or insert/bind source
     }
 
     try {
         $.rangeslider();
     }catch(err)
     {
-        /*! rangeslider.js - v2.0.4 */
-        // Missing lib, embed it first
+        /*! rangeslider.js - v2.0.5 */
+        // Handle error or insert/bind source
     }
 
 
@@ -76,6 +76,7 @@ if(!window.jQuery)
                 [640,360],
                 [512,288]
             ],
+            pauseOnClick: false, 
             hlsConfig: {
                 debug : false,
                 autoStartLoad : true,
@@ -111,12 +112,12 @@ if(!window.jQuery)
         var shield,
             suggest,
             toolbar,
-            ready = false,
             api,
             apiId = Math.floor((Math.random()*10000000)+1), // Create a shadow api
             player,
             isLive = false,
             hls,
+            hlsCapableString = '', 
             type = 'html5',
             isHls = false,
             source,
@@ -129,7 +130,7 @@ if(!window.jQuery)
             publicApi = {},
             suggestPointer = 0,
             suggestClicked = false;
-            progressStep = 0.01; // final sense is 10 000
+            progressStep = 0.01; // Full sense: 100, so .01 is enough accurate
 
         // Extend options
         var _extend = function()
@@ -211,7 +212,7 @@ if(!window.jQuery)
                     'apiType': 'html5video',
                 });
 
-                apiElement = $('<video class="julia-video" id="julia-api-'+apiId+'"></video>');
+                apiElement = $('<video class="julia-video" id="julia-api-'+apiId+'" preload="auto"></video>');
                 player.prepend(apiElement);
                 api = document.getElementById('julia-api-'+apiId);
                 api.controls = false;
@@ -758,10 +759,10 @@ if(!window.jQuery)
             hlsCapable: function()
             {
                 var vid = document.createElement('video');
-                vid.id = 'video-test';
-                var can = vid.canPlayType('application/vnd.apple.mpegURL');
-                $('#video-test').remove();
-                return (can == 'probably');
+                vid.id = 'video-cap-test-'+apiId;
+                hlsCapableString = vid.canPlayType('application/vnd.apple.mpegURL');
+                $('#video-cap-test'+apiId).remove();
+                return (hlsCapableString == 'probably' || hlsCapableString == 'maybe');
             },
 
             resize: function()
@@ -1013,13 +1014,9 @@ if(!window.jQuery)
             // Set mute if needed
             if(options.muted === true)
             {
-                _control('sound-off', {
-                    'event': 'playStart'
-                });
+                _control('sound-off');
             }else{
-                _control('sound-on', {
-                    'event': 'playStart'
-                });
+                _control('sound-on');
 
                 // Set initial volume
                 _control('volume', {
@@ -1041,29 +1038,25 @@ if(!window.jQuery)
             });
         }
 
-        // Bind can play by ready state
+        // Bind can play by ready state / fake readyState
         // Because of Firefox cannot bind canplaythrough event with HLS.js properly
         var _canplaythrough = function()
         {
-            try {
-                _playAllowStart({
-                    type: '_canplaythrough'
-                });
-
-            }catch(e)
+            if(started === false)
             {
-                if(api.readyState>3)
-                {
-                    _playAllowStart({
-                        type: '_canplaythrough'
-                    });
-                }else{
-                    setTimeout( function()
-                    {
-                        _canplaythrough();
-                    }, 250);
-                }
-            }
+	            // don't let mobile Firefox make decision about readyState, mobile Firefox lie!
+	            if(api.readyState>=3 || (_support.isMobile() === true && api.readyState>=2) )
+	            {
+	                _playAllowStart({
+	                    type: '_canplaythrough'
+	                });
+	            }else{
+	                setTimeout( function()
+	                {
+	                    _canplaythrough();
+	                }, 250);
+	            }
+	        }
         }
 
         // Bindings
@@ -1124,7 +1117,10 @@ if(!window.jQuery)
                 {
                     e.preventDefault();
                     e.stopPropagation();
-                    //_control('pause');
+                    if(options.pauseOnClick === true)
+                    {
+                    	_control('pause');
+                    }
                 });
 
                 // Fullscreen toolbar behavior bindings
@@ -1236,16 +1232,15 @@ if(!window.jQuery)
             // Native video api
             nativeEvents: function()
             {
-                if(_support.forceReady()===true)
+                if(_support.forceReady()===true && isHls === true)
                 {
                     _canplaythrough();
                 }else{
                     api.oncanplaythrough = function(e)
                     {
                         duration = api.duration;
-                        ready = true;
-
-                        if(started === false)
+                    
+                        if(started === false && api.readyState >= 3)
                         {
                             _playAllowStart(e);
                         }
@@ -1365,7 +1360,6 @@ if(!window.jQuery)
                     if(started === false)
                     {
                         duration = api.duration;
-                        ready = true;
                         seeking = false;
                         _debug.run({
                             'duration': duration,
@@ -1391,7 +1385,7 @@ if(!window.jQuery)
                     ready: function(flashTime)
                     {
                         api.load(source);
-                        ready = true;
+                        
                         _debug.run({
                             'ready': flashTime
                         });
@@ -1559,15 +1553,12 @@ if(!window.jQuery)
             flashApi = false;
             isLive = false;
 
+            hlsCapable = _support.hlsCapable();
+
             if(isHls === true)
             {
-                useHlsLib = _support.hlsCapable() === false && Hls.isSupported() ? true: false;
+                useHlsLib = hlsCapable === false && Hls.isSupported() ? true: false;
             }
-
-            // Debug
-            _debug.run({
-                'useHlsLib': useHlsLib,
-            });
 
             // ************************
             // HLS library supported
@@ -1594,7 +1585,6 @@ if(!window.jQuery)
                     }
                 });
 
-
                 for(x in options.triggerHls)
                 {
                     handle = options.triggerHls[x];
@@ -1617,7 +1607,7 @@ if(!window.jQuery)
             // No HLS library support,
             // but HLS is requested
             // ************************
-            }else if(isHls === true && useHlsLib === false)
+            }else if(isHls === true && useHlsLib === false && hlsCapable === false)
             {
                 flashApi = true;
 
@@ -1642,11 +1632,17 @@ if(!window.jQuery)
                 toolbar.removeClass('live');
             }
 
-            _debug.run({
-                'isHls': isHls,
+
+            stats = {
+            	'isHls': isHls,
                 'flashApi': flashApi,
-                'live': isLive
-            });
+                'useHlsLib': useHlsLib,
+                'live': isLive, 
+                'hlsCapable': hlsCapable, 
+                'hlsCapableString': hlsCapableString
+            };
+
+            _debug.run(stats);
 
             // ************************
             // Bind all events
@@ -1667,7 +1663,8 @@ if(!window.jQuery)
                 control : _control,
                 support : _support,
                 media: api,
-                id: apiId
+                id: apiId, 
+                stats: stats
             };
         }
 
@@ -1700,11 +1697,6 @@ if(!window.jQuery)
 
             // Store plugin object in element's data
             $(this).data('julia', __julia);
-
-/*            $(window).on('resize', function()
-            {
-            	__julia.support.resize();
-            });*/
         });
     };
 
@@ -1761,6 +1753,11 @@ if(!window.jQuery)
     $.fn.getID = function()
     {
     	return $(this).data('julia').id;
-    }
+    };
+
+    $.fn.stats = function()
+    {
+    	return $(this).data('julia').stats;
+    };
 
 })(jQuery);
