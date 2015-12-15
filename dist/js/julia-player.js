@@ -2,8 +2,8 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.8.3
-* build: 2015-12-14
+* version: 0.8.5
+* build: 2015-12-16
 * licensed under the MIT License
 *
 * @requires:
@@ -78,7 +78,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                 [640,360],
                 [512,288]
             ],
-            pauseOnClick: false, 
+            pauseOnClick: false,
             hlsConfig: {
                 debug : false,
                 autoStartLoad : true,
@@ -119,7 +119,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
             player,
             isLive = false,
             hls,
-            hlsCapableString = '', 
+            hlsCapableString = '',
             type = 'html5',
             isHls = false,
             source,
@@ -1241,7 +1241,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                     api.oncanplaythrough = function(e)
                     {
                         duration = api.duration;
-                    
+
                         if(started === false && api.readyState >= 3)
                         {
                             _playAllowStart(e);
@@ -1286,7 +1286,12 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                 // Errors
                 api.onerror = function(e)
                 {
-                    _suggest.run();
+                    // Bring to life again
+                    _init();
+                }
+
+                api.onemptied = function(e)
+                {
                 }
 
                 api.onstalled = function(e)
@@ -1294,10 +1299,6 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                 }
 
                 api.onsuspend = function(e)
-                {
-                }
-
-                api.onemptied = function(e)
                 {
                 }
 
@@ -1379,6 +1380,47 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
             },
 
 
+            // Specific events, error handlers
+            hlsLibEvents: function()
+            {
+                hls.on(Hls.Events.ERROR, function(event, data)
+                {
+
+                    switch(data.details)
+                    {
+                        case hls.ErrorDetails.MANIFEST_LOAD_ERROR:
+                        case hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
+                        case hls.ErrorDetails.MANIFEST_PARSING_ERROR:
+                        case hls.ErrorDetails.LEVEL_LOAD_ERROR:
+                        case hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
+                        case hls.ErrorDetails.LEVEL_SWITCH_ERROR:
+                        case hls.ErrorDetails.FRAG_LOAD_ERROR:
+                        case hls.ErrorDetails.FRAG_LOOP_LOADING_ERROR:
+                        case hls.ErrorDetails.FRAG_LOAD_TIMEOUT:
+                        case hls.ErrorDetails.FRAG_DECRYPT_ERROR:
+                        case hls.ErrorDetails.FRAG_PARSING_ERROR:
+                        case hls.ErrorDetails.BUFFER_APPEND_ERROR:
+                        case hls.ErrorDetails.BUFFER_APPENDING_ERROR:
+
+                            _debug.run({
+                                recoveringError: data.details,
+                                errorType: data.type,
+                                errorFatal: data.fatal
+                            });
+
+
+                            if(data.fatal === true)
+                            {
+                                // Bring to life again
+                                _init();
+                            }
+
+                        break; default:
+                    }
+                });
+            },
+
+
             // Flash fallback for legacy browsers
             flashEvents: function()
             {
@@ -1387,7 +1429,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                     ready: function(flashTime)
                     {
                         api.load(source);
-                        
+
                         _debug.run({
                             'ready': flashTime
                         });
@@ -1415,7 +1457,10 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                             'flashErrorMessage': message,
                         });
 
-                        _suggest.run();
+                        // Bring to life again
+                        _init();
+
+                        //_suggest.run();
                     },
                     manifest: function(flashDuration, levels_, loadmetrics)
                     {
@@ -1570,7 +1615,10 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
             {
                 _api();
 
-                var hls = new Hls(options.hlsConfig);
+                hls = new Hls(options.hlsConfig);
+
+                _bind.hlsLibEvents();
+
                 hls.loadSource(source);
                 hls.attachMedia(api);
 
@@ -1639,8 +1687,8 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
             	'isHls': isHls,
                 'flashApi': flashApi,
                 'useHlsLib': useHlsLib,
-                'live': isLive, 
-                'hlsCapable': hlsCapable, 
+                'live': isLive,
+                'hlsCapable': hlsCapable,
                 'hlsCapableString': hlsCapableString
             };
 
@@ -1665,7 +1713,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                 control : _control,
                 support : _support,
                 media: api,
-                id: apiId, 
+                id: apiId,
                 stats: stats
             };
         }

@@ -2,8 +2,8 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.8.3
-* build: 2015-12-14
+* version: 0.8.5
+* build: 2015-12-16
 * licensed under the MIT License
 *
 * @requires:
@@ -75,7 +75,7 @@ if(!window.jQuery)
                 [640,360],
                 [512,288]
             ],
-            pauseOnClick: false, 
+            pauseOnClick: false,
             hlsConfig: {
                 debug : false,
                 autoStartLoad : true,
@@ -116,7 +116,7 @@ if(!window.jQuery)
             player,
             isLive = false,
             hls,
-            hlsCapableString = '', 
+            hlsCapableString = '',
             type = 'html5',
             isHls = false,
             source,
@@ -1238,7 +1238,7 @@ if(!window.jQuery)
                     api.oncanplaythrough = function(e)
                     {
                         duration = api.duration;
-                    
+
                         if(started === false && api.readyState >= 3)
                         {
                             _playAllowStart(e);
@@ -1283,7 +1283,12 @@ if(!window.jQuery)
                 // Errors
                 api.onerror = function(e)
                 {
-                    _suggest.run();
+                    // Bring to life again
+                    _init();
+                }
+
+                api.onemptied = function(e)
+                {
                 }
 
                 api.onstalled = function(e)
@@ -1291,10 +1296,6 @@ if(!window.jQuery)
                 }
 
                 api.onsuspend = function(e)
-                {
-                }
-
-                api.onemptied = function(e)
                 {
                 }
 
@@ -1376,6 +1377,47 @@ if(!window.jQuery)
             },
 
 
+            // Specific events, error handlers
+            hlsLibEvents: function()
+            {
+                hls.on(Hls.Events.ERROR, function(event, data)
+                {
+
+                    switch(data.details)
+                    {
+                        case hls.ErrorDetails.MANIFEST_LOAD_ERROR:
+                        case hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
+                        case hls.ErrorDetails.MANIFEST_PARSING_ERROR:
+                        case hls.ErrorDetails.LEVEL_LOAD_ERROR:
+                        case hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
+                        case hls.ErrorDetails.LEVEL_SWITCH_ERROR:
+                        case hls.ErrorDetails.FRAG_LOAD_ERROR:
+                        case hls.ErrorDetails.FRAG_LOOP_LOADING_ERROR:
+                        case hls.ErrorDetails.FRAG_LOAD_TIMEOUT:
+                        case hls.ErrorDetails.FRAG_DECRYPT_ERROR:
+                        case hls.ErrorDetails.FRAG_PARSING_ERROR:
+                        case hls.ErrorDetails.BUFFER_APPEND_ERROR:
+                        case hls.ErrorDetails.BUFFER_APPENDING_ERROR:
+
+                            _debug.run({
+                                recoveringError: data.details,
+                                errorType: data.type,
+                                errorFatal: data.fatal
+                            });
+
+
+                            if(data.fatal === true)
+                            {
+                                // Bring to life again
+                                _init();
+                            }
+
+                        break; default:
+                    }
+                });
+            },
+
+
             // Flash fallback for legacy browsers
             flashEvents: function()
             {
@@ -1384,7 +1426,7 @@ if(!window.jQuery)
                     ready: function(flashTime)
                     {
                         api.load(source);
-                        
+
                         _debug.run({
                             'ready': flashTime
                         });
@@ -1412,7 +1454,10 @@ if(!window.jQuery)
                             'flashErrorMessage': message,
                         });
 
-                        _suggest.run();
+                        // Bring to life again
+                        _init();
+
+                        //_suggest.run();
                     },
                     manifest: function(flashDuration, levels_, loadmetrics)
                     {
@@ -1567,7 +1612,10 @@ if(!window.jQuery)
             {
                 _api();
 
-                var hls = new Hls(options.hlsConfig);
+                hls = new Hls(options.hlsConfig);
+
+                _bind.hlsLibEvents();
+
                 hls.loadSource(source);
                 hls.attachMedia(api);
 
@@ -1636,8 +1684,8 @@ if(!window.jQuery)
             	'isHls': isHls,
                 'flashApi': flashApi,
                 'useHlsLib': useHlsLib,
-                'live': isLive, 
-                'hlsCapable': hlsCapable, 
+                'live': isLive,
+                'hlsCapable': hlsCapable,
                 'hlsCapableString': hlsCapableString
             };
 
@@ -1662,7 +1710,7 @@ if(!window.jQuery)
                 control : _control,
                 support : _support,
                 media: api,
-                id: apiId, 
+                id: apiId,
                 stats: stats
             };
         }
