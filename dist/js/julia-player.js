@@ -536,7 +536,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
             toolbar.hide();
 
             // Rangeslider polyfill
-            $('#julia-toolbar-'+apiId+'>div.julia-progress>input[type="range"], #julia-toolbar-'+apiId+'>div.julia-volume>input[type="range"]').rangeslider({
+            $('#julia-toolbar-'+apiId+'>div.julia-progress>input, #julia-toolbar-'+apiId+'>div.julia-volume>input').rangeslider({
                 polyfill: false,
                 rangeClass: 'julia-rangeslider',
                 disabledClass: 'julia-rangeslider--disabled',
@@ -849,7 +849,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                         toolbar.find('.julia-playback.pause').removeClass('pause').addClass('play')
                         .find('i').removeClass('ion-pause').addClass('ion-play');
                         shield.find('.julia-big-play').show();
-                        toolbar.find('.julia-progress>input[type="range"]').val(0).rangeslider('update', true);
+                        toolbar.find('.julia-progress>input').val(0).rangeslider('update', true);
 
                     break; case 'goto':
                         api.currentTime = data.currentTime;
@@ -858,7 +858,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                         toolbar.find('.julia-panel.julia-duration>span').text(data.duration);
                         if(started === false)
                         {
-                            toolbar.find('.julia-progress>input[type="range"]').val(0).rangeslider('update', true);
+                            toolbar.find('.julia-progress>input').val(0).rangeslider('update', true);
                         }
                         _debug.run({
                             'setDuration': data.duration
@@ -866,7 +866,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                     break; case 'volume':
                         options.volume = data.volume;
                         api.volume = data.volume/100;
-                        toolbar.find('.julia-volume>input[type="range"]').val(data.volume).rangeslider('update', true);
+                        toolbar.find('.julia-volume>input').val(data.volume).rangeslider('update', true);
                         if(data.volume>0)
                         {
                             _control('sound-on');
@@ -939,7 +939,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                         toolbar.find('.julia-playback.pause').removeClass('pause').addClass('play')
                         .find('i').removeClass('ion-pause').addClass('ion-play');
                         shield.find('.julia-big-play').show();
-                        toolbar.find('.julia-progress>input[type="range"]').val(0).rangeslider('update', true);
+                        toolbar.find('.julia-progress>input').val(0).rangeslider('update', true);
 
                     break; case 'goto':
                         api.seek(data.currentTime);
@@ -948,7 +948,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                         toolbar.find('.julia-panel.julia-duration>span').text(data.duration);
                         if(started === false)
                         {
-                            toolbar.find('.julia-progress>input[type="range"]').val(0).rangeslider('update', true);
+                            toolbar.find('.julia-progress>input').val(0).rangeslider('update', true);
                         }
                         _debug.run({
                             'setDuration': data.duration
@@ -956,7 +956,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                     break; case 'volume':
                         options.volume = data.volume;
                         api.volume(options.volume);
-                        toolbar.find('.julia-volume>input[type="range"]').val(data.volume).rangeslider('update', true);
+                        toolbar.find('.julia-volume>input').val(data.volume).rangeslider('update', true);
                         if(data.volume>0)
                         {
                             _control('sound-on');
@@ -974,7 +974,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                         _persist.set('muted', options.muted, 30);
                         toolbar.find('.julia-sound.off').removeClass('off').addClass('on')
                         .find('i').removeClass('ion-android-volume-off').addClass('ion-android-volume-up');
-                        toolbar.find('.julia-volume>input[type="range"]').val(options.volume).rangeslider('update', true);
+                        toolbar.find('.julia-volume>input').val(options.volume).rangeslider('update', true);
 
                     break; case 'sound-off':
                         api.volume(0);
@@ -983,7 +983,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                         _persist.set('muted', options.muted, 30);
                         toolbar.find('.julia-sound.on').removeClass('on').addClass('off')
                         .find('i').removeClass('ion-android-volume-up').addClass('ion-android-volume-off');
-                        toolbar.find('.julia-volume>input[type="range"]').val(0).rangeslider('update', true);
+                        toolbar.find('.julia-volume>input').val(0).rangeslider('update', true);
 
                     break; case 'fullscreen-on':
                         _fullscreen.on();
@@ -1154,7 +1154,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                 });
 
                 // Bind progressbar change
-                toolbar.on('change input', '.julia-progress>input[type="range"]', function(e)
+                toolbar.on('change input', '.julia-progress>input', function(e)
                 {
                     if(e.type == 'input')
                     {
@@ -1172,7 +1172,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                 });
 
                 // Bind volumebar change
-                toolbar.on('change', '.julia-volume>input[type="range"]', function()
+                toolbar.on('change', '.julia-volume>input', function()
                 {
                     _control('volume', {
                         volume: $(this).val(),
@@ -1307,7 +1307,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                     if(seeking === false)
                     {
                         currentTimeReadable = _timeline.toHuman( api.currentTime.toFixed(2) );
-                        toolbar.find('.julia-progress>input[type="range"]').val( _timeline.toPercents( api.currentTime.toFixed(2) ) ).rangeslider('update', true);
+                        toolbar.find('.julia-progress>input').val( _timeline.toPercents( api.currentTime.toFixed(2) ) ).rangeslider('update', true);
                         toolbar.find('.julia-panel.julia-currentTime>span').text(currentTimeReadable);
                     }
 
@@ -1348,9 +1348,9 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                 {
                     if(api.muted === false)
                     {
-                        toolbar.find('.julia-volume>input[type="range"]').val(api.volume*100).rangeslider('update', true);
+                        toolbar.find('.julia-volume>input').val(api.volume*100).rangeslider('update', true);
                     }else{
-                        toolbar.find('.julia-volume>input[type="range"]').val(0).rangeslider('update', true);
+                        toolbar.find('.julia-volume>input').val(0).rangeslider('update', true);
                     }
                 }
 
@@ -1494,7 +1494,7 @@ r=0;r<o.length;r++)o[r].cc+=u;if(s)e.updateFragPTS(i,s.sn,s.startPTS,s.endPTS);e
                         if(seeking === false)
                         {
                             currentTimeReadable = _timeline.toHuman( api.getPosition() );
-                            toolbar.find('.julia-progress>input[type="range"]').val( _timeline.toPercents( api.getPosition() ) ).rangeslider('update', true);
+                            toolbar.find('.julia-progress>input').val( _timeline.toPercents( api.getPosition() ) ).rangeslider('update', true);
                             toolbar.find('.julia-panel.julia-currentTime>span').text(currentTimeReadable);
                         }
                     },
