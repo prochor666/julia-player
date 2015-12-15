@@ -2,9 +2,8 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.8.2
-* build: 2015-12-06
-* since 11/2015
+* version: 0.8.3
+* build: 2015-12-14
 * licensed under the MIT License
 *
 * @requires:
