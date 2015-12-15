@@ -33,18 +33,18 @@ if(!window.jQuery)
     // Support libs
     try {
         h = new Hls;
+
     }catch(err)
     {
-        /*! hls.js 0.3.10 */
-        // Handle error or insert/bind source
+        /*! hls.js 0.3.10, handle error or insert/bind source */
     }
 
     try {
         $.rangeslider();
     }catch(err)
+
     {
-        /*! rangeslider.js - v2.0.5 */
-        // Handle error or insert/bind source
+        /*! rangeslider.js - v2.0.5, handle error or insert/bind source */
     }
 
 
@@ -95,7 +95,6 @@ if(!window.jQuery)
                 appendErrorMaxRetry : 200,
             },
             suggest: [],
-            ads: [],
             suggestLimit: 2,
             suggestTimeout: 10000,
             swf: __JULIA_ROOT_PATH__+'/swf/flashlsChromeless.swf',
@@ -106,6 +105,7 @@ if(!window.jQuery)
             },
             triggerHls: {}
         };
+
 
         // UI & behavior globals
         var shield,
@@ -131,6 +131,7 @@ if(!window.jQuery)
             suggestClicked = false;
             progressStep = 0.01; // Full sense: 100, so .01 is enough accurate
 
+
         // Extend options
         var _extend = function()
         {
@@ -141,6 +142,7 @@ if(!window.jQuery)
                     _options[o] = options[o];
                 }
             }
+
             options = _options;
             _debug.run(options);
         };
@@ -193,6 +195,7 @@ if(!window.jQuery)
                         return c.substring(name.length,c.length);
                     }
                 }
+
                 return '';
             }
 
@@ -203,10 +206,9 @@ if(!window.jQuery)
         {
             $('#julia-api-'+apiId).remove();
 
-            // default api object
+            // Create default api object
             if(flashApi === false)
             {
-                // Debug
                 _debug.run({
                     'apiType': 'html5video',
                 });
@@ -215,15 +217,15 @@ if(!window.jQuery)
                 player.prepend(apiElement);
                 api = document.getElementById('julia-api-'+apiId);
                 api.controls = false;
+
             }else{
 
-                // Debug
                 _debug.run({
                     'apiType': 'flashls',
                 });
 
                 flashlsCallbackName = 'flashlsCallback'+apiId;
-                //width="960" height="540"
+
                 apiElement = $('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="" id="julia-api-'+apiId+'">'
                             +'<param name="movie" value="'+options.swf+'?inline=1" />'
                             +'<param name="quality" value="autohigh" />'
@@ -254,6 +256,7 @@ if(!window.jQuery)
                     {
                         this.flashObject = flashObject;
                     }
+
                     this.constructor(flashObject);
 
                     this.load = function(url)
@@ -442,12 +445,10 @@ if(!window.jQuery)
                 api = new flashlsAPI(getFlashMovieObject('julia-api-'+apiId));
             }
 
-            // Debug
             _debug.run({
                 'apiId': apiId,
                 'api': api,
             });
-
         };
 
         // Video shield for helpers, buttons, preloaders, advertising etc...
@@ -546,7 +547,6 @@ if(!window.jQuery)
                 onSlideEnd : function(position, value){}
             });
 
-            // Debug
             _debug.run({
                 'element': element,
                 'toolbar': toolbar,
@@ -725,6 +725,7 @@ if(!window.jQuery)
                 {
                     return true;
                 }
+
                 return false;
             },
 
@@ -734,15 +735,7 @@ if(!window.jQuery)
                 {
                     return true;
                 }
-                return false;
-            },
 
-            fullScreenEventMiss: function()
-            {
-                if( /Trident\/7.0; rv:11.0/i.test(navigator.userAgent) )
-                {
-                    return true;
-                }
                 return false;
             },
 
@@ -813,9 +806,11 @@ if(!window.jQuery)
 
                 a = _support.aspect() == 0 ? dim[1]/dim[0]: _support.aspect(api.videoWidth, api.videoHeight);
                 dimensions = [parentWidth, (parentWidth*a)];
+
                 _debug.run({
                     'resizeFallback': dimensions
                 });
+
                 return dimensions;
             }
         };
@@ -860,6 +855,7 @@ if(!window.jQuery)
                         _debug.run({
                             'setDuration': data.duration
                         });
+
                     break; case 'volume':
                         options.volume = data.volume;
                         api.volume = data.volume/100;
@@ -873,6 +869,7 @@ if(!window.jQuery)
                         _debug.run({
                             'volume is': api.volume
                         });
+
                     break; case 'sound-on':
                         api.muted = false;
                         options.muted = false;
@@ -913,17 +910,20 @@ if(!window.jQuery)
                         if(started === false)
                         {
                             api.play(-1);
+
                             _debug.run({
                                 'FlashPlay': 'play',
                                 'FlashPosition': api.getPosition()
                             });
                         }else{
                             api.resume(); //(api.getPosition());
+
                             _debug.run({
                                 'FlashPlay': 'resume',
                                 'FlashPosition': api.getPosition()
                             });
                         }
+
                     break; case 'pause':
                         api.pause();
                         toolbar.find('.julia-playback.pause').removeClass('pause').addClass('play')
@@ -950,6 +950,7 @@ if(!window.jQuery)
                         _debug.run({
                             'setDuration': data.duration
                         });
+
                     break; case 'volume':
                         options.volume = data.volume;
                         api.volume(options.volume);
@@ -1029,7 +1030,6 @@ if(!window.jQuery)
                 _control('play');
             }
 
-            // Start debug
             _debug.run({
                 'eventType': e.type,
                 'duration': api.duration,
@@ -1164,6 +1164,7 @@ if(!window.jQuery)
                         _control('goto', {
                             currentTime: seekTo
                         });
+
                         seeking = false;
                     }
                 });
@@ -1177,13 +1178,13 @@ if(!window.jQuery)
                     });
                 });
 
-                // Not window, beacuse of fullscreen event
+                // Fullscreen event included
                 $(window).on('resize', function()
                 {
                     _support.resize();
                 });
 
-                // Toggle fullscreen button based on fullscreen change event
+                // Fullscreen change event handler
                 $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
                 {
                     if(!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement)
@@ -1361,6 +1362,7 @@ if(!window.jQuery)
                     {
                         duration = api.duration;
                         seeking = false;
+
                         _debug.run({
                             'duration': duration,
                             'readyState': api.readyState,
@@ -1423,6 +1425,7 @@ if(!window.jQuery)
             {
                 // Flash event object
                 var flashlsEvents = {
+
                     ready: function(flashTime)
                     {
                         api.load(source);
@@ -1431,9 +1434,11 @@ if(!window.jQuery)
                             'ready': flashTime
                         });
                     },
+
                     videoSize: function(width, height) {
                         _support.resize();
                     },
+
                     complete: function()
                     {
                         _debug.run({
@@ -1446,6 +1451,7 @@ if(!window.jQuery)
                             _suggest.run();
                         }, 1500);
                     },
+
                     error: function(code, url, message)
                     {
                         _debug.run({
@@ -1456,9 +1462,8 @@ if(!window.jQuery)
 
                         // Bring to life again
                         _init();
-
-                        //_suggest.run();
                     },
+
                     manifest: function(flashDuration, levels_, loadmetrics)
                     {
                         duration = flashDuration.toFixed(2);
@@ -1501,26 +1506,21 @@ if(!window.jQuery)
                                 api.play(-1);
                             }
 
-                            // Some debug
                             _debug.run({
                                 'duration': api.duration,
                                 'readyState': true
                             });
                         }
-
                     },
+
                     levelLoaded: function(loadmetrics)
                     {
-                        /*_debug.run({
-                            'Level loaded metrics': loadmetrics
-                        });*/
                     },
+
                     fragmentLoaded: function(loadmetrics)
                     {
-                        /*_debug.run({
-                            'Fragment loaded metrics': loadmetrics
-                        });*/
                     },
+
                     fragmentPlaying: function(playmetrics)
                     {
                         toolbar.find('.julia-playback.play').removeClass('play').addClass('pause')
@@ -1531,6 +1531,7 @@ if(!window.jQuery)
                         toolbar.show();
                         started = true;
                     },
+
                     position: function(timemetrics)
                     {
                         if(seeking === false)
@@ -1539,7 +1540,7 @@ if(!window.jQuery)
                             toolbar.find('.julia-progress>input').val( _timeline.toPercents( api.getPosition() ) ).rangeslider('update', true);
                             toolbar.find('.julia-panel.julia-currentTime>span').text(currentTimeReadable);
                         }
-                    },
+                    }
                 };
 
                 // Create a single global callback function and pass it's name
@@ -1576,6 +1577,7 @@ if(!window.jQuery)
             // User data
             volume = _persist.get('volume');
             muted = _persist.get('muted');
+
             if(volume.length>0)
             {
             	options.volume = parseInt(volume);
@@ -1635,13 +1637,16 @@ if(!window.jQuery)
                 for(x in options.triggerHls)
                 {
                     handle = options.triggerHls[x];
+
                     if(typeof window[handle] === 'function')
                     {
                         hls.on(Hls.Events[x], function(event, data)
                         {
                             window[handle](apiId, event, data);
                         });
+
                     }else{
+
                         _debug.run({
                             'triggerHlsError': handle+' is not a function'
                         });
