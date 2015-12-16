@@ -2,7 +2,7 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.8.5
+* version: 0.8.6
 * build: 2015-12-16
 * licensed under the MIT License
 *
@@ -42,7 +42,6 @@ if(!window.jQuery)
     try {
         $.rangeslider();
     }catch(err)
-
     {
         /*! rangeslider.js - v2.0.5, handle error or insert/bind source */
     }
@@ -1384,29 +1383,27 @@ if(!window.jQuery)
             {
                 hls.on(Hls.Events.ERROR, function(event, data)
                 {
-
                     switch(data.details)
                     {
-                        case hls.ErrorDetails.MANIFEST_LOAD_ERROR:
-                        case hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
-                        case hls.ErrorDetails.MANIFEST_PARSING_ERROR:
-                        case hls.ErrorDetails.LEVEL_LOAD_ERROR:
-                        case hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
-                        case hls.ErrorDetails.LEVEL_SWITCH_ERROR:
-                        case hls.ErrorDetails.FRAG_LOAD_ERROR:
-                        case hls.ErrorDetails.FRAG_LOOP_LOADING_ERROR:
-                        case hls.ErrorDetails.FRAG_LOAD_TIMEOUT:
-                        case hls.ErrorDetails.FRAG_DECRYPT_ERROR:
-                        case hls.ErrorDetails.FRAG_PARSING_ERROR:
-                        case hls.ErrorDetails.BUFFER_APPEND_ERROR:
-                        case hls.ErrorDetails.BUFFER_APPENDING_ERROR:
+                        case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
+                        case Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
+                        case Hls.ErrorDetails.MANIFEST_PARSING_ERROR:
+                        case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
+                        case Hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
+                        case Hls.ErrorDetails.LEVEL_SWITCH_ERROR:
+                        case Hls.ErrorDetails.FRAG_LOAD_ERROR:
+                        case Hls.ErrorDetails.FRAG_LOOP_LOADING_ERROR:
+                        case Hls.ErrorDetails.FRAG_LOAD_TIMEOUT:
+                        case Hls.ErrorDetails.FRAG_DECRYPT_ERROR:
+                        case Hls.ErrorDetails.FRAG_PARSING_ERROR:
+                        case Hls.ErrorDetails.BUFFER_APPEND_ERROR:
+                        case Hls.ErrorDetails.BUFFER_APPENDING_ERROR:
 
                             _debug.run({
                                 recoveringError: data.details,
                                 errorType: data.type,
                                 errorFatal: data.fatal
                             });
-
 
                             if(data.fatal === true)
                             {
