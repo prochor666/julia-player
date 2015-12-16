@@ -1739,7 +1739,7 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                 }
 
                 // Define publicApi
-                publicApi = {
+                _env.publicApi = {
                     control : _control,
                     support : _support,
                     media: _env.api,
@@ -1759,7 +1759,7 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
         _support.resize();
 
         // Populate public API
-        return publicApi;
+        return _env.publicApi;
     }
 
     // Build plugin instances

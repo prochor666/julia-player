@@ -36,7 +36,8 @@ if(!window.jQuery)
 
     }catch(err)
     {
-        /*! hls.js 0.3.10, handle error or insert/bind source */
+        /*! hls.js 0.3.11, handle error or insert/bind source */
+
     }
 
     try {
@@ -1733,7 +1734,7 @@ if(!window.jQuery)
                 }
 
                 // Define publicApi
-                publicApi = {
+                _env.publicApi = {
                     control : _control,
                     support : _support,
                     media: _env.api,
@@ -1753,7 +1754,7 @@ if(!window.jQuery)
         _support.resize();
 
         // Populate public API
-        return publicApi;
+        return _env.publicApi;
     }
 
     // Build plugin instances
