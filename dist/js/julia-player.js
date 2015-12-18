@@ -2,12 +2,12 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.9.0
-* build: 2015-12-16
+* version: 0.9.1
+* build: 2015-12-18
 * licensed under the MIT License
 *
 * @requires:
-* hls.js [optional]
+* hls.js [required]
 * jquery [required]
 * ionicons [required]
 * rangeslider [required]
@@ -81,6 +81,7 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                 [512,288]
             ],
             pauseOnClick: false,
+            poster: '',
             hlsConfig: {
                 debug : false,
                 autoStartLoad : true,
@@ -118,14 +119,18 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
             element: _element,
             suggest: '',
             toolbar: '',
+            poster: '',
             api: '',
             apiId: Math.floor((Math.random()*10000000)+1), // Create a shadow api
             player: '',
             isLive: false,
             hls: {},
+            hlsCapable: '',
             hlsCapableString: '',
             type: 'html5',
             isHls: false,
+            useHlsLib: false,
+            tries: 0,
             source: '',
             flashApi: false,
             duration: 0,
@@ -471,11 +476,31 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
             {
                 _env.shield = $('<div class="julia-shield" id="julia-shield-'+_env.apiId+'">'
                             +'  <button class="julia-btn julia-big-play"><i class="ion-play"></i></button>'
-                            +'  <div class="julia-preloader on"><i class="ion-load-c"></i></div>'
+                            +'  <div class="julia-preloader"><i class="ion-load-c"></i></div>'
                             +'</div>'
                     );
 
                 _env.suggest = $('<div class="julia-suggest" id="julia-suggest-'+_env.apiId+'"></div>');
+            },
+
+            posterSet: function()
+            {
+                _ui.posterUnset();
+                if(_env.poster.length > 0)
+                {
+                    img = $('<img src="'+_env.poster+'" width="100%" height="100%">')
+
+                    _env.shield.append(img);
+
+                    _debug.run({
+                        poster: _env.poster,
+                    })
+                }
+            },
+
+            posterUnset: function()
+            {
+                _env.shield.find('img').remove();
             },
 
             // Button toolbar
@@ -507,25 +532,6 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                     +'    <i class="ion-android-expand"></i>'
                     +'</button>'
                 +'</div>');
-            },
-
-            // Select playback url
-            selectSource: function()
-            {
-                _env.source = options.source && options.source.length>0 ? options.source: _env.element.prop('src');
-
-                if(options.forceHls === true)
-                {
-                    _env.source += _env.source.indexOf('?') == -1 ? '?m3u8=yes': '&m3u8=yes';
-                }
-
-                _env.type = _env.source.indexOf('m3u8') == -1 ? _env.type: 'hls';
-
-                _debug.run({
-                    'sourceType': _env.type
-                });
-
-                _env.isHls = _env.source.indexOf('m3u8') == -1 ? false: true;
             },
 
             // Create player object
@@ -651,6 +657,7 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                 _env.suggest.html('');
                 _control.press('stop');
                 _env.suggestClicked = false;
+                _env.tries = 0;
 
                 if(options.suggest.length > 0)
                 {
@@ -675,11 +682,10 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                                     }
 
                                     _env.suggestClicked = true;
-                                    _env.shield.find('.julia-preloader').show();
                                     _env.shield.find('.julia-big-play').hide();
                                     _env.started = false;
                                     options.source = $(this).data('file');
-                                    _ui.selectSource();
+                                    _boot.selectSource();
                                     options.autoplay = true;
                                     options.live = $(this).data('mode') == 'live' ? true: false;
                                     options.i18n.liveText = $(this).data('live-text');
@@ -776,26 +782,26 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
 
             resize: function()
             {
-	            // Player dimensions
-	            defaultDim = _env.element.width() ? [_env.element.width(), _env.element.height()]: [options.width, options.height];
-	            dimensions = options.responsive === true ? _support.getSize(): defaultDim;
+                // Player dimensions
+                defaultDim = _env.element.width() ? [_env.element.width(), _env.element.height()]: [options.width, options.height];
+                dimensions = options.responsive === true ? _support.getSize(): defaultDim;
 
                 _debug.run({
                     'resizeDefaults': defaultDim,
                     'resize': dimensions
                 });
 
-	            _env.player.width(dimensions[0]);
-	            _env.player.height(dimensions[1]);
+                _env.player.width(dimensions[0]);
+                _env.player.height(dimensions[1]);
 
                 if(_env.flashApi===false)
-	            {
-	                _env.api.setAttribute('width', '100%');
-	                _env.api.setAttribute('height', '100%');
-	            }else{
-	                _env.api.flashObject.width = '100%';
-	                _env.api.flashObject.height = '100%';
-	            }
+                {
+                    _env.api.setAttribute('width', '100%');
+                    _env.api.setAttribute('height', '100%');
+                }else{
+                    _env.api.flashObject.width = '100%';
+                    _env.api.flashObject.height = '100%';
+                }
             },
 
             getSize: function()
@@ -1025,7 +1031,7 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
             // First play with some handlers
             playAllowStart: function(e)
             {
-                _env.shield.find('.julia-preloader').hide();
+                _env.shield.find('.julia-preloader').removeClass('on');
                 _env.shield.find('.julia-big-play').show();
                 _env.toolbar.show();
 
@@ -1139,7 +1145,7 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                     e.stopPropagation();
                     if(options.pauseOnClick === true)
                     {
-                    	_control.press('pause');
+                        _control.press('pause');
                     }
                 });
 
@@ -1207,11 +1213,11 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                 });
 
                 // Fullscreen change event handler
-                 _env.player.on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
+                $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
                 {
                     if(!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement)
                     {
-                        _env.player.removeClass('julia-fullscreen-on').addClass('julia-fullscreen-off')
+                        $('.julia-player').removeClass('julia-fullscreen-on').addClass('julia-fullscreen-off')
                         .find('button.julia-fullscreen-toggle').removeClass('off').addClass('on')
                         .find('i').removeClass('ion-android-contract').addClass('ion-android-expand');
 
@@ -1231,7 +1237,7 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
 
                     }else{
 
-                        _env.player.removeClass('julia-fullscreen-off').addClass('julia-fullscreen-on')
+                        $('.julia-player').removeClass('julia-fullscreen-off').addClass('julia-fullscreen-on')
                         .find('button.julia-fullscreen-toggle').removeClass('on').addClass('off')
                         .find('i').removeClass('ion-android-expand').addClass('ion-android-contract');
 
@@ -1276,6 +1282,7 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                     .find('i').removeClass('ion-play').addClass('ion-pause');
                     _env.shield.find('.julia-big-play').hide();
                     _env.shield.find('.julia-preloader').hide();
+                    _ui.posterUnset();
                     _env.toolbar.show();
                 }
 
@@ -1307,7 +1314,10 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                 _env.api.onerror = function(e)
                 {
                     // Bring to life again
-                    _boot.init();
+                    if(_env.tries<11)
+                    {
+                        _boot.init();
+                    }
                 }
 
                 _env.api.onemptied = function(e)
@@ -1428,7 +1438,7 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                                 errorFatal: data.fatal
                             });
 
-                            if(data.fatal === true)
+                            if(data.fatal === true && _env.tries<11)
                             {
                                 // Bring to life again
                                 _boot.init();
@@ -1481,7 +1491,10 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                         });
 
                         // Bring to life again
-                        _boot.init();
+                        if(_env.tries<10)
+                        {
+                            _boot.init();
+                        }
                     },
 
                     manifest: function(flashDuration, levels_, loadmetrics)
@@ -1547,6 +1560,7 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                         .find('i').removeClass('ion-play').addClass('ion-pause');
                         _env.shield.find('.julia-big-play').hide();
                         _env.shield.find('.julia-preloader').hide();
+                        _ui.posterUnset();
                         _env.suggest.html('').removeClass('on');
                         _env.toolbar.show();
                         _env.started = true;
@@ -1605,47 +1619,52 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
 
                 if(volume.length>0)
                 {
-                	options.volume = parseInt(volume);
+                    options.volume = parseInt(volume);
                 }
 
                 if(muted.length>0)
                 {
-                	options.muted = muted == 'false' ?  false: true;
+                    options.muted = muted == 'false' ?  false: true;
                 }
 
                 // Create UI
                 _ui.player();
-
-                // Create source
-                _ui.selectSource();
             },
 
-            // Initilize player
-            init: function()
+            // Select playback url
+            selectSource: function()
             {
-                useHlsLib = false;
-                _env.flashApi = false;
-                _env.isLive = false;
-
-                hlsCapable = _support.hlsCapable();
-
-                if(_env.isHls === true)
+                _env.element.prop('preload', 'none');
+                _env.source = options.source && options.source.length>0 ? options.source: _env.element.prop('src');
+                if(options.forceHls === true)
                 {
-                    useHlsLib = hlsCapable === false && Hls.isSupported() ? true: false;
+                    _env.source += _env.source.indexOf('?') == -1 ? '?m3u8=yes': '&m3u8=yes';
                 }
+
+                _env.type = _env.source.indexOf('m3u8') == -1 ? _env.type: 'hls';
+                _debug.run({
+                    'sourceType': _env.type
+                });
+
+                _env.isHls = _env.source.indexOf('m3u8') == -1 ? false: true;
+
+                _env.poster = options.poster && options.poster.length>0 ? options.poster: _env.element.prop('poster');
+                _ui.posterSet();
+            },
+
+
+            // load media
+            load: function()
+            {
+                _env.shield.find('.julia-preloader').addClass('on');
 
                 // ************************
                 // HLS library supported
                 // and HLS requested
                 // ************************
-                if(useHlsLib === true)
+                if(_env.useHlsLib === true)
                 {
-                    _api.create();
-
-                    _env.hls = new Hls(options.hlsConfig);
-
                     _bind.hlsLibEvents();
-
                     _env.hls.loadSource(_env.source);
                     _env.hls.attachMedia(_env.api);
 
@@ -1687,10 +1706,8 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                 // No HLS library support,
                 // but HLS is requested
                 // ************************
-                }else if(_env.isHls === true && useHlsLib === false && hlsCapable === false)
+                }else if(_env.flashApi === true)
                 {
-                    _env.flashApi = true;
-
                     _api.create();
 
                 // ************************
@@ -1698,31 +1715,8 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                 // ************************
                 }else{
 
-                    _api.create();
-
-                    _env.api.src = _env.source;
                     _env.api.load();
                 }
-
-                if(options.live === true)
-                {
-                    _env.isLive = true;
-                    _env.toolbar.addClass('live');
-                }else{
-                    _env.toolbar.removeClass('live');
-                }
-
-
-                stats = {
-                	'isHls': _env.isHls,
-                    'flashApi': _env.flashApi,
-                    'useHlsLib': useHlsLib,
-                    'live': _env.isLive,
-                    'hlsCapable': hlsCapable,
-                    'hlsCapableString': _env.hlsCapableString
-                };
-
-                _debug.run(stats);
 
                 // ************************
                 // Bind all events
@@ -1746,6 +1740,70 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
                     id: _env.apiId,
                     stats: stats
                 };
+
+            },
+
+            // Initilize player
+            init: function()
+            {
+                // Create source
+                _boot.selectSource();
+                _env.useHlsLib = false;
+                _env.flashApi = false;
+                _env.isLive = false;
+                _env.hlsCapable = _support.hlsCapable();
+                _env.tries+=1;
+
+                if(_env.isHls === true)
+                {
+                    _env.useHlsLib = _env.hlsCapable === false && Hls.isSupported() ? true: false;
+                }
+
+                // ************************
+                // HLS library supported
+                // and HLS requested
+                // ************************
+                if(_env.useHlsLib === true)
+                {
+                    _api.create();
+                    _env.hls = new Hls(options.hlsConfig);
+
+                // ************************
+                // No HLS library support,
+                // but HLS is requested
+                // ************************
+                }else if(_env.isHls === true && _env.useHlsLib === false && _env.hlsCapable === false)
+                {
+                    _env.flashApi = true;
+
+                // ************************
+                // Classic VOD file
+                // ************************
+                }else{
+
+                    _api.create();
+                    _env.api.src = _env.source;
+                }
+
+                if(options.live === true)
+                {
+                    _env.isLive = true;
+                    _env.toolbar.addClass('live');
+                }else{
+                    _env.toolbar.removeClass('live');
+                }
+
+
+                stats = {
+                    'isHls': _env.isHls,
+                    'flashApi': _env.flashApi,
+                    'useHlsLib': _env.useHlsLib,
+                    'live': _env.isLive,
+                    'hlsCapable': _env.hlsCapable,
+                    'hlsCapableString': _env.hlsCapableString
+                };
+
+                _debug.run(stats);
             }
         }
 
@@ -1754,6 +1812,9 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
 
         // Bring to life
         _boot.init();
+
+        // Bring to life
+        _boot.load();
 
         // Player dimensions
         _support.resize();
@@ -1765,7 +1826,7 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
     // Build plugin instances
     $.fn.julia = function(opts)
     {
-    	var resize = [];
+        var resize = [];
         return this.each(function()
         {
             var element = $(this);
@@ -1833,12 +1894,12 @@ if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Ob
 
     $.fn.getID = function()
     {
-    	return $(this).data('julia').id;
+        return $(this).data('julia').id;
     };
 
     $.fn.stats = function()
     {
-    	return $(this).data('julia').stats;
+        return $(this).data('julia').stats;
     };
 
 })(jQuery);
