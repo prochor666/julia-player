@@ -103,6 +103,7 @@ if(!window.jQuery)
             i18n: {
                 liveText: 'Live'
             },
+            onTime: {},
             triggerHls: {}
         };
 
@@ -128,6 +129,7 @@ if(!window.jQuery)
             source: '',
             flashApi: false,
             duration: 0,
+            onTimeRised: [], 
             seeking: false,
             dimensions: false,
             flashlsCallbackName: '',
@@ -614,16 +616,30 @@ if(!window.jQuery)
 
         // Timeline numbers coonversion
         var _timeline = {
+
             toPercents: function(currentTime)
             {
                 p = (currentTime/_env.duration)*100;
                 return p;
             },
+
             toSeconds: function(percent)
             {
                 t = (_env.duration/100)*percent;
                 return t;
             },
+
+            toNum: function(human)
+            {
+                human = human.split(':');
+                human.reverse();
+                s = parseInt(human[0]);
+                m = human.length>1 ? parseInt(human[1]): 0;
+                h = human.length>2 ? parseInt(human[3]): 0;
+                t = s + m*60 + h*60*60;
+                return t;
+            }, 
+
             toHuman: function(time)
             {
                 time = time.toString().split('.');
@@ -844,10 +860,19 @@ if(!window.jQuery)
             {
                 data = data||{};
 
-                _debug.run({
-                    'action': action,
-                    'action-data': data,
-                });
+                if(data.length>0)
+                {    
+                    _debug.run({
+                        'action': action,
+                        'action-data': data,
+                    });
+
+                }else{
+                
+                    _debug.run({
+                        'action': action,
+                    });
+                }
 
                 switch(action)
                 {
@@ -1341,6 +1366,8 @@ if(!window.jQuery)
                         _env.toolbar.find('.julia-panel.julia-currentTime>span').text(currentTimeReadable);
                     }
 
+                    _bind.onTime(currentTimeReadable, _env.api.currentTime);
+                    
                     if(options.debugPlayback === true)
                     {
                         _debug.run({
@@ -1582,8 +1609,31 @@ if(!window.jQuery)
                 {
                     flashlsEvents[eventName].apply(null, args);
                 };
-            }
+            }, 
 
+            // Time update event callbacks
+            onTime: function(time, timeNum)
+            {
+                if( (time in options.onTime) && _env.onTimeRised.indexOf(time) == -1 )
+                {
+                    handle = options.onTime[time];
+                    _env.onTimeRised.push(time);
+
+                    if(typeof window[handle] === 'function')
+                    {
+                        window[handle](time, _env.publicApi);
+                        _debug.run({
+                            'onTime': handle+' raised'
+                        });
+                        
+                    }else{
+
+                        _debug.run({
+                            'onTimeError': handle+' is not a function, but: '+(typeof handle)
+                        });
+                    }
+                }
+            }
         };
 
 
@@ -1697,9 +1747,7 @@ if(!window.jQuery)
                                 'triggerHlsError': handle+' is not a function'
                             });
                         }
-
                     }
-
 
                 // ************************
                 // No HLS library support,
@@ -1733,8 +1781,10 @@ if(!window.jQuery)
 
                 // Define publicApi
                 _env.publicApi = {
-                    control : _control,
-                    support : _support,
+                    control: _control,
+                    support: _support,
+                    timeline: _timeline, 
+                    shield: _env.shield, 
                     media: _env.api,
                     id: _env.apiId,
                     stats: stats
