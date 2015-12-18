@@ -2,7 +2,7 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.9.1
+* version: 0.9.2
 * build: 2015-12-18
 * licensed under the MIT License
 *
@@ -36,8 +36,7 @@ if(!window.jQuery)
 
     }catch(err)
     {
-        /*! hls.js 0.3.11, handle error or insert/bind source */
-
+        /*! hls.js 0.3.12, handle error or insert/bind source */
     }
 
     try {
@@ -663,8 +662,11 @@ if(!window.jQuery)
                         {
                             mode = !!options.suggest[i].live && options.suggest[i].live === true ? 'live': 'vod';
                             liveText = !!options.suggest[i].liveText ? options.suggest[i].liveText: 'Live';
-                            suggestItemWidget = $('<div class="julia-suggest-item" data-file="'+options.suggest[i].file+'" data-mode="'+mode+'" data-live-text="'+liveText+'" data-index="'+i+'">'
-                                    +'<div class="julia-suggest-item-title">'+options.suggest[i].title+' ('+i+')</div>'
+                            var poster = !!options.suggest[i].poster ? options.suggest[i].poster: '';
+                            posterImage = poster.length>0 ? '<img src="'+poster+'" width="100%" height="100%">': '';
+                            suggestItemWidget = $('<div class="julia-suggest-item" data-poster="'+poster+'" data-file="'+options.suggest[i].file+'" data-mode="'+mode+'" data-live-text="'+liveText+'" data-index="'+i+'">'
+                                    + posterImage
+                                    +'<div class="julia-suggest-item-title">'+options.suggest[i].title+'</div>'
                                 +'</div>');
 
                                 suggestItemWidget.on('click', function(e)
@@ -676,6 +678,7 @@ if(!window.jQuery)
 
                                     }
 
+                                    options.poster = $(this).data('poster');
                                     _env.suggestClicked = true;
                                     _env.shield.find('.julia-big-play').hide();
                                     _env.started = false;
@@ -696,6 +699,7 @@ if(!window.jQuery)
                                     _env.suggest.removeClass('on');
 
                                     _boot.init();
+                                    _boot.load();
                                     _support.resize();
                                 });
 
@@ -1276,7 +1280,7 @@ if(!window.jQuery)
                     _env.toolbar.find('.julia-playback.play').removeClass('play').addClass('pause')
                     .find('i').removeClass('ion-play').addClass('ion-pause');
                     _env.shield.find('.julia-big-play').hide();
-                    _env.shield.find('.julia-preloader').hide();
+                    _env.shield.find('.julia-preloader').removeClass('on');
                     _ui.posterUnset();
                     _env.toolbar.show();
                 }
@@ -1286,7 +1290,7 @@ if(!window.jQuery)
                     _env.toolbar.find('.julia-playback.play').removeClass('play').addClass('pause')
                     .find('i').removeClass('ion-play').addClass('ion-pause');
                     _env.shield.find('.julia-big-play').hide();
-                    _env.shield.find('.julia-preloader').hide();
+                    _env.shield.find('.julia-preloader').removeClass('on');
                     _env.suggest.html('').removeClass('on');
                     _env.toolbar.show();
                     _control.press('setDuration', {
@@ -1506,7 +1510,7 @@ if(!window.jQuery)
 
                         if(_env.started === false)
                         {
-                            _env.shield.find('.julia-preloader').hide();
+                            _env.shield.find('.julia-preloader').removeClass('on');
                             _env.shield.find('.julia-big-play').show();
                             _env.toolbar.show();
 
@@ -1554,7 +1558,7 @@ if(!window.jQuery)
                         _env.toolbar.find('.julia-playback.play').removeClass('play').addClass('pause')
                         .find('i').removeClass('ion-play').addClass('ion-pause');
                         _env.shield.find('.julia-big-play').hide();
-                        _env.shield.find('.julia-preloader').hide();
+                        _env.shield.find('.julia-preloader').removeClass('on');
                         _ui.posterUnset();
                         _env.suggest.html('').removeClass('on');
                         _env.toolbar.show();
@@ -1787,7 +1791,6 @@ if(!window.jQuery)
                 }else{
                     _env.toolbar.removeClass('live');
                 }
-
 
                 stats = {
                     'isHls': _env.isHls,

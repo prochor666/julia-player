@@ -55,6 +55,10 @@ div.julia-player.julia-theme-default>div.julia-shield {
     z-index: 73;
 }
 
+div.julia-player.julia-theme-default>div.julia-shield>img {
+    z-index: 75;
+}
+
 /* *****************************
 * === SUGGEST ===
 ***************************** */
@@ -297,7 +301,7 @@ div.julia-player.julia-theme-default>div.julia-suggest>div.julia-suggest-item {
     width: 42.5%;
     height: 50%;
     min-height: 80px;
-    font-size: 1.5em;
+    font-size: 1.2em;
     border: 1px solid #444;
     color: #ABABAB;
     background: rgba(0,0,0,1);
@@ -305,6 +309,14 @@ div.julia-player.julia-theme-default>div.julia-suggest>div.julia-suggest-item {
     margin: 5% 0 0 5%;
     padding: 2%;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;    
+}
+
+div.julia-player.julia-theme-default>div.julia-suggest>div.julia-suggest-item>img {
+    position: absolute; 
+    top: 0; 
+    left: 0;
 }
 
 div.julia-player.julia-theme-default>div.julia-suggest>div.julia-suggest-item:hover {
@@ -312,8 +324,20 @@ div.julia-player.julia-theme-default>div.julia-suggest>div.julia-suggest-item:ho
 }
 
 div.julia-player.julia-theme-default>div.julia-suggest>div.julia-suggest-item>div.julia-suggest-item-title {
-
+    position: absolute; 
+    top: 0; 
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,.8);
+    padding: 10px;
+    text-align: left;
 }
+
+@media (max-width: 480px) {
+    div.julia-player.julia-theme-default>div.julia-suggest>div.julia-suggest-item {
+        font-size: 12px;
+    }    
+}    
 
 
 /* *****************************
