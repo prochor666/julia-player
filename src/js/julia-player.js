@@ -2,8 +2,8 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.9.2
-* build: 2015-12-18
+* version: 0.9.3
+* build: 2015-12-21
 * licensed under the MIT License
 *
 * @requires:
@@ -36,7 +36,7 @@ if(!window.jQuery)
 
     }catch(err)
     {
-        /*! hls.js 0.3.12, handle error or insert/bind source */
+        /*! hls.js 0.3.14, handle error or insert/bind source */
     }
 
     try {
@@ -129,6 +129,7 @@ if(!window.jQuery)
             source: '',
             flashApi: false,
             duration: 0,
+            apiOk: false,
             onTimeRised: [], 
             seeking: false,
             dimensions: false,
@@ -229,232 +230,247 @@ if(!window.jQuery)
                     _env.player.prepend(apiElement);
                     _env.api = document.getElementById('julia-api-'+_env.apiId);
                     _env.api.controls = false;
+                    _env.apiOk = true;
 
                 }else{
 
-                    _debug.run({
-                        'apiType': 'flashls',
-                    });
-
-                    _env.flashlsCallbackName = 'flashlsCallback'+_env.apiId;
-
-                    apiElement = $('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="" id="julia-api-'+_env.apiId+'">'
-                                +'<param name="movie" value="'+options.swf+'?inline=1" />'
-                                +'<param name="quality" value="autohigh" />'
-                                +'<param name="swliveconnect" value="true" />'
-                                +'<param name="allowScriptAccess" value="sameDomain" />'
-                                +'<param name="bgcolor" value="#000000" />'
-                                +'<param name="allowFullScreen" value="true" />'
-                                +'<param name="wmode" value="opaque" />'
-                                +'<param name="FlashVars" value="callback='+_env.flashlsCallbackName+'" />'
-                                +'<embed src="'+options.swf+'?inline=1" name="julia-api-'+_env.apiId+'" '
-                                +'    quality="autohigh" '
-                                +'    bgcolor="#000000" '
-                                +'    align="middle" allowFullScreen="true" '
-                                +'    allowScriptAccess="sameDomain" '
-                                +'    type="application/x-shockwave-flash" '
-                                +'    swliveconnect="true" '
-                                +'    wmode="opaque" '
-                                +'    FlashVars="callback='+_env.flashlsCallbackName+'"'
-                                +'    pluginspage="http://www.macromedia.com/go/getflashplayer" >'
-                                +'</embed>'
-                            +'</object>');
-
-                    _env.player.prepend(apiElement);
-
-                    flashlsAPI = function(flashObject)
+                    var flash = _flash.detect();
+                    var flashOk = flash.installed;
+                    
+                    if( (flash.major==11 && flash.minor>=2) || flash.major>11 )
                     {
-                        this.constructor = function(flashObject)
+                        _debug.run({
+                            'apiType': 'flashls',
+                        });
+
+                        _env.apiOk = true;
+                        _env.flashlsCallbackName = 'flashlsCallback'+_env.apiId;
+
+                        apiElement = $('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="" id="julia-api-'+_env.apiId+'">'
+                                    +'<param name="movie" value="'+options.swf+'?inline=1" />'
+                                    +'<param name="quality" value="autohigh" />'
+                                    +'<param name="swliveconnect" value="true" />'
+                                    +'<param name="allowScriptAccess" value="sameDomain" />'
+                                    +'<param name="bgcolor" value="#000000" />'
+                                    +'<param name="allowFullScreen" value="true" />'
+                                    +'<param name="wmode" value="opaque" />'
+                                    +'<param name="FlashVars" value="callback='+_env.flashlsCallbackName+'" />'
+                                    +'<embed src="'+options.swf+'?inline=1" name="julia-api-'+_env.apiId+'" '
+                                    +'    quality="autohigh" '
+                                    +'    bgcolor="#000000" '
+                                    +'    align="middle" allowFullScreen="true" '
+                                    +'    allowScriptAccess="sameDomain" '
+                                    +'    type="application/x-shockwave-flash" '
+                                    +'    swliveconnect="true" '
+                                    +'    wmode="opaque" '
+                                    +'    FlashVars="callback='+_env.flashlsCallbackName+'"'
+                                    +'    pluginspage="http://www.macromedia.com/go/getflashplayer" >'
+                                    +'</embed>'
+                                +'</object>');
+
+                        _env.player.prepend(apiElement);
+
+                        flashlsAPI = function(flashObject)
                         {
-                            this.flashObject = flashObject;
-                        }
-
-                        this.constructor(flashObject);
-
-                        this.load = function(url)
-                        {
-                            this.flashObject.playerLoad(url);
-                        }
-
-                        this.play = function(offset)
-                        {
-                            started = true;
-                            this.flashObject.playerPlay(offset);
-                        }
-
-                        this.pause = function()
-                        {
-                            this.flashObject.playerPause();
-                        }
-
-                        this.resume = function() {
-                            this.flashObject.playerResume();
-                        }
-
-                        this.seek = function(offset) {
-                            this.flashObject.playerSeek(offset);
-                        }
-
-                        this.stop = function() {
-                            this.flashObject.playerStop();
-                        }
-
-                        this.volume = function(volume) {
-                            this.flashObject.playerVolume(volume);
-                        }
-
-                        this.setCurrentLevel = function(level) {
-                            this.flashObject.playerSetCurrentLevel(level);
-                        }
-
-                        this.setNextLevel = function(level) {
-                            this.flashObject.playerSetNextLevel(level);
-                        }
-
-                        this.setLoadLevel = function(level) {
-                            this.flashObject.playerSetLoadLevel(level);
-                        }
-
-                        this.setMaxBufferLength = function(len) {
-                            this.flashObject.playerSetmaxBufferLength(len);
-                        }
-
-                        this.getPosition = function() {
-                            return this.flashObject.getPosition();
-                        }
-
-                        this.getDuration = function() {
-                            return this.flashObject.getDuration();
-                        }
-
-                        this.getbufferLength = function() {
-                            return this.flashObject.getbufferLength();
-                        }
-
-                        this.getbackBufferLength = function() {
-                            return this.flashObject.getbackBufferLength();
-                        }
-
-                        this.getLowBufferLength = function() {
-                            return this.flashObject.getlowBufferLength();
-                        }
-
-                        this.getMinBufferLength = function() {
-                            return this.flashObject.getminBufferLength();
-                        }
-
-                        this.getMaxBufferLength = function() {
-                            return this.flashObject.getmaxBufferLength();
-                        }
-
-                        this.getLevels = function() {
-                            return this.flashObject.getLevels();
-                        }
-
-                        this.getAutoLevel = function() {
-                            return this.flashObject.getAutoLevel();
-                        }
-
-                        this.getCurrentLevel = function() {
-                            return this.flashObject.getCurrentLevel();
-                        }
-
-                        this.getNextLevel = function() {
-                            return this.flashObject.getNextLevel();
-                        }
-
-                        this.getLoadLevel = function() {
-                            return this.flashObject.getLoadLevel();
-                        }
-
-                        this.getAudioTrackList = function() {
-                            return this.flashObject.getAudioTrackList();
-                        }
-
-                        this.getStats = function() {
-                            return this.flashObject.getStats();
-                        }
-
-                        this.setAudioTrack = function(trackId) {
-                            this.flashObject.playerSetAudioTrack(trackId);
-                        }
-
-                        this.playerSetLogDebug = function(state) {
-                            this.flashObject.playerSetLogDebug(state);
-                        }
-
-                        this.getLogDebug = function() {
-                            return this.flashObject.getLogDebug();
-                        }
-
-                        this.playerSetLogDebug2 = function(state) {
-                            this.flashObject.playerSetLogDebug2(state);
-                        }
-
-                        this.getLogDebug2 = function() {
-                            return this.flashObject.getLogDebug2();
-                        }
-
-                        this.playerSetUseHardwareVideoDecoder = function(state) {
-                            this.flashObject.playerSetUseHardwareVideoDecoder(state);
-                        }
-
-                        this.getUseHardwareVideoDecoder = function() {
-                            return this.flashObject.getUseHardwareVideoDecoder();
-                        }
-
-                        this.playerSetflushLiveURLCache = function(state) {
-                            this.flashObject.playerSetflushLiveURLCache(state);
-                        }
-
-                        this.getflushLiveURLCache = function() {
-                            return this.flashObject.getflushLiveURLCache();
-                        }
-
-                        this.playerSetJSURLStream = function(state) {
-                            this.flashObject.playerSetJSURLStream(state);
-                        }
-
-                        this.getJSURLStream = function() {
-                            return this.flashObject.getJSURLStream();
-                        }
-
-                        this.playerCapLeveltoStage = function(state) {
-                            this.flashObject.playerCapLeveltoStage(state);
-                        }
-
-                        this.getCapLeveltoStage = function() {
-                            return this.flashObject.getCapLeveltoStage();
-                        }
-
-                        this.playerSetAutoLevelCapping = function(level) {
-                            this.flashObject.playerSetAutoLevelCapping(level);
-                        }
-
-                        this.getAutoLevelCapping = function() {
-                            return this.flashObject.getAutoLevelCapping();
-                        }
-                    };
-
-                    getFlashMovieObject = function(movieName)
-                    {
-                        if (window.document[movieName])
-                        {
-                            return window.document[movieName];
-                        }
-                        if (navigator.appName.indexOf("Microsoft Internet")==-1)
-                        {
-                            if (document.embeds && document.embeds[movieName])
+                            this.constructor = function(flashObject)
                             {
-                               return document.embeds[movieName];
-                            }else // if (navigator.appName.indexOf("Microsoft Internet")!=-1)
+                                this.flashObject = flashObject;
+                            }
+
+                            this.constructor(flashObject);
+
+                            this.load = function(url)
                             {
-                                return document.getElementById(movieName);
+                                this.flashObject.playerLoad(url);
+                            }
+
+                            this.play = function(offset)
+                            {
+                                started = true;
+                                this.flashObject.playerPlay(offset);
+                            }
+
+                            this.pause = function()
+                            {
+                                this.flashObject.playerPause();
+                            }
+
+                            this.resume = function() {
+                                this.flashObject.playerResume();
+                            }
+
+                            this.seek = function(offset) {
+                                this.flashObject.playerSeek(offset);
+                            }
+
+                            this.stop = function() {
+                                this.flashObject.playerStop();
+                            }
+
+                            this.volume = function(volume) {
+                                this.flashObject.playerVolume(volume);
+                            }
+
+                            this.setCurrentLevel = function(level) {
+                                this.flashObject.playerSetCurrentLevel(level);
+                            }
+
+                            this.setNextLevel = function(level) {
+                                this.flashObject.playerSetNextLevel(level);
+                            }
+
+                            this.setLoadLevel = function(level) {
+                                this.flashObject.playerSetLoadLevel(level);
+                            }
+
+                            this.setMaxBufferLength = function(len) {
+                                this.flashObject.playerSetmaxBufferLength(len);
+                            }
+
+                            this.getPosition = function() {
+                                return this.flashObject.getPosition();
+                            }
+
+                            this.getDuration = function() {
+                                return this.flashObject.getDuration();
+                            }
+
+                            this.getbufferLength = function() {
+                                return this.flashObject.getbufferLength();
+                            }
+
+                            this.getbackBufferLength = function() {
+                                return this.flashObject.getbackBufferLength();
+                            }
+
+                            this.getLowBufferLength = function() {
+                                return this.flashObject.getlowBufferLength();
+                            }
+
+                            this.getMinBufferLength = function() {
+                                return this.flashObject.getminBufferLength();
+                            }
+
+                            this.getMaxBufferLength = function() {
+                                return this.flashObject.getmaxBufferLength();
+                            }
+
+                            this.getLevels = function() {
+                                return this.flashObject.getLevels();
+                            }
+
+                            this.getAutoLevel = function() {
+                                return this.flashObject.getAutoLevel();
+                            }
+
+                            this.getCurrentLevel = function() {
+                                return this.flashObject.getCurrentLevel();
+                            }
+
+                            this.getNextLevel = function() {
+                                return this.flashObject.getNextLevel();
+                            }
+
+                            this.getLoadLevel = function() {
+                                return this.flashObject.getLoadLevel();
+                            }
+
+                            this.getAudioTrackList = function() {
+                                return this.flashObject.getAudioTrackList();
+                            }
+
+                            this.getStats = function() {
+                                return this.flashObject.getStats();
+                            }
+
+                            this.setAudioTrack = function(trackId) {
+                                this.flashObject.playerSetAudioTrack(trackId);
+                            }
+
+                            this.playerSetLogDebug = function(state) {
+                                this.flashObject.playerSetLogDebug(state);
+                            }
+
+                            this.getLogDebug = function() {
+                                return this.flashObject.getLogDebug();
+                            }
+
+                            this.playerSetLogDebug2 = function(state) {
+                                this.flashObject.playerSetLogDebug2(state);
+                            }
+
+                            this.getLogDebug2 = function() {
+                                return this.flashObject.getLogDebug2();
+                            }
+
+                            this.playerSetUseHardwareVideoDecoder = function(state) {
+                                this.flashObject.playerSetUseHardwareVideoDecoder(state);
+                            }
+
+                            this.getUseHardwareVideoDecoder = function() {
+                                return this.flashObject.getUseHardwareVideoDecoder();
+                            }
+
+                            this.playerSetflushLiveURLCache = function(state) {
+                                this.flashObject.playerSetflushLiveURLCache(state);
+                            }
+
+                            this.getflushLiveURLCache = function() {
+                                return this.flashObject.getflushLiveURLCache();
+                            }
+
+                            this.playerSetJSURLStream = function(state) {
+                                this.flashObject.playerSetJSURLStream(state);
+                            }
+
+                            this.getJSURLStream = function() {
+                                return this.flashObject.getJSURLStream();
+                            }
+
+                            this.playerCapLeveltoStage = function(state) {
+                                this.flashObject.playerCapLeveltoStage(state);
+                            }
+
+                            this.getCapLeveltoStage = function() {
+                                return this.flashObject.getCapLeveltoStage();
+                            }
+
+                            this.playerSetAutoLevelCapping = function(level) {
+                                this.flashObject.playerSetAutoLevelCapping(level);
+                            }
+
+                            this.getAutoLevelCapping = function() {
+                                return this.flashObject.getAutoLevelCapping();
+                            }
+                        };
+
+                        getFlashMovieObject = function(movieName)
+                        {
+                            if (window.document[movieName])
+                            {
+                                return window.document[movieName];
+                            }
+                            if (navigator.appName.indexOf("Microsoft Internet")==-1)
+                            {
+                                if (document.embeds && document.embeds[movieName])
+                                {
+                                   return document.embeds[movieName];
+                                }else // if (navigator.appName.indexOf("Microsoft Internet")!=-1)
+                                {
+                                    return document.getElementById(movieName);
+                                }
                             }
                         }
-                    }
 
-                    _env.api = new flashlsAPI(getFlashMovieObject('julia-api-'+_env.apiId));
+                        _env.api = new flashlsAPI(getFlashMovieObject('julia-api-'+_env.apiId));
+
+                    }else{
+
+                        _env.api = {};
+                        _env.shield.find('.julia-preloader').html('<div style="background: #111; color: #DDD; min-height: 100%; padding-top: 10%; font-size: 1.2em;"><span class="ion-android-warning"></span> <a href="https://get.adobe.com/cz/flashplayer/" target="_blank" style="color: #FFF;">Adobe Flash Player</a> is required</div>');
+                        _env.api.flashObject = $('<div class="julia-error" id="julia-api-'+_env.apiId+'"></div>');
+                        _env.player.prepend(_env.api.flashObject);
+                    }    
                 }
 
                 _debug.run({
@@ -465,6 +481,177 @@ if(!window.jQuery)
         };
 
 
+        var _flash = {
+
+            detect: function()
+            {
+                var self = this;
+                self.installed = false;
+                self.raw = "";
+                self.major = -1;
+                self.minor = -1;
+                self.revision = -1;
+                self.revisionStr = "";
+                var activeXDetectRules = [
+                    {
+                        "name":"ShockwaveFlash.ShockwaveFlash.7",
+                        "version":function(obj){
+                            return getActiveXVersion(obj);
+                        }
+                    },
+                    {
+                        "name":"ShockwaveFlash.ShockwaveFlash.6",
+                        "version":function(obj){
+                            var version = "6,0,21";
+                            try{
+                                obj.AllowScriptAccess = "always";
+                                version = getActiveXVersion(obj);
+                            }catch(err){}
+                            return version;
+                        }
+                    },
+                    {
+                        "name":"ShockwaveFlash.ShockwaveFlash",
+                        "version":function(obj){
+                            return getActiveXVersion(obj);
+                        }
+                    }
+                ];
+                
+                /**
+                 * Extract the ActiveX version of the plugin.
+                 * 
+                 * @param {Object} The flash ActiveX object.
+                 * @type String
+                 */
+                var getActiveXVersion = function(activeXObj)
+                {
+                    var version = -1;
+                    try
+                    {
+                        version = activeXObj.GetVariable("$version");
+                    }catch(err)
+                    {}
+                    return version;
+                };
+               
+                /**
+                 * Try and retrieve an ActiveX object having a specified name.
+                 * 
+                 * @param {String} name The ActiveX object name lookup.
+                 * @return One of ActiveX object or a simple object having an attribute of activeXError with a value of true.
+                 * @type Object
+                 */
+                var getActiveXObject = function(name)
+                {
+                    var obj = -1;
+                    try
+                    {
+                        obj = new ActiveXObject(name);
+                    }catch(err)
+                    {
+                        obj = {activeXError:true};
+                    }
+                    return obj;
+                };
+                
+                /**
+                 * Parse an ActiveX $version string into an object.
+                 * 
+                 * @param {String} str The ActiveX Object GetVariable($version) return value. 
+                 * @return An object having raw, major, minor, revision and revisionStr attributes.
+                 * @type Object
+                 */
+                var parseActiveXVersion = function(str)
+                {
+                    var versionArray = str.split(",");//replace with regex
+                    return {
+                        "raw":str,
+                        "major":parseInt(versionArray[0].split(" ")[1], 10),
+                        "minor":parseInt(versionArray[1], 10),
+                        "revision":parseInt(versionArray[2], 10),
+                        "revisionStr":versionArray[2]
+                    };
+                };
+                
+                /**
+                 * Parse a standard enabledPlugin.description into an object.
+                 * 
+                 * @param {String} str The enabledPlugin.description value.
+                 * @return An object having raw, major, minor, revision and revisionStr attributes.
+                 * @type Object
+                 */
+                var parseStandardVersion = function(str)
+                {
+                    var descParts = str.split(/ +/);
+                    var majorMinor = descParts[2].split(/\./);
+                    var revisionStr = descParts[3];
+                    return {
+                        "raw":str,
+                        "major":parseInt(majorMinor[0], 10),
+                        "minor":parseInt(majorMinor[1], 10), 
+                        "revisionStr":revisionStr,
+                        "revision":parseRevisionStrToInt(revisionStr)
+                    };
+                };
+                
+                /**
+                 * Parse the plugin revision string into an integer.
+                 * 
+                 * @param {String} The revision in string format.
+                 * @type Number
+                 */
+                var parseRevisionStrToInt = function(str)
+                {
+                    return parseInt(str.replace(/[a-zA-Z]/g, ""), 10) || self.revision;
+                };
+              
+                /**
+                 * Constructor, sets raw, major, minor, revisionStr, revision and installed public properties.
+                */
+                if(navigator.plugins && navigator.plugins.length>0)
+                {
+                    var type = 'application/x-shockwave-flash';
+                    var mimeTypes = navigator.mimeTypes;
+                    if(mimeTypes && mimeTypes[type] && mimeTypes[type].enabledPlugin && mimeTypes[type].enabledPlugin.description)
+                    {
+                        var version = mimeTypes[type].enabledPlugin.description;
+                        var versionObj = parseStandardVersion(version);
+                        self.raw = versionObj.raw;
+                        self.major = versionObj.major;
+                        self.minor = versionObj.minor; 
+                        self.revisionStr = versionObj.revisionStr;
+                        self.revision = versionObj.revision;
+                        self.installed = true;
+                    }
+                }else if(navigator.appVersion.indexOf("Mac")==-1 && window.execScript)
+                {
+                    var version = -1;
+                    for(var i=0; i<activeXDetectRules.length && version==-1; i++)
+                    {
+                        var obj = getActiveXObject(activeXDetectRules[i].name);
+                        if(!obj.activeXError)
+                        {
+                            self.installed = true;
+                            version = activeXDetectRules[i].version(obj);
+                            if(version!=-1)
+                            {
+                                var versionObj = parseActiveXVersion(version);
+                                self.raw = versionObj.raw;
+                                self.major = versionObj.major;
+                                self.minor = versionObj.minor; 
+                                self.revision = versionObj.revision;
+                                self.revisionStr = versionObj.revisionStr;
+                            }
+                        }
+                    }
+                }
+
+                return self;
+            }
+        };
+
+        // UI kit    
         var _ui = {
 
             // Video shield for helpers, buttons, preloaders, advertising etc...
@@ -814,8 +1001,15 @@ if(!window.jQuery)
                     _env.api.setAttribute('width', '100%');
                     _env.api.setAttribute('height', '100%');
                 }else{
-                    _env.api.flashObject.width = '100%';
-                    _env.api.flashObject.height = '100%';
+
+                    if(_env.apiOk === true)
+                    {    
+                        _env.api.flashObject.width = '100%';
+                        _env.api.flashObject.height = '100%';
+                    }else{
+                        _env.api.flashObject.width('100%');
+                        _env.api.flashObject.height('100%');
+                    }
                 }
             },
 
@@ -1706,7 +1900,7 @@ if(!window.jQuery)
             load: function()
             {
                 _env.shield.find('.julia-preloader').addClass('on');
-
+                    
                 // ************************
                 // HLS library supported
                 // and HLS requested
@@ -1768,16 +1962,30 @@ if(!window.jQuery)
                 // ************************
                 // Bind all events
                 // ************************
-                _bind.domEvents();
-
-                if(_env.flashApi === false)
+                if(_env.apiOk === true)
                 {
-                    // Classic html5 api
-                    _bind.nativeEvents();
-                }else{
-                    // Flash api
-                    _bind.flashEvents();
+                    _bind.domEvents();
+
+                    if(_env.flashApi === false)
+                    {
+                        // Classic html5 api
+                        _bind.nativeEvents();
+                    }else{
+                        // Flash api
+                        _bind.flashEvents();
+                    }
                 }
+
+                stats = {
+                    'isHls': _env.isHls,
+                    'flashApi': _env.flashApi,
+                    'useHlsLib': _env.useHlsLib,
+                    'live': _env.isLive,
+                    'hlsCapable': _env.hlsCapable,
+                    'hlsCapableString': _env.hlsCapableString
+                };
+
+                _debug.run(stats);
 
                 // Define publicApi
                 _env.publicApi = {
@@ -1841,17 +2049,6 @@ if(!window.jQuery)
                 }else{
                     _env.toolbar.removeClass('live');
                 }
-
-                stats = {
-                    'isHls': _env.isHls,
-                    'flashApi': _env.flashApi,
-                    'useHlsLib': _env.useHlsLib,
-                    'live': _env.isLive,
-                    'hlsCapable': _env.hlsCapable,
-                    'hlsCapableString': _env.hlsCapableString
-                };
-
-                _debug.run(stats);
             }
         }
 
