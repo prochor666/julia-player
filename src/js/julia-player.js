@@ -2,15 +2,15 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.9.3
-* build: 2015-12-21
+* version: 0.9.4
+* build: 2016-1-28
 * licensed under the MIT License
 *
 * @requires:
 * hls.js [required]
 * jquery [required]
 * ionicons [required]
-* rangeslider [required]
+* rangeslider.js [required]
 *
 ************************************* */
 
@@ -33,19 +33,17 @@ if(!window.jQuery)
     // Support libs
     try {
         h = new Hls;
-
     }catch(err)
     {
-        /*! hls.js 0.3.14, handle error or insert/bind source */
+        /*! hls.js 0.4.7, handle error or insert/bind source */
     }
 
     try {
         $.rangeslider();
     }catch(err)
     {
-        /*! rangeslider.js - v2.0.5, handle error or insert/bind source */
+        /*! rangeslider.js - v2.1.1, handle error or insert/bind source */
     }
-
 
     // Julia main class
     _julia = function(el, opts)
@@ -99,6 +97,7 @@ if(!window.jQuery)
             suggestTimeout: 10000,
             swf: __JULIA_ROOT_PATH__+'/swf/flashlsChromeless.swf',
             themePath: __JULIA_ROOT_PATH__+'/css/themes',
+            pluginPath: __JULIA_ROOT_PATH__+'/js/plugins',
             theme: 'default',
             i18n: {
                 liveText: 'Live'
@@ -116,13 +115,12 @@ if(!window.jQuery)
             toolbar: '',
             poster: '',
             api: '',
-            apiId: Math.floor((Math.random()*10000000)+1), // Create a shadow api
+            apiId: Math.floor((Math.random()*10000000)+1), // Create a shadow api unique ID
             player: '',
             isLive: false,
             hls: {},
-            hlsCapable: '',
-            hlsCapableString: '',
-            type: 'html5',
+            canPlayMedia: '',
+            canPlayMediaString: '',
             isHls: false,
             useHlsLib: false,
             tries: 0,
@@ -130,10 +128,13 @@ if(!window.jQuery)
             flashApi: false,
             duration: 0,
             apiOk: false,
-            onTimeRised: [], 
+            onTimeRised: [],
             seeking: false,
-            dimensions: false,
-            flashlsCallbackName: '',
+            dimensions: {
+            	width: 0, 
+            	height: 0,
+            },
+            flashCallbackName: '',
             started: false,
             publicApi: {},
             suggestPointer: 0,
@@ -236,7 +237,7 @@ if(!window.jQuery)
 
                     var flash = _flash.detect();
                     var flashOk = flash.installed;
-                    
+
                     if( (flash.major==11 && flash.minor>=2) || flash.major>11 )
                     {
                         _debug.run({
@@ -244,7 +245,7 @@ if(!window.jQuery)
                         });
 
                         _env.apiOk = true;
-                        _env.flashlsCallbackName = 'flashlsCallback'+_env.apiId;
+                        _env.flashCallbackName = 'flashlsCallback'+_env.apiId;
 
                         apiElement = $('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="" id="julia-api-'+_env.apiId+'">'
                                     +'<param name="movie" value="'+options.swf+'?inline=1" />'
@@ -254,7 +255,7 @@ if(!window.jQuery)
                                     +'<param name="bgcolor" value="#000000" />'
                                     +'<param name="allowFullScreen" value="true" />'
                                     +'<param name="wmode" value="opaque" />'
-                                    +'<param name="FlashVars" value="callback='+_env.flashlsCallbackName+'" />'
+                                    +'<param name="FlashVars" value="callback='+_env.flashCallbackName+'" />'
                                     +'<embed src="'+options.swf+'?inline=1" name="julia-api-'+_env.apiId+'" '
                                     +'    quality="autohigh" '
                                     +'    bgcolor="#000000" '
@@ -263,7 +264,7 @@ if(!window.jQuery)
                                     +'    type="application/x-shockwave-flash" '
                                     +'    swliveconnect="true" '
                                     +'    wmode="opaque" '
-                                    +'    FlashVars="callback='+_env.flashlsCallbackName+'"'
+                                    +'    FlashVars="callback='+_env.flashCallbackName+'"'
                                     +'    pluginspage="http://www.macromedia.com/go/getflashplayer" >'
                                     +'</embed>'
                                 +'</object>');
@@ -470,7 +471,7 @@ if(!window.jQuery)
                         _env.shield.find('.julia-preloader').html('<div style="background: #111; color: #DDD; min-height: 100%; padding-top: 10%; font-size: 1.2em;"><span class="ion-android-warning"></span> <a href="https://get.adobe.com/cz/flashplayer/" target="_blank" style="color: #FFF;">Adobe Flash Player</a> is required</div>');
                         _env.api.flashObject = $('<div class="julia-error" id="julia-api-'+_env.apiId+'"></div>');
                         _env.player.prepend(_env.api.flashObject);
-                    }    
+                    }
                 }
 
                 _debug.run({
@@ -517,10 +518,10 @@ if(!window.jQuery)
                         }
                     }
                 ];
-                
+
                 /**
                  * Extract the ActiveX version of the plugin.
-                 * 
+                 *
                  * @param {Object} The flash ActiveX object.
                  * @type String
                  */
@@ -534,10 +535,10 @@ if(!window.jQuery)
                     {}
                     return version;
                 };
-               
+
                 /**
                  * Try and retrieve an ActiveX object having a specified name.
-                 * 
+                 *
                  * @param {String} name The ActiveX object name lookup.
                  * @return One of ActiveX object or a simple object having an attribute of activeXError with a value of true.
                  * @type Object
@@ -554,11 +555,11 @@ if(!window.jQuery)
                     }
                     return obj;
                 };
-                
+
                 /**
                  * Parse an ActiveX $version string into an object.
-                 * 
-                 * @param {String} str The ActiveX Object GetVariable($version) return value. 
+                 *
+                 * @param {String} str The ActiveX Object GetVariable($version) return value.
                  * @return An object having raw, major, minor, revision and revisionStr attributes.
                  * @type Object
                  */
@@ -573,10 +574,10 @@ if(!window.jQuery)
                         "revisionStr":versionArray[2]
                     };
                 };
-                
+
                 /**
                  * Parse a standard enabledPlugin.description into an object.
-                 * 
+                 *
                  * @param {String} str The enabledPlugin.description value.
                  * @return An object having raw, major, minor, revision and revisionStr attributes.
                  * @type Object
@@ -589,15 +590,15 @@ if(!window.jQuery)
                     return {
                         "raw":str,
                         "major":parseInt(majorMinor[0], 10),
-                        "minor":parseInt(majorMinor[1], 10), 
+                        "minor":parseInt(majorMinor[1], 10),
                         "revisionStr":revisionStr,
                         "revision":parseRevisionStrToInt(revisionStr)
                     };
                 };
-                
+
                 /**
                  * Parse the plugin revision string into an integer.
-                 * 
+                 *
                  * @param {String} The revision in string format.
                  * @type Number
                  */
@@ -605,7 +606,7 @@ if(!window.jQuery)
                 {
                     return parseInt(str.replace(/[a-zA-Z]/g, ""), 10) || self.revision;
                 };
-              
+
                 /**
                  * Constructor, sets raw, major, minor, revisionStr, revision and installed public properties.
                 */
@@ -619,7 +620,7 @@ if(!window.jQuery)
                         var versionObj = parseStandardVersion(version);
                         self.raw = versionObj.raw;
                         self.major = versionObj.major;
-                        self.minor = versionObj.minor; 
+                        self.minor = versionObj.minor;
                         self.revisionStr = versionObj.revisionStr;
                         self.revision = versionObj.revision;
                         self.installed = true;
@@ -639,7 +640,7 @@ if(!window.jQuery)
                                 var versionObj = parseActiveXVersion(version);
                                 self.raw = versionObj.raw;
                                 self.major = versionObj.major;
-                                self.minor = versionObj.minor; 
+                                self.minor = versionObj.minor;
                                 self.revision = versionObj.revision;
                                 self.revisionStr = versionObj.revisionStr;
                             }
@@ -651,7 +652,7 @@ if(!window.jQuery)
             }
         };
 
-        // UI kit    
+        // UI kit
         var _ui = {
 
             // Video shield for helpers, buttons, preloaders, advertising etc...
@@ -825,7 +826,7 @@ if(!window.jQuery)
                 h = human.length>2 ? parseInt(human[3]): 0;
                 t = s + m*60 + h*60*60;
                 return t;
-            }, 
+            },
 
             toHuman: function(time)
             {
@@ -973,13 +974,13 @@ if(!window.jQuery)
                 $('head').append('<link rel="stylesheet" type="text/css" href="'+options.themePath+'/'+options.theme+'/julia.css">');
             },
 
-            hlsCapable: function()
+            canPlayMedia: function()
             {
                 var vid = document.createElement('video');
                 vid.id = 'video-cap-test-'+_env.apiId;
-                _env.hlsCapableString = vid.canPlayType('application/vnd.apple.mpegURL');
+                _env.canPlayMediaString = vid.canPlayType('application/vnd.apple.mpegURL');
                 $('#video-cap-test'+_env.apiId).remove();
-                return (_env.hlsCapableString == 'probably' || _env.hlsCapableString == 'maybe');
+                return (_env.canPlayMediaString == 'probably' || _env.canPlayMediaString == 'maybe');
             },
 
             resize: function()
@@ -996,6 +997,9 @@ if(!window.jQuery)
                 _env.player.width(dimensions[0]);
                 _env.player.height(dimensions[1]);
 
+                _env.dimensions.width = dimensions[0];
+                _env.dimensions.height = dimensions[1];
+
                 if(_env.flashApi===false)
                 {
                     _env.api.setAttribute('width', '100%');
@@ -1003,7 +1007,7 @@ if(!window.jQuery)
                 }else{
 
                     if(_env.apiOk === true)
-                    {    
+                    {
                         _env.api.flashObject.width = '100%';
                         _env.api.flashObject.height = '100%';
                     }else{
@@ -1055,14 +1059,14 @@ if(!window.jQuery)
                 data = data||{};
 
                 if(data.length>0)
-                {    
+                {
                     _debug.run({
                         'action': action,
                         'action-data': data,
                     });
 
                 }else{
-                
+
                     _debug.run({
                         'action': action,
                     });
@@ -1561,7 +1565,7 @@ if(!window.jQuery)
                     }
 
                     _bind.onTime(currentTimeReadable, _env.api.currentTime);
-                    
+
                     if(options.debugPlayback === true)
                     {
                         _debug.run({
@@ -1799,11 +1803,11 @@ if(!window.jQuery)
 
                 // Create a single global callback function and pass it's name
                 // to the SWF with the name `callback` in the FlashVars parameter.
-                window[_env.flashlsCallbackName] = function(eventName, args)
+                window[_env.flashCallbackName] = function(eventName, args)
                 {
                     flashlsEvents[eventName].apply(null, args);
                 };
-            }, 
+            },
 
             // Time update event callbacks
             onTime: function(time, timeNum)
@@ -1819,7 +1823,7 @@ if(!window.jQuery)
                         _debug.run({
                             'onTime': handle+' raised'
                         });
-                        
+
                     }else{
 
                         _debug.run({
@@ -1879,17 +1883,17 @@ if(!window.jQuery)
             {
                 _env.element.prop('preload', 'none');
                 _env.source = options.source && options.source.length>0 ? options.source: _env.element.prop('src');
-                if(options.forceHls === true)
-                {
-                    _env.source += _env.source.indexOf('?') == -1 ? '?m3u8=yes': '&m3u8=yes';
-                }
-
-                _env.type = _env.source.indexOf('m3u8') == -1 ? _env.type: 'hls';
-                _debug.run({
-                    'sourceType': _env.type
-                });
 
                 _env.isHls = _env.source.indexOf('m3u8') == -1 ? false: true;
+                if(options.forceHls === true)
+                {
+                    //_env.source += _env.source.indexOf('?') == -1 ? '?m3u8=yes': '&m3u8=yes';
+                    _env.isHls = true;
+                }
+
+                _debug.run({
+                    'sourceType': (_env.isHls === false ? 'file': 'hls')
+                });
 
                 _env.poster = options.poster && options.poster.length>0 ? options.poster: _env.element.prop('poster');
                 _ui.posterSet();
@@ -1900,7 +1904,7 @@ if(!window.jQuery)
             load: function()
             {
                 _env.shield.find('.julia-preloader').addClass('on');
-                    
+
                 // ************************
                 // HLS library supported
                 // and HLS requested
@@ -1981,8 +1985,8 @@ if(!window.jQuery)
                     'flashApi': _env.flashApi,
                     'useHlsLib': _env.useHlsLib,
                     'live': _env.isLive,
-                    'hlsCapable': _env.hlsCapable,
-                    'hlsCapableString': _env.hlsCapableString
+                    'canPlayMediaString': _env.canPlayMediaString, 
+                    'canPlayMedia': _env.canPlayMedia,
                 };
 
                 _debug.run(stats);
@@ -1990,9 +1994,12 @@ if(!window.jQuery)
                 // Define publicApi
                 _env.publicApi = {
                     control: _control,
+                    options: options, 
                     support: _support,
-                    timeline: _timeline, 
+                    dimensions: _env.dimensions,  
+                    timeline: _timeline,
                     shield: _env.shield, 
+                    toolbar: _env.toolbar, 
                     media: _env.api,
                     id: _env.apiId,
                     stats: stats
@@ -2008,12 +2015,12 @@ if(!window.jQuery)
                 _env.useHlsLib = false;
                 _env.flashApi = false;
                 _env.isLive = false;
-                _env.hlsCapable = _support.hlsCapable();
+                _env.canPlayMedia = _support.canPlayMedia();
                 _env.tries+=1;
 
                 if(_env.isHls === true)
                 {
-                    _env.useHlsLib = _env.hlsCapable === false && Hls.isSupported() ? true: false;
+                    _env.useHlsLib = _env.canPlayMedia === false && Hls.isSupported() ? true: false;
                 }
 
                 // ************************
@@ -2029,7 +2036,7 @@ if(!window.jQuery)
                 // No HLS library support,
                 // but HLS is requested
                 // ************************
-                }else if(_env.isHls === true && _env.useHlsLib === false && _env.hlsCapable === false)
+                }else if(_env.isHls === true && _env.useHlsLib === false && _env.canPlayMedia === false)
                 {
                     _env.flashApi = true;
 
