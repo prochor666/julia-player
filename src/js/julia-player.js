@@ -2,8 +2,8 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.9.4
-* build: 2016-1-28
+* version: 0.9.5
+* build: 2016-2-25
 * licensed under the MIT License
 *
 * @requires:
@@ -33,16 +33,19 @@ if(!window.jQuery)
     // Support libs
     try {
         h = new Hls;
+
     }catch(err)
     {
-        /*! hls.js 0.4.7, handle error or insert/bind source */
+        /*! hls.js 0.5.7, handle error or insert source */
+
     }
 
     try {
         $.rangeslider();
     }catch(err)
     {
-        /*! rangeslider.js - v2.1.1, handle error or insert/bind source */
+        /*! rangeslider.js - v2.1.1, handle error or insert source */
+
     }
 
     // Julia main class
@@ -131,7 +134,7 @@ if(!window.jQuery)
             onTimeRised: [],
             seeking: false,
             dimensions: {
-            	width: 0, 
+            	width: 0,
             	height: 0,
             },
             flashCallbackName: '',
@@ -1236,7 +1239,10 @@ if(!window.jQuery)
                         _fullscreen.off();
 
                     break; case 'destroy':
-                        _env.player.remove();
+
+                        setTiemout( function(){
+                            _env.player.remove();
+                        }, 100);
 
                     break; default:
 
@@ -1985,7 +1991,7 @@ if(!window.jQuery)
                     'flashApi': _env.flashApi,
                     'useHlsLib': _env.useHlsLib,
                     'live': _env.isLive,
-                    'canPlayMediaString': _env.canPlayMediaString, 
+                    'canPlayMediaString': _env.canPlayMediaString,
                     'canPlayMedia': _env.canPlayMedia,
                 };
 
@@ -1994,12 +2000,12 @@ if(!window.jQuery)
                 // Define publicApi
                 _env.publicApi = {
                     control: _control,
-                    options: options, 
+                    options: options,
                     support: _support,
-                    dimensions: _env.dimensions,  
+                    dimensions: _env.dimensions,
                     timeline: _timeline,
-                    shield: _env.shield, 
-                    toolbar: _env.toolbar, 
+                    shield: _env.shield,
+                    toolbar: _env.toolbar,
                     media: _env.api,
                     id: _env.apiId,
                     stats: stats
