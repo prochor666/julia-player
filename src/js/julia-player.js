@@ -2,7 +2,7 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.9.5
+* version: 0.9.6
 * build: 2016-2-25
 * licensed under the MIT License
 *
@@ -37,7 +37,6 @@ if(!window.jQuery)
     }catch(err)
     {
         /*! hls.js 0.5.7, handle error or insert source */
-
     }
 
     try {
@@ -45,7 +44,6 @@ if(!window.jQuery)
     }catch(err)
     {
         /*! rangeslider.js - v2.1.1, handle error or insert source */
-
     }
 
     // Julia main class
@@ -1371,7 +1369,7 @@ if(!window.jQuery)
                 {
                     e.preventDefault();
                     e.stopPropagation();
-                    if(options.pauseOnClick === true)
+                    if(options.pauseOnClick === true && _support.isMobile() === false)
                     {
                         _control.press('pause');
                     }

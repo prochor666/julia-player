@@ -2,7 +2,7 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.9.5
+* version: 0.9.6
 * build: 2016-2-25
 * licensed under the MIT License
 *
@@ -1375,7 +1375,7 @@ s={data:[],size:0}}s&&(s.data.push(n.subarray(a,t+188)),s.size+=t+188-a)}else if
                 {
                     e.preventDefault();
                     e.stopPropagation();
-                    if(options.pauseOnClick === true)
+                    if(options.pauseOnClick === true && _support.isMobile() === false)
                     {
                         _control.press('pause');
                     }
