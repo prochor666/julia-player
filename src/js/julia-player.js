@@ -2,7 +2,7 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.9.6
+* version: 0.9.7
 * build: 2016-2-25
 * licensed under the MIT License
 *
@@ -37,6 +37,7 @@ if(!window.jQuery)
     }catch(err)
     {
         /*! hls.js 0.5.7, handle error or insert source */
+
     }
 
     try {
@@ -44,6 +45,7 @@ if(!window.jQuery)
     }catch(err)
     {
         /*! rangeslider.js - v2.1.1, handle error or insert source */
+
     }
 
     // Julia main class
@@ -104,7 +106,12 @@ if(!window.jQuery)
                 liveText: 'Live'
             },
             onTime: {},
-            triggerHls: {}
+            triggerHls: {},
+            onPlay: false,
+            onPause: false,
+            onStop: false,
+            onPosition: false,
+            onSuggest: false,
         };
 
 
@@ -876,6 +883,13 @@ if(!window.jQuery)
 
                                 suggestItemWidget.on('click', function(e)
                                 {
+
+                                    if(options.onSuggest !== false)
+                                    {
+                                        _call.fn(options.onSuggest, options.suggest[i]);
+                                    }
+
+
                                     if(_env.flashApi===false)
                                     {
                                         options.muted = _env.api.muted;
@@ -1052,6 +1066,20 @@ if(!window.jQuery)
             }
         };
 
+
+        // Callback
+        var _call = {
+
+            fn: function(f, data)
+            {
+                data = data||{};
+                if(f !== false)
+                {
+                    f(_options, _env, data);
+                }
+            }
+        };
+
         // Api && UI control
         var _control = {
 
@@ -1076,6 +1104,11 @@ if(!window.jQuery)
                 switch(action)
                 {
                     case 'play':
+
+                        if(options.onPlay !== false)
+                        {
+                            _call.fn(options.onPlay, data);
+                        }
 
                         if(_env.flashApi === false)
                         {
@@ -1107,6 +1140,11 @@ if(!window.jQuery)
 
                     break; case 'pause':
 
+                        if(options.onPause !== false)
+                        {
+                            _call.fn(options.onPause, data);
+                        }
+
                         if(_env.flashApi === false)
                         {
                             _env.api.pause();
@@ -1120,6 +1158,11 @@ if(!window.jQuery)
                         }
 
                     break; case 'stop':
+
+                        if(options.onStop !== false)
+                        {
+                            _call.fn(options.onStop, data);
+                        }
 
                         if(_env.flashApi === false)
                         {
@@ -1138,6 +1181,11 @@ if(!window.jQuery)
                         _env.toolbar.find('.julia-progress>input').val(0).rangeslider('update', true);
 
                     break; case 'goto':
+
+                        if(options.onPosition !== false)
+                        {
+                            _call.fn(options.onPosition, data);
+                        }
 
                         if(_env.flashApi === false)
                         {

@@ -2,7 +2,7 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.9.6
+* version: 0.9.7
 * build: 2016-2-25
 * licensed under the MIT License
 *
@@ -110,7 +110,12 @@ s={data:[],size:0}}s&&(s.data.push(n.subarray(a,t+188)),s.size+=t+188-a)}else if
                 liveText: 'Live'
             },
             onTime: {},
-            triggerHls: {}
+            triggerHls: {},
+            onPlay: false,
+            onPause: false,
+            onStop: false,
+            onPosition: false,
+            onSuggest: false,
         };
 
 
@@ -882,6 +887,13 @@ s={data:[],size:0}}s&&(s.data.push(n.subarray(a,t+188)),s.size+=t+188-a)}else if
 
                                 suggestItemWidget.on('click', function(e)
                                 {
+
+                                    if(options.onSuggest !== false)
+                                    {
+                                        _call.fn(options.onSuggest, options.suggest[i]);
+                                    }
+
+
                                     if(_env.flashApi===false)
                                     {
                                         options.muted = _env.api.muted;
@@ -1058,6 +1070,20 @@ s={data:[],size:0}}s&&(s.data.push(n.subarray(a,t+188)),s.size+=t+188-a)}else if
             }
         };
 
+
+        // Callback
+        var _call = {
+
+            fn: function(f, data)
+            {
+                data = data||{};
+                if(f !== false)
+                {
+                    f(_options, _env, data);
+                }
+            }
+        };
+
         // Api && UI control
         var _control = {
 
@@ -1082,6 +1108,11 @@ s={data:[],size:0}}s&&(s.data.push(n.subarray(a,t+188)),s.size+=t+188-a)}else if
                 switch(action)
                 {
                     case 'play':
+
+                        if(options.onPlay !== false)
+                        {
+                            _call.fn(options.onPlay, data);
+                        }
 
                         if(_env.flashApi === false)
                         {
@@ -1113,6 +1144,11 @@ s={data:[],size:0}}s&&(s.data.push(n.subarray(a,t+188)),s.size+=t+188-a)}else if
 
                     break; case 'pause':
 
+                        if(options.onPause !== false)
+                        {
+                            _call.fn(options.onPause, data);
+                        }
+
                         if(_env.flashApi === false)
                         {
                             _env.api.pause();
@@ -1126,6 +1162,11 @@ s={data:[],size:0}}s&&(s.data.push(n.subarray(a,t+188)),s.size+=t+188-a)}else if
                         }
 
                     break; case 'stop':
+
+                        if(options.onStop !== false)
+                        {
+                            _call.fn(options.onStop, data);
+                        }
 
                         if(_env.flashApi === false)
                         {
@@ -1144,6 +1185,11 @@ s={data:[],size:0}}s&&(s.data.push(n.subarray(a,t+188)),s.size+=t+188-a)}else if
                         _env.toolbar.find('.julia-progress>input').val(0).rangeslider('update', true);
 
                     break; case 'goto':
+
+                        if(options.onPosition !== false)
+                        {
+                            _call.fn(options.onPosition, data);
+                        }
 
                         if(_env.flashApi === false)
                         {
