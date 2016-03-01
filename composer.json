@@ -1,0 +1,16 @@
+{
+    "name": "prochor666/julia-player",
+    "type": "library",
+    "description": "Javascript video player, supports VOD or HLS streams",
+    "keywords": ["player","video"],
+    "homepage": "https://github.com/prochor666/julia-player",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jan Prochazka",
+            "email": "prochor666@gmail.com",
+            "homepage": "http://multizone.cz",
+            "role": "Developer"
+        }
+    ],
+}
