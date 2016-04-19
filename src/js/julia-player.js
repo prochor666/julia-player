@@ -2,8 +2,8 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.9.7
-* build: 2016-2-25
+* version: 0.9.9
+* build: 2016-04-19
 * licensed under the MIT License
 *
 * @requires:
@@ -36,7 +36,7 @@ if(!window.jQuery)
 
     }catch(err)
     {
-        /*! hls.js 0.5.7, handle error or insert source */
+        /*! hls.js 0.5.22, handle error or insert source */
 
     }
 
@@ -1934,7 +1934,8 @@ if(!window.jQuery)
             selectSource: function()
             {
                 _env.element.prop('preload', 'none');
-                _env.source = options.source && options.source.length>0 ? options.source: _env.element.prop('src');
+                protoSource = _env.element.prop('src') ? _env.element.prop('src'): _env.element.find('source').prop('src');
+                _env.source = options.source && options.source.length>0 ? options.source: protoSource;
 
                 _env.isHls = _env.source.indexOf('m3u8') == -1 ? false: true;
                 if(options.forceHls === true)
