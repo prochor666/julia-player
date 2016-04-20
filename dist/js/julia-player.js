@@ -2,8 +2,8 @@
 * Julia player
 *
 * @author prochor666@gmail.com
-* version: 0.9.9
-* build: 2016-04-19
+* version: 0.9.10
+* build: 2016-04-21
 * licensed under the MIT License
 *
 * @requires:
@@ -1038,7 +1038,13 @@ this.id=a,this.id2=s,null===this.id?(t=e.manifestLoadingMaxRetry,r=e.manifestLoa
 
             getSize: function()
             {
-                var parentWidth = _env.element.parent().width();
+                // Fix video wrapped in inline block, can not get size properlym if inline element detected
+                var parentBlock = _env.element.parent().css('display').toLowerCase();
+                if(parentBlock == 'inline')
+                {
+                    _env.element.parent().css({'display': 'block'});
+                }
+                                var parentWidth = _env.element.parent().width();
                 for(i in options.dimensions)
                 {
                     var dim = options.dimensions[i];
