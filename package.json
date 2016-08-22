@@ -1,0 +1,33 @@
+{
+  "name": "julia-player",
+  "version": "1.0.0",
+  "description": "Julia player, HTML5 responsive, mobile ready media player",
+  "main": "gulpfile.js",
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^2.0.12",
+    "gulp-concat": "^2.6.0",
+    "gulp-minify": "^0.0.14",
+    "gulp-sass": "^2.3.2",
+    "gulp-sourcemaps": "^1.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prochor666/julia-player.git"
+  },
+  "keywords": [
+    "html5",
+    "video",
+    "player"
+  ],
+  "author": "prochor666@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/prochor666/julia-player/issues"
+  },
+  "homepage": "https://github.com/prochor666/julia-player#readme"
+}
