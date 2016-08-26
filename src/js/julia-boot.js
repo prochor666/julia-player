@@ -21,8 +21,8 @@ Julia.prototype._Boot = function(origin)
         }
 
         // Persistent data
-        volume = origin.Persist.get('volume');
-        muted = origin.Persist.get('muted');
+        volume = origin.Persist.get('julia-player-volume');
+        muted = origin.Persist.get('julia-player-muted');
 
         if(typeof volume !=='undefined' && volume.length>0)
         {

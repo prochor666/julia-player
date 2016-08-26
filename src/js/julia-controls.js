@@ -97,8 +97,8 @@ Julia.prototype._Controls = function(origin)
 
                 origin.env.api.muted = false;
                 origin.options.muted = false;
-                origin.Persist.set('volume', origin.options.volume, 999);
-                origin.Persist.set('muted', origin.options.muted, 999);
+                origin.Persist.set('julia-player-volume', origin.options.volume, 999);
+                origin.Persist.set('julia-player-muted', origin.options.muted, 999);
 
                 origin.Ui.state( origin.env.model.buttons.sound, 'off', 'on' );
                 origin.Ui.icon( origin.env.model.buttons.sound, 'julia-sound-off', 'julia-sound-on' );
@@ -107,8 +107,8 @@ Julia.prototype._Controls = function(origin)
 
                 origin.env.api.muted = true;
                 origin.options.muted = true;
-                origin.Persist.set('volume', origin.options.volume, 999);
-                origin.Persist.set('muted', origin.options.muted, 999);
+                origin.Persist.set('julia-player-volume', origin.options.volume, 999);
+                origin.Persist.set('julia-player-muted', origin.options.muted, 999);
 
                 origin.Ui.state( origin.env.model.buttons.sound, 'on', 'off' );
                 origin.Ui.icon( origin.env.model.buttons.sound, 'julia-sound-on', 'julia-sound-off' );

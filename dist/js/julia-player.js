@@ -1570,8 +1570,8 @@ Julia.prototype._Controls = function(origin)
 
                 origin.env.api.muted = false;
                 origin.options.muted = false;
-                origin.Persist.set('volume', origin.options.volume, 999);
-                origin.Persist.set('muted', origin.options.muted, 999);
+                origin.Persist.set('julia-player-volume', origin.options.volume, 999);
+                origin.Persist.set('julia-player-muted', origin.options.muted, 999);
 
                 origin.Ui.state( origin.env.model.buttons.sound, 'off', 'on' );
                 origin.Ui.icon( origin.env.model.buttons.sound, 'julia-sound-off', 'julia-sound-on' );
@@ -1580,8 +1580,8 @@ Julia.prototype._Controls = function(origin)
 
                 origin.env.api.muted = true;
                 origin.options.muted = true;
-                origin.Persist.set('volume', origin.options.volume, 999);
-                origin.Persist.set('muted', origin.options.muted, 999);
+                origin.Persist.set('julia-player-volume', origin.options.volume, 999);
+                origin.Persist.set('julia-player-muted', origin.options.muted, 999);
 
                 origin.Ui.state( origin.env.model.buttons.sound, 'on', 'off' );
                 origin.Ui.icon( origin.env.model.buttons.sound, 'julia-sound-on', 'julia-sound-off' );
@@ -2185,8 +2185,8 @@ Julia.prototype._Boot = function(origin)
         }
 
         // Persistent data
-        volume = origin.Persist.get('volume');
-        muted = origin.Persist.get('muted');
+        volume = origin.Persist.get('julia-player-volume');
+        muted = origin.Persist.get('julia-player-muted');
 
         if(typeof volume !=='undefined' && volume.length>0)
         {
@@ -2313,7 +2313,7 @@ Julia.prototype._Loader = function(origin)
                 origin.env.hls.on(Hls.Events.LEVEL_LOADED, function(event, data)
                 {
                     // SET LIVE EVENT STATE
-                    if(data.details.live === true || origin.options.live === true)
+                    if(data.details.live === true && origin.options.live === false)
                     {
                         origin.env.isLive = true;
                         origin.Ui.state(origin.env.model.toolbar, '', 'live');
