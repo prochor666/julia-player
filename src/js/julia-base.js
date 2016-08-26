@@ -248,7 +248,7 @@ var Julia = function(options)
     });
 
 
-    // Run player
+    // Run player init
     origin.Boot.run();
 
 

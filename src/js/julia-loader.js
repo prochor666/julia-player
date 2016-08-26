@@ -88,19 +88,7 @@ Julia.prototype._Loader = function(origin)
                 // DETECT LEVEL DATA
                 origin.env.hls.on(Hls.Events.LEVEL_LOADED, function(event, data)
                 {
-                    // SET LIVE EVENT STATE
-                    if(origin.options.live === true)
-                    {
-                        origin.env.isLive = true;
-                        origin.Ui.state(origin.env.model.toolbar, '', 'live');
-                    /*}else if(data.details.live === true)
-                    {
-                        origin.env.isLive = true;
-                        origin.Ui.state(origin.env.model.toolbar, '', 'live');
-                    */}else{
-                        origin.env.isLive = false;
-                        origin.Ui.state(origin.env.model.toolbar, 'live', '');
-                    }
+
                 });
 
 
