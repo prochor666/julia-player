@@ -11,14 +11,27 @@ var cleanCSS = require('gulp-clean-css');
 var sass = require('gulp-sass');
 var concat = require('gulp-concat');
 var minify = require('gulp-minify');
-var sourcemaps = require('gulp-sourcemaps');
 
 // Sources
 var appSrc = [
-    'src/js/lib/hls.js',
+    //'src/js/lib/dash.all.debug.js',
+    //'src/js/lib/hls.js',
     'src/js/lib/rangeslider.js',
-    'src/js/julia-pre.js',
-    'src/js/julia-core.js',
+    'src/js/julia-base.js',
+    'src/js/julia-api.js',
+    'src/js/julia-ui.js',
+    'src/js/julia-events.js',
+    'src/js/julia-controls.js',
+    'src/js/julia-support.js',
+    'src/js/julia-suggest.js',
+    'src/js/julia-fullscreen.js',
+    'src/js/julia-persist.js',
+    'src/js/julia-timecode.js',
+    'src/js/julia-callback.js',
+    'src/js/julia-inject.js',
+    'src/js/julia-require.js',
+    'src/js/julia-boot.js',
+    'src/js/julia-loader.js',
     'src/js/julia-jquery-plugin.js',
 ];
 
@@ -31,9 +44,6 @@ gulp.task('sass', function()
         .pipe(gulp.dest('dist/css'))
         .pipe(cleanCSS())
         .pipe(concat('julia-player.min.css'))
-        //.pipe(sourcemaps.init())
-        //.pipe(cleanCSS())
-        //.pipe(sourcemaps.write())
         .pipe(gulp.dest('dist/css'));
 });
 

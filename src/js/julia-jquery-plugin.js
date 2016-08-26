@@ -23,59 +23,69 @@ $.fn.julia = function(options)
 // API wrappers
 $.fn.play = function()
 {
-    $(this).data('julia').control.press('play');
+    $(this).data('julia').Controls.press('play');
 };
 
-$.fn.destroy = function()
+$.fn.setOptions = function(options)
 {
-    $(this).data('julia').control.press('destroy');
+    $(this).data('julia').Extend(options);
 };
 
-$.fn.media = function()
+$.fn.options = function()
 {
-    return $(this).data('julia').media;
+    return $(this).data('julia').options;
+};
+
+$.fn.source = function(options)
+{
+    $(this).data('julia').Inject.source(options);
+};
+
+$.fn.api = function()
+{
+    return $(this).data('julia').api;
 };
 
 $.fn.pause = function()
 {
-    $(this).data('julia').control.press('pause');
+    $(this).data('julia').Controls.press('pause');
 };
 
 $.fn.stop = function()
 {
-    $(this).data('julia').control.press('stop');
+    $(this).data('julia').Controls.press('stop');
 };
 
 $.fn.goto = function(t)
 {
-    $(this).data('julia').control.press('goto', {
+    $(this).data('julia').Controls.press('goto', {
         currentTime: t
     });
 };
 
 $.fn.mute = function()
 {
-    if($(this).data('julia').media.muted === false)
+    if($(this).data('julia').api.muted === false)
     {
-        $(this).data('julia').control.press('sound-off');
+        $(this).data('julia').Controls.press('sound-off');
     }else{
-        $(this).data('julia').control.press('sound-on');
+        $(this).data('julia').Controls.press('sound-on');
     }
 };
 
 $.fn.volume = function(volume)
 {
-    $(this).data('julia').control.press('volume', {
+    $(this).data('julia').Controls.press('volume', {
         volume: volume
     });
 };
 
 $.fn.getID = function()
 {
-    return $(this).data('julia').id;
+    return $(this).data('julia').ID;
 };
 
 $.fn.stats = function()
 {
-    return $(this).data('julia').stats;
+    return $(this).data('julia').stats();
 };

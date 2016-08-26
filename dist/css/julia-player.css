@@ -63,25 +63,25 @@
 .julia-list:before {
   content: "\f10f"; }
 
-/* *****************************
-* FIX!
-* Hide default controls
-* in fullscreen mode
+/* *****************************
+* FIX!
+* Hide default controls
+* in fullscreen mode
 ***************************** */
 video::-webkit-media-controls {
   display: none !important; }
 
-/* *****************************
-* FIX!
-* 4/5px gap bellow resizable
-* inline media elements
+/* *****************************
+* FIX!
+* 4/5px gap bellow resizable
+* inline media elements
 ***************************** */
 video, audio, canvas {
   vertical-align: top; }
 
-/* *****************************
-* === PRELOADER EFFECT ===
-* change to CSS loader
+/* *****************************
+* === PRELOADER EFFECT ===
+* change to CSS loader
 ***************************** */
 @keyframes julia-preload-spin {
   100% {
@@ -108,9 +108,9 @@ video, audio, canvas {
     -moz-transform: rotate(360deg);
     transform: rotate(360deg); } }
 
-/* *****************************
-* Julia player style
-* === CONTAINER ===
+/* *****************************
+* Julia player style
+* === CONTAINER ===
 ***************************** */
 div.julia-player {
   padding: 0;
@@ -119,9 +119,9 @@ div.julia-player {
   display: inline-block;
   background: black;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.9);
-  /* *****************************
-    * Julia player style
-    * Keep UI unselectable
+  /* *****************************
+    * Julia player style
+    * Keep UI unselectable
     ***************************** */
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -129,23 +129,23 @@ div.julia-player {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  /* *****************************
-    * === VIDEO ELEMENT ===
+  /* *****************************
+    * === VIDEO ELEMENT ===
     ****************************** */
-  /* *****************************
-    * === FULLSCREEN MODE ===
+  /* *****************************
+    * === FULLSCREEN MODE ===
     ****************************** */
-  /* *****************************
-    * === SHIELD ===
+  /* *****************************
+    * === SHIELD ===
     ***************************** */
-  /* *****************************
-    * === SUGGEST ===
+  /* *****************************
+    * === SUGGEST ===
     ***************************** */
-  /* *****************************
-    * === BASE TOOLBAR ===
+  /* *****************************
+    * === BASE TOOLBAR ===
     ***************************** */
-  /* *****************************
-    * === BUTTONS ===
+  /* *****************************
+    * === BUTTONS ===
     ***************************** */ }
   div.julia-player div, div.julia-player video, div.julia-player canvas {
     padding: 0;
@@ -173,8 +173,8 @@ div.julia-player {
     left: 0;
     background: transparent;
     z-index: 73;
-    /* *****************************
-        * === PRELOADER ===
+    /* *****************************
+        * === PRELOADER ===
         ***************************** */ }
     div.julia-player > div.julia-shield > img {
       z-index: 75; }
@@ -225,9 +225,9 @@ div.julia-player {
     background: black;
     z-index: 77;
     display: none;
-    /* *****************************
-        * Julia player style
-        * === SUGGEST ITEMS ===
+    /* *****************************
+        * Julia player style
+        * === SUGGEST ITEMS ===
         ***************************** */ }
     div.julia-player > div.julia-suggest.on {
       display: block; }
@@ -268,18 +268,18 @@ div.julia-player {
     right: 0;
     z-index: 70;
     opacity: .0;
-    /* *****************************
-        * === PANELS ===
+    /* *****************************
+        * === PANELS ===
         ***************************** */
-    /* *****************************
-        * === BARS ===
+    /* *****************************
+        * === BARS ===
         ***************************** */
-    /* *****************************
-        * === TOOLBAR VISIBLE MODE ===
+    /* *****************************
+        * === TOOLBAR VISIBLE MODE ===
         ***************************** */
-    /* *****************************
-        * Rangeslider polyfill styles
-        * Progress bars
+    /* *****************************
+        * Rangeslider polyfill styles
+        * Progress bars
         ******************************* */ }
     div.julia-player > div.julia-toolbar div.julia-panel {
       display: inline-block;
@@ -431,8 +431,8 @@ div.julia-player {
   div.julia-player div.julia-suggest div.julia-suggest-item {
     font-size: 12px; } }
 
-/* *****************************
-* === TRANSITIONS ===
+/* *****************************
+* === TRANSITIONS ===
 ****************************** */
 div.julia-player,
 div.julia-player > div.julia-toolbar,
@@ -444,8 +444,8 @@ div.julia-player > div.julia-suggest > div.julia-suggest-item,
   -o-transition: all 250ms;
   transition: all 250ms; }
 
-/* *****************************
-* === BACKDROP ===
+/* *****************************
+* === BACKDROP ===
 ****************************** */
 ::backdrop {
   background-color: #000; }
