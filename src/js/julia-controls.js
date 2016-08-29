@@ -59,6 +59,7 @@ Julia.prototype._Controls = function(origin)
                     origin.Callback.fn(origin.options.onPosition, data);
                 }
 
+                origin.Ui.state( origin.env.model.preloader, '', 'on' );
                 origin.env.api.currentTime = data.currentTime;
 
             break; case 'setDuration':

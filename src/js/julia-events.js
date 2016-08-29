@@ -57,7 +57,7 @@ Julia.prototype._Events = function(origin)
                 {
                     origin.Loader.init();
                 }
-                
+
                 origin.Controls.press('play');
             }
         });
@@ -194,7 +194,7 @@ Julia.prototype._Events = function(origin)
             origin.env.api.oncanplaythrough = function(e)
             {
                 origin.env.duration = origin.env.api.duration;
-
+                
                 if(origin.env.started === false && origin.env.api.readyState >= 3)
                 {
                     origin.Api.allowStart(e);

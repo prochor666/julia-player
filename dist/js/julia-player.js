@@ -489,7 +489,7 @@
 * Julia HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.0.1
+* @version: 1.0.2
 * @build: 2016-08-30
 * @license: MIT
 *
@@ -1123,7 +1123,7 @@ Julia.prototype._Events = function(origin)
                 {
                     origin.Loader.init();
                 }
-                
+
                 origin.Controls.press('play');
             }
         });
@@ -1260,7 +1260,7 @@ Julia.prototype._Events = function(origin)
             origin.env.api.oncanplaythrough = function(e)
             {
                 origin.env.duration = origin.env.api.duration;
-
+                
                 if(origin.env.started === false && origin.env.api.readyState >= 3)
                 {
                     origin.Api.allowStart(e);
@@ -1530,6 +1530,7 @@ Julia.prototype._Controls = function(origin)
                     origin.Callback.fn(origin.options.onPosition, data);
                 }
 
+                origin.Ui.state( origin.env.model.preloader, '', 'on' );
                 origin.env.api.currentTime = data.currentTime;
 
             break; case 'setDuration':
