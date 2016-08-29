@@ -13,9 +13,7 @@
 * rangeslider.js [required]
 *
 * Julia player constructor
-* options, environment
-* private methods
-*
+* options, environment, theme
 ****************************************** */
 var Julia = function(options)
 {
@@ -126,8 +124,8 @@ var Julia = function(options)
             }
         },
         isLive: false,
-        hls: {},
-        dash: {},
+        hls: false,
+        dash: false,
         canPlayMedia: '',
         canPlayMediaString: '',
         isHls: false,
@@ -245,6 +243,12 @@ var Julia = function(options)
 
         origin.Ui.state(origin.env.model.preloader, 'on', '');
         origin.env.model.buttons.bigPlay.show();
+
+        // Autostart playback, if possible
+        if(origin.options.autoplay === true && origin.Support.isMobile() === false)
+        {
+            origin.env.model.buttons.bigPlay.click();
+        }
     });
 
 

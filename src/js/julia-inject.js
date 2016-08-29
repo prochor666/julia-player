@@ -12,34 +12,34 @@ Julia.prototype._Inject = function(origin)
 
     self.source = function(options)
     {
-        if(origin.env.started === true)
-        {
-            origin.Controls.press('stop');
-        }
-
         $('#julia-player-'+origin.env.ID).remove();
-
-        // Run player
-        origin.Boot.run();
+        origin.env.started = false;
 
         $.extend(true, origin.options, options);
 
-        origin.Api.source();
+        // Run player
+        origin.Boot.run();
 
         if( origin.options.live === true )
         {
             origin.env.isLive = true;
             origin.Ui.panel( origin.env.model.panels.live, origin.options.i18n.liveText );
-            origin.Ui.state(origin.env.model.toolbar, '', 'live');
+            origin.Ui.state( origin.env.model.toolbar, '', 'live' );
         }else{
             origin.env.isLive = false;
             origin.Ui.panel( origin.env.model.panels.live, '' );
-            origin.Ui.state(origin.env.model.toolbar, 'live', '');
+            origin.Ui.state( origin.env.model.toolbar, 'live', '' );
         }
 
-        console.warn(origin.options.live);
+        origin.Ui.state(origin.env.model.preloader, 'on', '');
 
-        origin.Loader.init();
+        // Autostart playback, if possible
+        if(origin.options.autoplay === true && origin.Support.isMobile() === false)
+        {
+            origin.env.model.buttons.bigPlay.click();
+        }else{
+            origin.env.model.buttons.bigPlay.show();
+        }
     };
 
 

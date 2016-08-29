@@ -105,7 +105,7 @@ div.julia-player.julia-theme-mediumspringgreen>div.julia-suggest>div.julia-sugge
 * Rangeslider polyfill styles
 ****************************** */
 div.julia-player.julia-theme-mediumspringgreen>div.julia-toolbar>div[class*="julia"]>.julia-rangeslider {
-    background: #777;
+    
 }
 
 div.julia-player.julia-theme-mediumspringgreen>div.julia-toolbar>div[class*="julia"]>.julia-rangeslider>.julia-rangeslider__fill {

@@ -24,7 +24,7 @@ Julia.prototype._Boot = function(origin)
         volume = origin.Persist.get('julia-player-volume');
         muted = origin.Persist.get('julia-player-muted');
 
-        if(typeof volume !=='undefined' && volume.length>0)
+        if(typeof volume !== 'undefined' && volume.length>0)
         {
             origin.options.volume = parseInt(volume);
 
@@ -34,20 +34,33 @@ Julia.prototype._Boot = function(origin)
             }
         }
 
-        if(typeof volume !=='undefined' && muted.length>0)
+        if(typeof muted !=='undefined' && muted.length>0)
         {
             origin.options.muted = muted == 'false' ?  false: true;
+        }
+
+
+        if(origin.env.hls !== false)
+        {
+            origin.env.hls.destroy();
+            origin.env.hls = false;
+        }
+
+        if(origin.env.dash !== false)
+        {
+            origin.env.dash.reset();
+            origin.env.dash = false;
         }
 
 
         // Create UI
         origin.Ui.create();
 
-        // Create API
-        origin.Api.create();
-
         // Source select, poster select
         origin.Api.source();
+
+        // Create API
+        origin.Api.create();
 
         // Size Fix
         origin.Support.resize();

@@ -1,11 +1,25 @@
 /* *****************************
-* Julia player base color theme
+* === TOOLBAR ===
 ***************************** */
-div.julia-player.julia-theme-aqua {
-    background: rgba(0,0,0,1);
+div.julia-player.julia-theme-aqua>div.julia-toolbar {
+    background: rgba(0,0,0,.7);
+}
+
+div.julia-player.julia-theme-aqua>div.julia-shield>div.julia-preloader {
+    background-color: rgba(0,0,0,.8);
+}
+
+div.julia-player.julia-theme-aqua>div.julia-shield>div.julia-preloader>i {
+    color: #777;
 }
 
 
+/* *****************************
+* === BUTTONS ===
+***************************** */
+div.julia-player.julia-theme-aqua button.julia-btn:hover {
+    color: #00FFFF;
+}
 
 
 /* *****************************
@@ -16,68 +30,10 @@ div.julia-player.julia-theme-aqua>div.julia-suggest {
 }
 
 
-
-
-/* *****************************
-* === TOOLBAR ===
-***************************** */
-div.julia-player.julia-theme-aqua>div.julia-toolbar {
-    background: rgba(0,0,0,.7);
-}
-
-div.julia-player.julia-theme-aqua>div.julia-shield>div.julia-preloader {
-    background-color: rgba(0,0,0,.7);
-}
-
-div.julia-player.julia-theme-aqua>div.julia-shield>div.julia-preloader>i {
-    color: #777;
-}
-
-
-
-
-/* *****************************
-* === BUTTONS ===
-***************************** */
-div.julia-player.julia-theme-aqua button.julia-btn {
-    color: #F9F9F9;
-}
-
-div.julia-player.julia-theme-aqua button.julia-btn:hover {
-    color: #00FFFF;
-}
-
-
-
-
-/* *****************************
-* === PANELS ===
-***************************** */
-div.julia-player.julia-theme-aqua>div.julia-toolbar>div.julia-panel {
-    color: #DDD;
-}
-
-div.julia-player.julia-theme-aqua>div.julia-toolbar>div.julia-panel.julia-currentTime {
-}
-
-div.julia-player.julia-theme-aqua>div.julia-toolbar>div.julia-panel.julia-live-indicator {
-}
-
-div.julia-player.julia-theme-aqua>div.julia-toolbar>div.julia-panel.julia-duration {
-}
-
-div.julia-player.julia-theme-aqua>div.julia-toolbar.live>div.julia-panel.julia-live-indicator {
-}
-
-
-
-
 /* *****************************
 * === SUGGEST ITEMS ===
 ***************************** */
 div.julia-player.julia-theme-aqua>div.julia-suggest>div.julia-suggest-item {
-    border: 1px solid #444;
-    color: #ABABAB;
     background: rgba(0,0,0,1);
 }
 
@@ -85,7 +41,7 @@ div.julia-player.julia-theme-aqua>div.julia-suggest>div.julia-suggest-item>img {
 }
 
 div.julia-player.julia-theme-aqua>div.julia-suggest>div.julia-suggest-item:hover {
-    border: 1px solid #00FFFF;
+    color: #ABABAB;
 }
 
 div.julia-player.julia-theme-aqua>div.julia-suggest>div.julia-suggest-item>div.julia-suggest-item-title {
@@ -98,37 +54,9 @@ div.julia-player.julia-theme-aqua>div.julia-suggest>div.julia-suggest-item>div.j
 }
 
 
-
-
-
 /* *****************************
 * Rangeslider polyfill styles
 ****************************** */
-div.julia-player.julia-theme-aqua>div.julia-toolbar>div[class*="julia"]>.julia-rangeslider {
-    background: #777;
-}
-
 div.julia-player.julia-theme-aqua>div.julia-toolbar>div[class*="julia"]>.julia-rangeslider>.julia-rangeslider__fill {
-    background: #00FFFF;
-}
-
-div.julia-player.julia-theme-aqua>div.julia-toolbar>div[class*="julia"]>.julia-rangeslider>.julia-rangeslider__handle {
-    background-color: #F9F9F9;
-}
-
-div.julia-player.julia-theme-aqua>div.julia-toolbar>div[class*="julia"]>.julia-rangeslider>.julia-rangeslider__handle:active {
     background-color: #00FFFF;
-}
-
-input[type="range"]:focus + div.julia-player.julia-theme-aqua>div.julia-toolbar>div[class*="julia"]>.julia-rangeslider .julia-rangeslider__handle {
-}
-
-
-
-
-/* **************
-* Progress bar
-************** */
-div.julia-player.julia-theme-aqua .julia-progress .julia-rangeslider__handle {
-    background-color: #FFF;
 }

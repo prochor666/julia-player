@@ -232,16 +232,15 @@ div.julia-player {
     div.julia-player > div.julia-suggest.on {
       display: block; }
     div.julia-player > div.julia-suggest > div.julia-suggest-item {
-      width: 42.5%;
+      width: 50%;
       height: 50%;
       min-height: 80px;
-      font-size: 1.2em;
-      border: 1px solid #444;
-      color: #ABABAB;
+      font-size: 1.1em;
+      color: #F9F9F9;
       background: black;
       float: left;
-      margin: 5% 0 0 5%;
-      padding: 2%;
+      margin: 0;
+      padding: 0;
       cursor: pointer;
       position: relative;
       overflow: hidden; }
@@ -250,10 +249,12 @@ div.julia-player {
         top: 0;
         left: 0; }
       div.julia-player > div.julia-suggest > div.julia-suggest-item:hover {
-        border: 1px solid #FFCC00; }
+        color: #ABABAB; }
+        div.julia-player > div.julia-suggest > div.julia-suggest-item:hover > div.julia-suggest-item-title {
+          background: rgba(0, 0, 0, 0.8); }
       div.julia-player > div.julia-suggest > div.julia-suggest-item > div.julia-suggest-item-title {
         position: absolute;
-        top: 0;
+        bottom: 0;
         left: 0;
         right: 0;
         background: rgba(0, 0, 0, 0.8);
@@ -261,13 +262,14 @@ div.julia-player {
         text-align: left; }
   div.julia-player > div.julia-toolbar {
     background: rgba(0, 0, 0, 0.7);
-    height: 44px;
+    height: 48px;
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: -1px;
+    left: -1px;
+    right: -1px;
     z-index: 70;
     opacity: .0;
+    border: none;
     /* *****************************
         * === PANELS ===
         ***************************** */
@@ -304,19 +306,19 @@ div.julia-player {
       div.julia-player > div.julia-toolbar div.julia-panel.julia-duration {
         left: 105px; }
     div.julia-player > div.julia-toolbar div.julia-progress {
-      height: 12px;
+      height: 18px;
       position: absolute;
-      left: 0;
+      left: 0px;
       right: 0;
-      top: 0; }
+      top: -6px; }
     div.julia-player > div.julia-toolbar div.julia-volume {
       width: 80px;
       border: 0;
       outline: 0;
-      height: 16px;
+      height: 18px;
       position: absolute;
       right: 50px;
-      bottom: 5px; }
+      bottom: 8px; }
     div.julia-player > div.julia-toolbar.live {
       height: 38px; }
       div.julia-player > div.julia-toolbar.live div.julia-progress {
@@ -332,68 +334,47 @@ div.julia-player {
     div.julia-player > div.julia-toolbar div.julia-progress .julia-rangeslider,
     div.julia-player > div.julia-toolbar div.julia-volume .julia-rangeslider {
       display: block;
-      background: #777;
-      position: relative; }
+      background-color: transparent;
+      position: relative;
+      height: 16px;
+      width: 100%;
+      cursor: pointer;
+      background-color: transparent; }
       div.julia-player > div.julia-toolbar div.julia-progress .julia-rangeslider .julia-rangeslider__fill,
       div.julia-player > div.julia-toolbar div.julia-volume .julia-rangeslider .julia-rangeslider__fill {
         display: block;
-        background: #FFCC00;
-        position: absolute; }
+        background: #F9F9F9;
+        position: absolute;
+        top: 5px;
+        height: 4px; }
       div.julia-player > div.julia-toolbar div.julia-progress .julia-rangeslider .julia-rangeslider__handle,
       div.julia-player > div.julia-toolbar div.julia-volume .julia-rangeslider .julia-rangeslider__handle {
-        background-color: #F9F9F9;
-        cursor: pointer;
-        display: inline-block;
-        width: 8px;
-        height: 8px;
+        display: block;
+        width: 14px;
+        height: 14px;
         position: absolute;
-        -moz-border-radius: 0;
-        -webkit-border-radius: 0;
-        border-radius: 0; }
+        -moz-border-radius: 50%;
+        -webkit-border-radius: 50%;
+        border-radius: 50%; }
         div.julia-player > div.julia-toolbar div.julia-progress .julia-rangeslider .julia-rangeslider__handle:after,
         div.julia-player > div.julia-toolbar div.julia-volume .julia-rangeslider .julia-rangeslider__handle:after {
+          background-color: #F9F9F9;
+          cursor: pointer;
           content: "";
           display: block;
-          width: 8px;
-          height: 8px;
+          width: 14px;
+          height: 14px;
           margin: auto;
           position: absolute;
           top: 0;
           right: 0;
           bottom: 0;
-          left: 0;
+          left: 0px;
+          touch-action: pan-y;
+          -ms-touch-action: pan-y;
           -moz-border-radius: 50%;
           -webkit-border-radius: 50%;
           border-radius: 50%; }
-        div.julia-player > div.julia-toolbar div.julia-progress .julia-rangeslider .julia-rangeslider__handle:active,
-        div.julia-player > div.julia-toolbar div.julia-volume .julia-rangeslider .julia-rangeslider__handle:active {
-          background-color: #FFCC00; }
-    div.julia-player > div.julia-toolbar div.julia-progress > .julia-rangeslider--horizontal,
-    div.julia-player > div.julia-toolbar div.julia-volume > .julia-rangeslider--horizontal {
-      height: 6px;
-      width: 100%;
-      cursor: pointer; }
-      div.julia-player > div.julia-toolbar div.julia-progress > .julia-rangeslider--horizontal > .julia-rangeslider__fill,
-      div.julia-player > div.julia-toolbar div.julia-volume > .julia-rangeslider--horizontal > .julia-rangeslider__fill {
-        top: 0;
-        height: 100%; }
-      div.julia-player > div.julia-toolbar div.julia-progress > .julia-rangeslider--horizontal > .julia-rangeslider__handle,
-      div.julia-player > div.julia-toolbar div.julia-volume > .julia-rangeslider--horizontal > .julia-rangeslider__handle {
-        top: -1px;
-        touch-action: pan-y;
-        -ms-touch-action: pan-y;
-        -moz-border-radius: 50%;
-        -webkit-border-radius: 50%;
-        border-radius: 50%; }
-      div.julia-player > div.julia-toolbar div.julia-progress > .julia-rangeslider--horizontal:hover .julia-rangeslider__handle:after,
-      div.julia-player > div.julia-toolbar div.julia-volume > .julia-rangeslider--horizontal:hover .julia-rangeslider__handle:after {
-        width: 16px;
-        height: 16px;
-        background-color: inherit; }
-    div.julia-player > div.julia-toolbar div.julia-progress .julia-rangeslider--disabled,
-    div.julia-player > div.julia-toolbar div.julia-volume .julia-rangeslider--disabled {
-      filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
-      opacity: 0.4; }
   div.julia-player button.julia-btn {
     color: #F9F9F9;
     background: transparent;

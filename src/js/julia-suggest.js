@@ -62,7 +62,8 @@ Julia.prototype._Suggest = function(origin)
 
                             origin.Ui.state(origin.env.model.suggest, 'on', '');
 
-                            origin.Loader.init();
+                            //origin.Loader.init();
+                            origin.env.model.buttons.bigPlay.click();
                         });
 
                     origin.env.model.suggest.append(suggestItemWidget);

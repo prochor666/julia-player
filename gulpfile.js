@@ -1,7 +1,7 @@
 'use strict';
 
 /*
-Nebula hub app builder
+Julia player app builder
 @TODO * source maps
 */
 

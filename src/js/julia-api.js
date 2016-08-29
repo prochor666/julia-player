@@ -79,12 +79,6 @@ Julia.prototype._Api = function(origin)
             });
         }
 
-        // Autostart playback, if possible
-        if(origin.options.autoplay === true && origin.Support.isMobile() === false)
-        {
-            origin.Controls.press('play');
-        }
-
         origin.Base.debug({
             'eventType': e.type,
             'duration': origin.env.api.duration,
@@ -111,7 +105,7 @@ Julia.prototype._Api = function(origin)
                 setTimeout( function()
                 {
                     origin.Api.canplaythrough();
-                }, 250);
+                }, 100);
             }
         }
     };

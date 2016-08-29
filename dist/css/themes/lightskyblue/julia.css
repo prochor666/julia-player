@@ -1,0 +1,62 @@
+/* *****************************
+* === TOOLBAR ===
+***************************** */
+div.julia-player.julia-theme-lightskyblue>div.julia-toolbar {
+    background: rgba(0,0,0,.7);
+}
+
+div.julia-player.julia-theme-lightskyblue>div.julia-shield>div.julia-preloader {
+    background-color: rgba(0,0,0,.8);
+}
+
+div.julia-player.julia-theme-lightskyblue>div.julia-shield>div.julia-preloader>i {
+    color: #777;
+}
+
+
+/* *****************************
+* === BUTTONS ===
+***************************** */
+div.julia-player.julia-theme-lightskyblue button.julia-btn:hover {
+    color: #87CEFA;
+}
+
+
+/* *****************************
+* === SUGGEST ===
+***************************** */
+div.julia-player.julia-theme-lightskyblue>div.julia-suggest {
+    background: rgba(0,0,0,1);
+}
+
+
+/* *****************************
+* === SUGGEST ITEMS ===
+***************************** */
+div.julia-player.julia-theme-lightskyblue>div.julia-suggest>div.julia-suggest-item {
+    background: rgba(0,0,0,1);
+}
+
+div.julia-player.julia-theme-lightskyblue>div.julia-suggest>div.julia-suggest-item>img {
+}
+
+div.julia-player.julia-theme-lightskyblue>div.julia-suggest>div.julia-suggest-item:hover {
+    color: #ABABAB;
+}
+
+div.julia-player.julia-theme-lightskyblue>div.julia-suggest>div.julia-suggest-item>div.julia-suggest-item-title {
+    background: rgba(0,0,0,.8);
+}
+
+@media (max-width: 480px) {
+    div.julia-player.julia-theme-lightskyblue>div.julia-suggest>div.julia-suggest-item {
+    }
+}
+
+
+/* *****************************
+* Rangeslider polyfill styles
+****************************** */
+div.julia-player.julia-theme-lightskyblue>div.julia-toolbar>div[class*="julia"]>.julia-rangeslider>.julia-rangeslider__fill {
+    background-color: #87CEFA;
+}

@@ -9,8 +9,6 @@ Julia.prototype._Loader = function(origin)
 
     self.init = function()
     {
-        origin.env.hls = false;
-        origin.env.dash = false;
         origin.env.api.src = '';
 /*
         if(typeof reloadSource === 'undefined')
@@ -118,8 +116,6 @@ Julia.prototype._Loader = function(origin)
         }else if(origin.env.isDash === true)
         {
             origin.env.dash = dashjs.MediaPlayer().create();
-            //origin.env.dash.create();
-            //origin.env.dash.initialize(origin.env.api, origin.env.source, origin.options.autoplay);
 
             origin.env.dash.initialize();
             origin.env.dash.attachView(origin.env.api);
@@ -149,7 +145,6 @@ Julia.prototype._Loader = function(origin)
             type: 'origin.Loader'
         });
 
-
-        origin.Controls.press('play');
+        //origin.Controls.press('play');
     };
 };

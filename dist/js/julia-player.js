@@ -500,9 +500,7 @@
 * rangeslider.js [required]
 *
 * Julia player constructor
-* options, environment
-* private methods
-*
+* options, environment, theme
 ****************************************** */
 var Julia = function(options)
 {
@@ -613,8 +611,8 @@ var Julia = function(options)
             }
         },
         isLive: false,
-        hls: {},
-        dash: {},
+        hls: false,
+        dash: false,
         canPlayMedia: '',
         canPlayMediaString: '',
         isHls: false,
@@ -732,6 +730,12 @@ var Julia = function(options)
 
         origin.Ui.state(origin.env.model.preloader, 'on', '');
         origin.env.model.buttons.bigPlay.show();
+
+        // Autostart playback, if possible
+        if(origin.options.autoplay === true && origin.Support.isMobile() === false)
+        {
+            origin.env.model.buttons.bigPlay.click();
+        }
     });
 
 
@@ -843,12 +847,6 @@ Julia.prototype._Api = function(origin)
             });
         }
 
-        // Autostart playback, if possible
-        if(origin.options.autoplay === true && origin.Support.isMobile() === false)
-        {
-            origin.Controls.press('play');
-        }
-
         origin.Base.debug({
             'eventType': e.type,
             'duration': origin.env.api.duration,
@@ -875,7 +873,7 @@ Julia.prototype._Api = function(origin)
                 setTimeout( function()
                 {
                     origin.Api.canplaythrough();
-                }, 250);
+                }, 100);
             }
         }
     };
@@ -1124,9 +1122,9 @@ Julia.prototype._Events = function(origin)
                 if(origin.env.started === false)
                 {
                     origin.Loader.init();
-                }else{
-                    origin.Controls.press('play');
                 }
+                
+                origin.Controls.press('play');
             }
         });
 
@@ -1765,7 +1763,8 @@ Julia.prototype._Suggest = function(origin)
 
                             origin.Ui.state(origin.env.model.suggest, 'on', '');
 
-                            origin.Loader.init();
+                            //origin.Loader.init();
+                            origin.env.model.buttons.bigPlay.click();
                         });
 
                     origin.env.model.suggest.append(suggestItemWidget);
@@ -2034,34 +2033,34 @@ Julia.prototype._Inject = function(origin)
 
     self.source = function(options)
     {
-        if(origin.env.started === true)
-        {
-            origin.Controls.press('stop');
-        }
-
         $('#julia-player-'+origin.env.ID).remove();
-
-        // Run player
-        origin.Boot.run();
+        origin.env.started = false;
 
         $.extend(true, origin.options, options);
 
-        origin.Api.source();
+        // Run player
+        origin.Boot.run();
 
         if( origin.options.live === true )
         {
             origin.env.isLive = true;
             origin.Ui.panel( origin.env.model.panels.live, origin.options.i18n.liveText );
-            origin.Ui.state(origin.env.model.toolbar, '', 'live');
+            origin.Ui.state( origin.env.model.toolbar, '', 'live' );
         }else{
             origin.env.isLive = false;
             origin.Ui.panel( origin.env.model.panels.live, '' );
-            origin.Ui.state(origin.env.model.toolbar, 'live', '');
+            origin.Ui.state( origin.env.model.toolbar, 'live', '' );
         }
 
-        console.warn(origin.options.live);
+        origin.Ui.state(origin.env.model.preloader, 'on', '');
 
-        origin.Loader.init();
+        // Autostart playback, if possible
+        if(origin.options.autoplay === true && origin.Support.isMobile() === false)
+        {
+            origin.env.model.buttons.bigPlay.click();
+        }else{
+            origin.env.model.buttons.bigPlay.show();
+        }
     };
 
 
@@ -2188,7 +2187,7 @@ Julia.prototype._Boot = function(origin)
         volume = origin.Persist.get('julia-player-volume');
         muted = origin.Persist.get('julia-player-muted');
 
-        if(typeof volume !=='undefined' && volume.length>0)
+        if(typeof volume !== 'undefined' && volume.length>0)
         {
             origin.options.volume = parseInt(volume);
 
@@ -2198,20 +2197,33 @@ Julia.prototype._Boot = function(origin)
             }
         }
 
-        if(typeof volume !=='undefined' && muted.length>0)
+        if(typeof muted !=='undefined' && muted.length>0)
         {
             origin.options.muted = muted == 'false' ?  false: true;
+        }
+
+
+        if(origin.env.hls !== false)
+        {
+            origin.env.hls.destroy();
+            origin.env.hls = false;
+        }
+
+        if(origin.env.dash !== false)
+        {
+            origin.env.dash.reset();
+            origin.env.dash = false;
         }
 
 
         // Create UI
         origin.Ui.create();
 
-        // Create API
-        origin.Api.create();
-
         // Source select, poster select
         origin.Api.source();
+
+        // Create API
+        origin.Api.create();
 
         // Size Fix
         origin.Support.resize();
@@ -2233,8 +2245,6 @@ Julia.prototype._Loader = function(origin)
 
     self.init = function()
     {
-        origin.env.hls = false;
-        origin.env.dash = false;
         origin.env.api.src = '';
 /*
         if(typeof reloadSource === 'undefined')
@@ -2342,8 +2352,6 @@ Julia.prototype._Loader = function(origin)
         }else if(origin.env.isDash === true)
         {
             origin.env.dash = dashjs.MediaPlayer().create();
-            //origin.env.dash.create();
-            //origin.env.dash.initialize(origin.env.api, origin.env.source, origin.options.autoplay);
 
             origin.env.dash.initialize();
             origin.env.dash.attachView(origin.env.api);
@@ -2373,8 +2381,7 @@ Julia.prototype._Loader = function(origin)
             type: 'origin.Loader'
         });
 
-
-        origin.Controls.press('play');
+        //origin.Controls.press('play');
     };
 };
 

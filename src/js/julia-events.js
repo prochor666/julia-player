@@ -56,9 +56,9 @@ Julia.prototype._Events = function(origin)
                 if(origin.env.started === false)
                 {
                     origin.Loader.init();
-                }else{
-                    origin.Controls.press('play');
                 }
+                
+                origin.Controls.press('play');
             }
         });
 
