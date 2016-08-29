@@ -42,11 +42,4 @@ Julia.prototype._Inject = function(origin)
         }
     };
 
-
-
-
-    self.layer = function(data)
-    {
-
-    };
 };
