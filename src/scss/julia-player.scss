@@ -310,29 +310,6 @@ div.julia-player {
 
 
 
-        /* *****************************
-        * === BARS ===
-        ***************************** */
-        div.julia-progress {
-            height: 18px;
-            position: absolute;
-            left: 0px;
-            right: 0;
-            top: -6px;
-        }
-
-        div.julia-volume {
-            width: 80px;
-            border: 0;
-            outline: 0;
-            height: 18px;
-            position: absolute;
-            right: 50px;
-            bottom: 8px;
-        }
-
-
-
 
         &.live {
             height: 38px;
@@ -371,32 +348,38 @@ div.julia-player {
         ******************************* */
         div.julia-progress,
         div.julia-volume {
+            position: absolute;
+            outline: 0;
+            z-index: 85;
 
             .julia-rangeslider {
-                display: block;
                 background-color: transparent;
                 position: relative;
                 height: 16px;
                 width: 100%;
                 cursor: pointer;
-                background-color: transparent;
 
                 .julia-rangeslider__fill {
                     display: block;
                     background: #F9F9F9;
                     position: absolute;
-                    top: 5px;
-                    height: 4px;
+                    top: 4px;
+                    height: 6px;
                 }
 
                 .julia-rangeslider__handle {
-                    display: block;
                     width: 14px;
                     height: 14px;
+                    display: inline-block;
+                    cursor: pointer;
                     position: absolute;
+                    touch-action: pan-y;
+                    -ms-touch-action: pan-y;
                     -moz-border-radius: 50%;
                     -webkit-border-radius: 50%;
                     border-radius: 50%;
+                    background-color: #F9F9F9;
+
 
                     &:after {
                         background-color: #F9F9F9;
@@ -405,14 +388,9 @@ div.julia-player {
                         display: block;
                         width: 14px;
                         height: 14px;
-                        margin: auto;
                         position: absolute;
                         top: 0;
-                        right: 0;
-                        bottom: 0;
-                        left: 0px;
-                        touch-action: pan-y;
-                        -ms-touch-action: pan-y;
+                        left: 0;
                         -moz-border-radius: 50%;
                         -webkit-border-radius: 50%;
                         border-radius: 50%;
@@ -420,6 +398,27 @@ div.julia-player {
                 }
             }
         }
+
+
+
+
+        /* *****************************
+        * === BARS ===
+        ***************************** */
+        div.julia-progress {
+            height: 18px;
+            left: 0px;
+            right: 0;
+            top: -6px;
+        }
+
+        div.julia-volume {
+            width: 80px;
+            height: 18px;
+            right: 50px;
+            bottom: 8px;
+        }
+
     }
 
 
@@ -495,8 +494,7 @@ div.julia-player {
 div.julia-player,
 div.julia-player>div.julia-toolbar,
 div.julia-player>div.julia-shield>button.julia-btn.julia-big-play,
-div.julia-player>div.julia-suggest>div.julia-suggest-item,
-.julia-rangeslider__handle:after
+div.julia-player>div.julia-suggest>div.julia-suggest-item
 {
     -webkit-transition: all 250ms;
     -moz-transition: all 250ms;
