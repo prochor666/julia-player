@@ -4,51 +4,15 @@
 
 
 /* *****************************
-* FIX!
-* Hide default controls
-* in fullscreen mode
-***************************** */
-video::-webkit-media-controls {
-    display:none !important;
-}
-
-
-
-
-/* *****************************
-* FIX!
-* 4/5px gap bellow resizable
-* inline media elements
-***************************** */
-video, audio, canvas {
-    vertical-align: top;
-}
-
-
-
-
-/* *****************************
 * === PRELOADER EFFECT ===
 * change to CSS loader
 ***************************** */
 @keyframes julia-preload-spin {
-	100%{ transform: rotate(360deg); transform: rotate(360deg); }
-}
-
-@-o-keyframes julia-preload-spin {
-	100%{ -o-transform: rotate(360deg); transform: rotate(360deg); }
-}
-
-@-ms-keyframes julia-preload-spin {
-	100%{ -ms-transform: rotate(360deg); transform: rotate(360deg); }
+	100%{ transform: rotate(360deg); }
 }
 
 @-webkit-keyframes julia-preload-spin {
 	100%{ -webkit-transform: rotate(360deg); transform: rotate(360deg); }
-}
-
-@-moz-keyframes julia-preload-spin {
-	100%{ -moz-transform: rotate(360deg); transform: rotate(360deg); }
 }
 
 
@@ -73,7 +37,6 @@ div.julia-player {
     ***************************** */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
-    -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
@@ -81,6 +44,12 @@ div.julia-player {
     div, video, canvas {
         padding: 0;
         margin: 0;
+        /* *****************************
+        * FIX!
+        * 4/5px gap bellow resizable
+        * inline media elements
+        ***************************** */
+        vertical-align: top;
     }
 
 
@@ -172,13 +141,12 @@ div.julia-player {
                 bottom: 50%;
                 left: 50%;
                 border-radius: 50%;
-            	border-left-color: transparent;
-            	border-right-color: transparent;
-            	animation: julia-preload-spin 800ms infinite linear;
-            		-o-animation: julia-preload-spin 800ms infinite linear;
-            		-ms-animation: julia-preload-spin 800ms infinite linear;
-            		-webkit-animation: julia-preload-spin 800ms infinite linear;
-            		-moz-animation: julia-preload-spin 800ms infinite linear;
+                border-left-color: transparent;
+                border-right-color: transparent;
+                animation: julia-preload-spin 800ms infinite linear;
+                -ms-animation: julia-preload-spin 800ms infinite linear;
+                -webkit-animation: julia-preload-spin 800ms infinite linear;
+                -moz-animation: julia-preload-spin 800ms infinite linear;
                 margin-left: -32px;
                 margin-bottom: -32px;
                 z-index: 80;
@@ -277,7 +245,7 @@ div.julia-player {
         * === PANELS ===
         ***************************** */
         div.julia-panel {
-            display: inline-block;
+            display: block;
             border: 0;
             outline: 0;
             height: 20px;
@@ -342,8 +310,13 @@ div.julia-player {
 
 
 
+        @import "julia-slider.scss";
+
+
+
+
         /* *****************************
-        * Rangeslider polyfill styles
+        * Slider wrappers
         * Progress bars
         ******************************* */
         div.julia-progress,
@@ -351,52 +324,6 @@ div.julia-player {
             position: absolute;
             outline: 0;
             z-index: 85;
-
-            .julia-rangeslider {
-                background-color: transparent;
-                position: relative;
-                height: 16px;
-                width: 100%;
-                cursor: pointer;
-
-                .julia-rangeslider__fill {
-                    display: block;
-                    background: #F9F9F9;
-                    position: absolute;
-                    top: 4px;
-                    height: 6px;
-                }
-
-                .julia-rangeslider__handle {
-                    width: 14px;
-                    height: 14px;
-                    display: inline-block;
-                    cursor: pointer;
-                    position: absolute;
-                    touch-action: pan-y;
-                    -ms-touch-action: pan-y;
-                    -moz-border-radius: 50%;
-                    -webkit-border-radius: 50%;
-                    border-radius: 50%;
-                    background-color: #F9F9F9;
-
-
-                    &:after {
-                        background-color: #F9F9F9;
-                        cursor: pointer;
-                        content: "";
-                        display: block;
-                        width: 14px;
-                        height: 14px;
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        -moz-border-radius: 50%;
-                        -webkit-border-radius: 50%;
-                        border-radius: 50%;
-                    }
-                }
-            }
         }
 
 
@@ -406,17 +333,17 @@ div.julia-player {
         * === BARS ===
         ***************************** */
         div.julia-progress {
-            height: 18px;
+            height: 30px;
             left: 0px;
             right: 0;
-            top: -6px;
+            top: -9px;
         }
 
         div.julia-volume {
-            width: 80px;
-            height: 18px;
-            right: 50px;
-            bottom: 8px;
+            width: 100px;
+            height: 30px;
+            right: 48px;
+            bottom: -1px;
         }
 
     }
@@ -450,7 +377,7 @@ div.julia-player {
         }
 
         &.julia-sound {
-            right: 140px;
+            right: 160px;
         }
 
         &.julia-fullscreen-toggle {
@@ -467,7 +394,7 @@ div.julia-player {
             font-size: 72px;
             margin-left: -36px;
             margin-bottom: -36px;
-            z-index: 74;
+            z-index: 80;
         }
     }
 }
@@ -477,6 +404,20 @@ div.julia-player {
 
 @media (max-width: 480px) {
     div.julia-player {
+
+        >div.julia-toolbar {
+            div.julia-volume {
+                width: 60px;
+                right: 48px;
+            }
+        }
+
+        button.julia-btn {
+            &.julia-sound {
+                right: 120px;
+            }
+        }
+
         div.julia-suggest {
             div.julia-suggest-item {
                 font-size: 12px;
@@ -498,7 +439,6 @@ div.julia-player>div.julia-suggest>div.julia-suggest-item
 {
     -webkit-transition: all 250ms;
     -moz-transition: all 250ms;
-    -o-transition: all 250ms;
     transition: all 250ms;
 }
 

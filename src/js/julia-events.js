@@ -46,6 +46,9 @@ Julia.prototype._Events = function(origin)
             origin.Controls.press('fullscreen-off');
         });
 
+
+
+
         // Big play
         origin.env.model.shield.on('click contextmenu', '.julia-big-play', function(e)
         {
@@ -55,12 +58,16 @@ Julia.prototype._Events = function(origin)
             {
                 if(origin.env.started === false)
                 {
+                    origin.Ui.state( origin.env.model.preloader, '', 'on' );
                     origin.Loader.init();
                 }
 
                 origin.Controls.press('play');
             }
         });
+
+
+
 
         // Area click
         origin.env.model.shield.on('click contextmenu', function(e)
@@ -73,10 +80,13 @@ Julia.prototype._Events = function(origin)
             }
         });
 
+
+
+
         // Fullscreen toolbar behavior bindings
         var mouseMoveCleaner;
 
-        origin.env.instance.on('mousemove', '#julia-shield-'+origin.env.ID+', #julia-suggest-'+origin.env.ID, function(e)
+        origin.env.instance.on('mousemove touchmove', '#julia-shield-'+origin.env.ID+', #julia-suggest-'+origin.env.ID, function(e)
         {
             e.preventDefault();
             origin.env.model.toolbar.addClass('julia-toolbar-visible');
@@ -87,13 +97,13 @@ Julia.prototype._Events = function(origin)
                 origin.env.model.toolbar.removeClass('julia-toolbar-visible');
             }, 1750);
         })
-        .on('mouseover mousemove mouseout', '#julia-toolbar-'+origin.env.ID+'.julia-toolbar-visible', function(e)
+        .on('mouseover mousemove touchmove mouseout', '#julia-toolbar-'+origin.env.ID+'.julia-toolbar-visible', function(e)
         {
             e.preventDefault();
             origin.env.model.toolbar.addClass('julia-toolbar-visible');
             clearTimeout(mouseMoveCleaner);
 
-            if(e.type == 'mouseout')
+            if( ['mouseout', 'touchend'].lastIndexOf( e.type.toLowerCase() ) > -1 )
             {
                 mouseMoveCleaner = setTimeout(function(e)
                 {
@@ -102,39 +112,41 @@ Julia.prototype._Events = function(origin)
             }
         });
 
+
+
+
         // Bind progressbar change
-        origin.env.model.toolbar.on('change input', '.julia-progress>input', function(e)
+        $('body').on('julia.progress-change', '#julia-player-'+origin.env.ID, function(e, percent)
         {
-            if(e.type == 'input')
-            {
-                origin.env.seeking = true;
-            }else{
+            seekTo = origin.Timecode.toSeconds( e.percent );
+            seekTo = seekTo >= origin.env.duration ? origin.env.duration: seekTo.toFixed(2);
 
-                seekTo = origin.Timecode.toSeconds( $(this).val() );
-                seekTo = seekTo >= origin.env.duration ? origin.env.duration: seekTo.toFixed(2);
-
-                origin.Controls.press('goto', {
-                    currentTime: seekTo
-                });
-
-                origin.env.seeking = false;
-            }
-        });
-
-        // Bind volumebar change
-        origin.env.model.toolbar.on('change', '.julia-volume>input', function()
-        {
-            origin.Controls.press('volume', {
-                volume: $(this).val(),
-                'event': 'slideChange'
+            origin.Controls.press('goto', {
+                currentTime: seekTo
             });
         });
+
+
+
+
+        $('body').on('julia.volume-change', '#julia-player-'+origin.env.ID, function(e, percent)
+        {
+            origin.Controls.press('volume', {
+                volume: e.percent,
+            });
+        });
+
+
+
 
         // Fullscreen event included
         $(window).on('resize', function()
         {
             origin.Support.resize();
         });
+
+
+
 
         // Fullscreen change event handler
         $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
@@ -194,13 +206,16 @@ Julia.prototype._Events = function(origin)
             origin.env.api.oncanplaythrough = function(e)
             {
                 origin.env.duration = origin.env.api.duration;
-                
+
                 if(origin.env.started === false && origin.env.api.readyState >= 3)
                 {
                     origin.Api.allowStart(e);
                 }
             }
         }
+
+
+
 
         // Video playback detect
         origin.env.api.onplay = function(e)
@@ -209,19 +224,21 @@ Julia.prototype._Events = function(origin)
             origin.Ui.icon( origin.env.model.buttons.play, 'julia-play', 'julia-pause' );
             origin.env.model.buttons.bigPlay.hide();
             //origin.Ui.state( origin.env.model.preloader, 'on', '' );
-            //origin.Ui.posterUnset();
+            origin.Ui.posterUnset();
             origin.env.model.toolbar.show();
         };
+
+
+
 
         origin.env.api.onplaying = function(e)
         {
             origin.Ui.state( origin.env.model.buttons.play, 'play', 'pause' );
             origin.Ui.icon( origin.env.model.buttons.play, 'julia-play', 'julia-pause' );
             origin.env.model.buttons.bigPlay.hide();
-            origin.Ui.state( origin.env.model.preloader, 'on', '' );
             origin.env.model.suggest.html('');
             origin.Ui.state( origin.env.model.suggest, 'on', '' );
-            origin.Ui.posterUnset();
+            //origin.Ui.posterUnset();
             origin.env.model.toolbar.show();
 
             origin.Controls.press('setDuration', {
@@ -229,6 +246,8 @@ Julia.prototype._Events = function(origin)
             });
             origin.env.started = true;
         };
+
+
 
 
         // Video pause
@@ -240,23 +259,37 @@ Julia.prototype._Events = function(origin)
         };
 
 
+
+
         // Errors
         origin.env.api.onerror = function(e)
         {
 
         };
 
+
+
+
         origin.env.api.onemptied = function(e)
         {
         };
+
+
+
 
         origin.env.api.onstalled = function(e)
         {
         };
 
+
+
+
         origin.env.api.onsuspend = function(e)
         {
         };
+
+
+
 
         // Video position
         origin.env.api.ontimeupdate = function(e)
@@ -265,15 +298,14 @@ Julia.prototype._Events = function(origin)
             {
                 currentTimeReadable = origin.Timecode.toHuman( origin.env.api.currentTime.toFixed(2) );
 
-                origin.Ui.progress(
-                    origin.env.model.ranges.progress,
-                    origin.Timecode.toPercents( origin.env.api.currentTime.toFixed(2) )
-                );
+                origin.env.model.sliders.progress.update( origin.Timecode.toPercents( origin.env.api.currentTime.toFixed(2) ) );
 
                 origin.Ui.panel(
                     origin.env.model.panels.currentTime,
                     currentTimeReadable
                 );
+
+                origin.Ui.state( origin.env.model.preloader, 'on', '' );
             }
 
             origin.Callback.onTime(currentTimeReadable, origin.env.api.currentTime);
@@ -286,35 +318,44 @@ Julia.prototype._Events = function(origin)
             }
         };
 
+
+
+
         // Video position
         origin.env.api.seeked = function(e)
         {
             origin.env.seeking = false;
         };
 
+
+
+
         // Video position
         origin.env.api.seeking = function(e)
         {
+            origin.Ui.state( origin.env.model.preloader, '', 'on' );
             origin.env.seeking = true;
         };
+
+
+
 
         // Volume
         origin.env.api.onvolumechange = function(e)
         {
             if(origin.env.api.muted === false)
             {
-                origin.Ui.progress(
-                    origin.env.model.ranges.volume,
-                    origin.env.api.volume*100
-                );
+                //origin.Ui.volume( origin.env.api.volume*100 );
+                origin.env.model.sliders.volume.update( origin.env.api.volume*100 );
 
             }else{
-                origin.Ui.progress(
-                    origin.env.model.ranges.volume,
-                    0
-                );
+                //origin.Ui.volume( 0 );
+                origin.env.model.sliders.volume.update( 0 );
             }
         };
+
+
+
 
         // Set video duration
         origin.env.api.ondurationchange = function(e)
@@ -333,6 +374,9 @@ Julia.prototype._Events = function(origin)
                 });
             }
         };
+
+
+
 
         // Bind playback end event
         origin.env.api.onended = function(e)

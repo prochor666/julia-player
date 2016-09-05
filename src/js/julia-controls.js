@@ -7,6 +7,9 @@ Julia.prototype._Controls = function(origin)
 {
     var self = this;
 
+
+
+
     self.press = function(action, data)
     {
         data = data||{};
@@ -50,17 +53,17 @@ Julia.prototype._Controls = function(origin)
                 origin.Ui.state( origin.env.model.buttons.play, 'pause', 'play' );
                 origin.Ui.icon( origin.env.model.buttons.play, 'julia-pause', 'julia-play' );
                 origin.env.model.buttons.bigPlay.show();
-                origin.Ui.progress( origin.env.model.ranges.progress, 0 );
+                origin.env.model.sliders.progress.update( 0 );
 
             break; case 'goto':
+
+                origin.Ui.state( origin.env.model.preloader, '', 'on' );
+                origin.env.api.currentTime = data.currentTime;
 
                 if(origin.options.onPosition !== false)
                 {
                     origin.Callback.fn(origin.options.onPosition, data);
                 }
-
-                origin.Ui.state( origin.env.model.preloader, '', 'on' );
-                origin.env.api.currentTime = data.currentTime;
 
             break; case 'setDuration':
 
@@ -68,7 +71,7 @@ Julia.prototype._Controls = function(origin)
 
                 if(origin.env.started === false)
                 {
-                    origin.Ui.progress( origin.env.model.ranges.progress, 0 );
+                    origin.env.model.sliders.progress.update( 0 );
                 }
 
                 origin.Base.debug({
@@ -84,7 +87,7 @@ Julia.prototype._Controls = function(origin)
                     'volume is': origin.env.api.volume
                 });
 
-                origin.Ui.progress( origin.env.model.ranges.volume, data.volume );
+                origin.env.model.sliders.volume.update( data.volume );
 
                 if(data.volume>0)
                 {

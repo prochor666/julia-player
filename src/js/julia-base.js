@@ -2,8 +2,8 @@
 * Julia HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.0.2
-* @build: 2016-08-30
+* @version: 1.0.3
+* @build: 2016-09-06
 * @license: MIT
 *
 * @requires:
@@ -20,12 +20,8 @@ var Julia = function(options)
     var origin = this;
 
 
-
-
     // Import origin.options
     options = typeof options === 'undefined' ? {}: options;
-
-
 
 
     // Root path workaround
@@ -39,8 +35,6 @@ var Julia = function(options)
 
     // Unique instance ID
     var __JULIA_INSTANCE__ID__ = Math.floor((Math.random()*10000000)+1);
-
-
 
 
     // Default origin.options
@@ -72,7 +66,7 @@ var Julia = function(options)
         dashConfig: {
         },
         suggest: [],
-        suggestLimit: 2,
+        suggestLimit: 4,
         suggestTimeout: 10000,
         themePath: __JULIA_ROOT_PATH__+'/css/themes',
         pluginPath: __JULIA_ROOT_PATH__+'/js/lib',
@@ -90,8 +84,6 @@ var Julia = function(options)
         onPosition: false,
         onSuggest: false,
     };
-
-
 
 
     // Environment
@@ -114,6 +106,10 @@ var Julia = function(options)
                 fullscreen: '',
             },
             ranges: {
+                volume: '',
+                progress: ''
+            },
+            sliders: {
                 volume: '',
                 progress: ''
             },
@@ -146,8 +142,6 @@ var Julia = function(options)
         suggestClicked: false,
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
     };
-
-
 
 
     // Base functions
@@ -252,6 +246,49 @@ var Julia = function(options)
     });
 
 
+    $('body').on('julia.ui-ready', '#julia-player-'+origin.env.ID, function(e)
+    {
+        origin.env.model.sliders.progress = new origin._Slider( origin, {
+            element: $('#julia-toolbar-'+origin.env.ID+'>div.julia-progress>input.julia-range'),
+            eventRise: 'progress-change'
+        });
+        origin.env.model.sliders.progress.init();
+
+        origin.env.model.sliders.volume = new origin._Slider( origin, {
+            element: $('#julia-toolbar-'+origin.env.ID+'>div.julia-volume>input.julia-range'),
+            eventRise: 'volume-change'
+        });
+        origin.env.model.sliders.volume.init();
+
+        // Size Fix
+        origin.Support.resize();
+
+        // Handle events
+        origin.Events.ui();
+        origin.Events.native();
+
+        // Persistent data
+        volume = origin.Persist.get('julia-player-volume');
+        muted = origin.Persist.get('julia-player-muted');
+
+        if(typeof volume !== 'undefined' && volume.length>0)
+        {
+            origin.options.volume = parseInt(volume);
+
+            if(origin.options.volume > 100 || origin.options.volume < 0)
+            {
+                origin.options.volume = 25;
+            }
+        }
+
+        if(typeof muted !=='undefined' && muted.length>0)
+        {
+            origin.options.muted = muted == 'false' ?  false: true;
+        }
+
+    });
+
+
     // Run player init
     origin.Boot.run();
 
@@ -270,8 +307,6 @@ var Julia = function(options)
         Timecode: origin.Timecode,
         Require: origin.Require,
         Inject: origin.Inject,
-        //Loader: origin.Loader,
-        //Boot: origin.Boot,
         stats: origin.Base.stats
     };
 

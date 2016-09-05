@@ -64,48 +64,16 @@
   content: "\f10f"; }
 
 /* *****************************
-* FIX!
-* Hide default controls
-* in fullscreen mode
-***************************** */
-video::-webkit-media-controls {
-  display: none !important; }
-
-/* *****************************
-* FIX!
-* 4/5px gap bellow resizable
-* inline media elements
-***************************** */
-video, audio, canvas {
-  vertical-align: top; }
-
-/* *****************************
 * === PRELOADER EFFECT ===
 * change to CSS loader
 ***************************** */
 @keyframes julia-preload-spin {
   100% {
-    transform: rotate(360deg);
-    transform: rotate(360deg); } }
-
-@-o-keyframes julia-preload-spin {
-  100% {
-    -o-transform: rotate(360deg);
-    transform: rotate(360deg); } }
-
-@-ms-keyframes julia-preload-spin {
-  100% {
-    -ms-transform: rotate(360deg);
     transform: rotate(360deg); } }
 
 @-webkit-keyframes julia-preload-spin {
   100% {
     -webkit-transform: rotate(360deg);
-    transform: rotate(360deg); } }
-
-@-moz-keyframes julia-preload-spin {
-  100% {
-    -moz-transform: rotate(360deg);
     transform: rotate(360deg); } }
 
 /* *****************************
@@ -125,7 +93,6 @@ div.julia-player {
     ***************************** */
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
@@ -149,7 +116,13 @@ div.julia-player {
     ***************************** */ }
   div.julia-player div, div.julia-player video, div.julia-player canvas {
     padding: 0;
-    margin: 0; }
+    margin: 0;
+    /* *****************************
+        * FIX!
+        * 4/5px gap bellow resizable
+        * inline media elements
+        ***************************** */
+    vertical-align: top; }
   div.julia-player video {
     min-width: 100%;
     height: auto;
@@ -163,8 +136,8 @@ div.julia-player {
     background: #000;
     display: block; }
     div.julia-player.julia-fullscreen-on video {
-      width: auto;
-      height: 100%; }
+      width: 100%;
+      height: auto; }
   div.julia-player > div.julia-shield {
     position: absolute;
     top: 0;
@@ -209,7 +182,6 @@ div.julia-player {
         border-left-color: transparent;
         border-right-color: transparent;
         animation: julia-preload-spin 800ms infinite linear;
-        -o-animation: julia-preload-spin 800ms infinite linear;
         -ms-animation: julia-preload-spin 800ms infinite linear;
         -webkit-animation: julia-preload-spin 800ms infinite linear;
         -moz-animation: julia-preload-spin 800ms infinite linear;
@@ -274,17 +246,17 @@ div.julia-player {
         * === PANELS ===
         ***************************** */
     /* *****************************
-        * === BARS ===
-        ***************************** */
-    /* *****************************
         * === TOOLBAR VISIBLE MODE ===
         ***************************** */
     /* *****************************
-        * Rangeslider polyfill styles
+        * Slider wrappers
         * Progress bars
-        ******************************* */ }
+        ******************************* */
+    /* *****************************
+        * === BARS ===
+        ***************************** */ }
     div.julia-player > div.julia-toolbar div.julia-panel {
-      display: inline-block;
+      display: block;
       border: 0;
       outline: 0;
       height: 20px;
@@ -305,20 +277,6 @@ div.julia-player {
         text-transform: uppercase; }
       div.julia-player > div.julia-toolbar div.julia-panel.julia-duration {
         left: 105px; }
-    div.julia-player > div.julia-toolbar div.julia-progress {
-      height: 18px;
-      position: absolute;
-      left: 0px;
-      right: 0;
-      top: -6px; }
-    div.julia-player > div.julia-toolbar div.julia-volume {
-      width: 80px;
-      border: 0;
-      outline: 0;
-      height: 18px;
-      position: absolute;
-      right: 50px;
-      bottom: 8px; }
     div.julia-player > div.julia-toolbar.live {
       height: 38px; }
       div.julia-player > div.julia-toolbar.live div.julia-progress {
@@ -331,50 +289,62 @@ div.julia-player {
     div.julia-player > div.julia-toolbar.julia-toolbar-visible {
       opacity: 1;
       z-index: 80; }
-    div.julia-player > div.julia-toolbar div.julia-progress .julia-rangeslider,
-    div.julia-player > div.julia-toolbar div.julia-volume .julia-rangeslider {
-      display: block;
-      background-color: transparent;
-      position: relative;
-      height: 16px;
+    div.julia-player > div.julia-toolbar .julia-slider {
       width: 100%;
+      height: 30px;
+      position: relative;
       cursor: pointer;
-      background-color: transparent; }
-      div.julia-player > div.julia-toolbar div.julia-progress .julia-rangeslider .julia-rangeslider__fill,
-      div.julia-player > div.julia-toolbar div.julia-volume .julia-rangeslider .julia-rangeslider__fill {
-        display: block;
+      background-color: transparent;
+      padding: 0;
+      margin: 0; }
+      div.julia-player > div.julia-toolbar .julia-slider [data-julia-slider-component] {
+        padding: 0;
+        margin: 0;
+        border: 0; }
+      div.julia-player > div.julia-toolbar .julia-slider .julia-slider-track {
+        width: 100%;
+        height: 20px;
+        background-color: transparent;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        z-index: 86; }
+      div.julia-player > div.julia-toolbar .julia-slider .julia-slider-fill {
         background: #F9F9F9;
+        width: 0;
+        height: 4px;
         position: absolute;
-        top: 5px;
-        height: 4px; }
-      div.julia-player > div.julia-toolbar div.julia-progress .julia-rangeslider .julia-rangeslider__handle,
-      div.julia-player > div.julia-toolbar div.julia-volume .julia-rangeslider .julia-rangeslider__handle {
-        display: block;
-        width: 14px;
-        height: 14px;
+        left: 0;
+        top: 8px;
+        z-index: 87; }
+      div.julia-player > div.julia-toolbar .julia-slider .julia-slider-handle {
+        background: #F9F9F9;
+        width: 12px;
+        height: 12px;
         position: absolute;
-        -moz-border-radius: 50%;
+        left: 0;
+        top: 4px;
         -webkit-border-radius: 50%;
-        border-radius: 50%; }
-        div.julia-player > div.julia-toolbar div.julia-progress .julia-rangeslider .julia-rangeslider__handle:after,
-        div.julia-player > div.julia-toolbar div.julia-volume .julia-rangeslider .julia-rangeslider__handle:after {
-          background-color: #F9F9F9;
-          cursor: pointer;
-          content: "";
-          display: block;
-          width: 14px;
-          height: 14px;
-          margin: auto;
-          position: absolute;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          left: 0px;
-          touch-action: pan-y;
-          -ms-touch-action: pan-y;
-          -moz-border-radius: 50%;
-          -webkit-border-radius: 50%;
-          border-radius: 50%; }
+        -moz-border-radius: 50%;
+        border-radius: 50%;
+        z-index: 88; }
+    div.julia-player > div.julia-toolbar div.julia-progress,
+    div.julia-player > div.julia-toolbar div.julia-volume {
+      position: absolute;
+      outline: 0;
+      z-index: 85; }
+    div.julia-player > div.julia-toolbar div.julia-progress {
+      height: 30px;
+      left: 0px;
+      right: 0;
+      top: -9px; }
+    div.julia-player > div.julia-toolbar div.julia-volume {
+      width: 100px;
+      height: 30px;
+      right: 48px;
+      bottom: -1px; }
   div.julia-player button.julia-btn {
     color: #F9F9F9;
     background: transparent;
@@ -393,7 +363,7 @@ div.julia-player {
     div.julia-player button.julia-btn.julia-playback {
       left: 5px; }
     div.julia-player button.julia-btn.julia-sound {
-      right: 140px; }
+      right: 160px; }
     div.julia-player button.julia-btn.julia-fullscreen-toggle {
       right: 5px; }
     div.julia-player button.julia-btn.julia-big-play {
@@ -406,9 +376,14 @@ div.julia-player {
       font-size: 72px;
       margin-left: -36px;
       margin-bottom: -36px;
-      z-index: 74; }
+      z-index: 80; }
 
 @media (max-width: 480px) {
+  div.julia-player > div.julia-toolbar div.julia-volume {
+    width: 60px;
+    right: 48px; }
+  div.julia-player button.julia-btn.julia-sound {
+    right: 120px; }
   div.julia-player div.julia-suggest div.julia-suggest-item {
     font-size: 12px; } }
 
@@ -418,11 +393,9 @@ div.julia-player {
 div.julia-player,
 div.julia-player > div.julia-toolbar,
 div.julia-player > div.julia-shield > button.julia-btn.julia-big-play,
-div.julia-player > div.julia-suggest > div.julia-suggest-item,
-.julia-rangeslider__handle:after {
+div.julia-player > div.julia-suggest > div.julia-suggest-item {
   -webkit-transition: all 250ms;
   -moz-transition: all 250ms;
-  -o-transition: all 250ms;
   transition: all 250ms; }
 
 /* *****************************

@@ -101,23 +101,29 @@ Julia.prototype._Ui = function(origin)
 
         origin.env.instance.insertAfter(origin.env.element);
 
-        // Rangeslider polyfill
-        $('#julia-toolbar-'+origin.env.ID+'>div.julia-progress>input, #julia-toolbar-'+origin.env.ID+'>div.julia-volume>input').rangeslider({
-            polyfill: false,
-            rangeClass: 'julia-rangeslider',
-            disabledClass: 'julia-rangeslider--disabled',
-            horizontalClass: 'julia-rangeslider--horizontal',
-            verticalClass: 'julia-rangeslider--vertical',
-            fillClass: 'julia-rangeslider__fill',
-            handleClass: 'julia-rangeslider__handle',
-            onInit: function(){},
-            onSlide : function(position, value){},
-            onSlideEnd : function(position, value){}
-        });
+        self.raiseEvent('julia.ui-ready');
 
         origin.Base.debug({
             'playerInstance': origin.env.instance,
         });
+    };
+
+
+
+
+    self.raiseEvent = function(eventName)
+    {
+        setTimeout( function()
+        {
+            if($('#julia-player-'+origin.env.ID).length == 1)
+            {
+                $('#julia-player-'+origin.env.ID).trigger({
+                    type: eventName,
+                });
+            }else{
+                self.raiseEvent(eventName);
+            }
+        }, 10);
     };
 
 
@@ -137,14 +143,6 @@ Julia.prototype._Ui = function(origin)
     {
         element.removeClass(remove)
         .addClass(add);
-    };
-
-
-
-
-    self.progress = function(element, value)
-    {
-        element.find('input[type="range"]').val(value).rangeslider('update', true);
     };
 
 

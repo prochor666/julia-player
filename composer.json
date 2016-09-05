@@ -1,7 +1,7 @@
 {
     "name": "prochor666/julia-player",
     "type": "library",
-    "description": "Javascript video player, supports VOD or HLS streams",
+    "description": "Julia player, responsive, mobile first, HTML5 player with HTTP Live Streaming (HLS) and Dynamic Adaptive Streaming over HTTP (MPEG-DASH) support",
     "keywords": ["player","video"],
     "homepage": "https://github.com/prochor666/julia-player",
     "license": "MIT",

@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Hls = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Hls = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -298,7 +298,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],2:[function(require,module,exports){
+},{}],2:[function(_dereq_,module,exports){
 var bundleFn = arguments[3];
 var sources = arguments[4];
 var cache = arguments[5];
@@ -365,7 +365,7 @@ module.exports = function (fn) {
     ));
 };
 
-},{}],3:[function(require,module,exports){
+},{}],3:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -374,23 +374,23 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventHandler = require('../event-handler');
+var _eventHandler = _dereq_('../event-handler');
 
 var _eventHandler2 = _interopRequireDefault(_eventHandler);
 
-var _bufferHelper = require('../helper/buffer-helper');
+var _bufferHelper = _dereq_('../helper/buffer-helper');
 
 var _bufferHelper2 = _interopRequireDefault(_bufferHelper);
 
-var _errors = require('../errors');
+var _errors = _dereq_('../errors');
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
-var _ewmaBandwidthEstimator = require('./ewma-bandwidth-estimator');
+var _ewmaBandwidthEstimator = _dereq_('./ewma-bandwidth-estimator');
 
 var _ewmaBandwidthEstimator2 = _interopRequireDefault(_ewmaBandwidthEstimator);
 
@@ -431,33 +431,32 @@ var AbrController = function (_EventHandler) {
   }, {
     key: 'onFragLoading',
     value: function onFragLoading(data) {
-      if (!this.timer) {
-        this.timer = setInterval(this.onCheck, 100);
-      }
-
-      // lazy init of bw Estimator, rationale is that we use different params for Live/VoD
-      // so we need to wait for stream manifest / playlist type to instantiate it.
-      if (!this.bwEstimator) {
-        var hls = this.hls,
-            level = data.frag.level,
-            isLive = hls.levels[level].details.live,
-            config = hls.config,
-            ewmaFast = void 0,
-            ewmaSlow = void 0;
-
-        if (isLive) {
-          ewmaFast = config.abrEwmaFastLive;
-          ewmaSlow = config.abrEwmaSlowLive;
-        } else {
-          ewmaFast = config.abrEwmaFastVoD;
-          ewmaSlow = config.abrEwmaSlowVoD;
-        }
-        this.bwEstimator = new _ewmaBandwidthEstimator2.default(hls, ewmaSlow, ewmaFast, config.abrEwmaDefaultEstimate);
-      }
-
       var frag = data.frag;
-      frag.trequest = performance.now();
-      this.fragCurrent = frag;
+      if (frag.type === 'main') {
+        if (!this.timer) {
+          this.timer = setInterval(this.onCheck, 100);
+        }
+        // lazy init of bw Estimator, rationale is that we use different params for Live/VoD
+        // so we need to wait for stream manifest / playlist type to instantiate it.
+        if (!this.bwEstimator) {
+          var hls = this.hls,
+              level = data.frag.level,
+              isLive = hls.levels[level].details.live,
+              config = hls.config,
+              ewmaFast = void 0,
+              ewmaSlow = void 0;
+
+          if (isLive) {
+            ewmaFast = config.abrEwmaFastLive;
+            ewmaSlow = config.abrEwmaSlowLive;
+          } else {
+            ewmaFast = config.abrEwmaFastVoD;
+            ewmaSlow = config.abrEwmaSlowVoD;
+          }
+          this.bwEstimator = new _ewmaBandwidthEstimator2.default(hls, ewmaSlow, ewmaFast, config.abrEwmaDefaultEstimate);
+        }
+        this.fragCurrent = frag;
+      }
     }
   }, {
     key: 'abandonRulesCheck',
@@ -469,33 +468,35 @@ var AbrController = function (_EventHandler) {
       */
       var hls = this.hls,
           v = hls.media,
-          frag = this.fragCurrent;
+          frag = this.fragCurrent,
+          loader = frag.loader;
 
       // if loader has been destroyed or loading has been aborted, stop timer and return
-      if (!frag.loader || frag.loader.stats && frag.loader.stats.aborted) {
+      if (!loader || loader.stats && loader.stats.aborted) {
         _logger.logger.warn('frag loader destroy or aborted, disarm abandonRulesCheck');
         this.clearTimer();
         return;
       }
+      var stats = loader.stats;
       /* only monitor frag retrieval time if
       (video not paused OR first fragment being loaded(ready state === HAVE_NOTHING = 0)) AND autoswitching enabled AND not lowest level (=> means that we have several levels) */
-      if (v && (!v.paused || !v.readyState) && frag.autoLevel && frag.level) {
-        var requestDelay = performance.now() - frag.trequest;
+      if (v && (!v.paused && v.playbackRate !== 0 || !v.readyState) && frag.autoLevel && frag.level) {
+        var requestDelay = performance.now() - stats.trequest,
+            playbackRate = Math.abs(v.playbackRate);
         // monitor fragment load progress after half of expected fragment duration,to stabilize bitrate
-        if (requestDelay > 500 * frag.duration) {
+        if (requestDelay > 500 * frag.duration / playbackRate) {
           var levels = hls.levels,
-              loadRate = Math.max(1, frag.loaded * 1000 / requestDelay),
+              loadRate = Math.max(1, stats.bw ? stats.bw / 8 : stats.loaded * 1000 / requestDelay),
               // byte/s; at least 1 byte/s to avoid division by zero
           // compute expected fragment length using frag duration and level bitrate. also ensure that expected len is gte than already loaded size
-          expectedLen = Math.max(frag.loaded, Math.round(frag.duration * levels[frag.level].bitrate / 8));
-
-          var pos = v.currentTime;
-          var fragLoadedDelay = (expectedLen - frag.loaded) / loadRate;
-          var bufferStarvationDelay = _bufferHelper2.default.bufferInfo(v, pos, hls.config.maxBufferHole).end - pos;
+          expectedLen = stats.total ? stats.total : Math.max(stats.loaded, Math.round(frag.duration * levels[frag.level].bitrate / 8)),
+              pos = v.currentTime,
+              fragLoadedDelay = (expectedLen - stats.loaded) / loadRate,
+              bufferStarvationDelay = (_bufferHelper2.default.bufferInfo(v, pos, hls.config.maxBufferHole).end - pos) / playbackRate;
           // consider emergency switch down only if we have less than 2 frag buffered AND
           // time to finish loading current fragment is bigger than buffer starvation delay
           // ie if we risk buffer starvation if bw does not increase quickly
-          if (bufferStarvationDelay < 2 * frag.duration && fragLoadedDelay > bufferStarvationDelay) {
+          if (bufferStarvationDelay < 2 * frag.duration / playbackRate && fragLoadedDelay > bufferStarvationDelay) {
             var fragLevelNextLoadedDelay = void 0,
                 nextLoadLevel = void 0;
             // lets iterate through lower level and try to find the biggest one that could avoid rebuffering
@@ -519,7 +520,7 @@ var AbrController = function (_EventHandler) {
               // force next load level in auto mode
               hls.nextLoadLevel = nextLoadLevel;
               // update bw estimate for this fragment before cancelling load (this will help reducing the bw)
-              this.bwEstimator.sample(requestDelay, frag.loaded);
+              this.bwEstimator.sample(requestDelay, stats.loaded);
               // abort fragment loading ...
               _logger.logger.warn('loading too slow, abort fragment loading and switch to level ' + nextLoadLevel);
               //abort fragment loading
@@ -534,20 +535,23 @@ var AbrController = function (_EventHandler) {
   }, {
     key: 'onFragLoaded',
     value: function onFragLoaded(data) {
-      var stats = data.stats;
-      // only update stats on first frag loading
-      // if same frag is loaded multiple times, it might be in browser cache, and loaded quickly
-      // and leading to wrong bw estimation
-      if (stats.aborted === undefined && data.frag.loadCounter === 1) {
-        this.bwEstimator.sample(performance.now() - stats.trequest, stats.loaded);
-      }
+      var frag = data.frag;
+      if (frag.type === 'main') {
+        var stats = data.stats;
+        // only update stats on first frag loading
+        // if same frag is loaded multiple times, it might be in browser cache, and loaded quickly
+        // and leading to wrong bw estimation
+        if (stats.aborted === undefined && frag.loadCounter === 1) {
+          this.bwEstimator.sample(performance.now() - stats.trequest, stats.loaded);
+        }
 
-      // stop monitoring bw once frag loaded
-      this.clearTimer();
-      // store level id after successful fragment load
-      this.lastLoadedFragLevel = data.frag.level;
-      // reset forced auto level value so that next level will be selected
-      this._nextAutoLevel = -1;
+        // stop monitoring bw once frag loaded
+        this.clearTimer();
+        // store level id after successful fragment load
+        this.lastLoadedFragLevel = frag.level;
+        // reset forced auto level value so that next level will be selected
+        this._nextAutoLevel = -1;
+      }
     }
   }, {
     key: 'onError',
@@ -588,10 +592,11 @@ var AbrController = function (_EventHandler) {
     key: 'nextAutoLevel',
     get: function get() {
       var hls = this.hls,
-          i,
-          maxAutoLevel,
+          config = hls.config,
           levels = hls.levels,
-          config = hls.config;
+          v = hls.media,
+          i = void 0,
+          maxAutoLevel = void 0;
       if (this._autoLevelCapping === -1 && levels && levels.length) {
         maxAutoLevel = levels.length - 1;
       } else {
@@ -602,8 +607,8 @@ var AbrController = function (_EventHandler) {
       if (this._nextAutoLevel !== -1) {
         return Math.min(this._nextAutoLevel, maxAutoLevel);
       }
-
-      var avgbw = this.bwEstimator ? this.bwEstimator.getEstimate() : config.abrEwmaDefaultEstimate,
+      var playbackRate = v && v.playbackRate !== 0 ? Math.abs(v.playbackRate) : 1.0,
+          avgbw = this.bwEstimator ? this.bwEstimator.getEstimate() / playbackRate : config.abrEwmaDefaultEstimate / playbackRate,
           adjustedbw = void 0;
       // follow algorithm captured from stagefright :
       // https://android.googlesource.com/platform/frameworks/av/+/master/media/libstagefright/httplive/LiveSession.cpp
@@ -633,7 +638,7 @@ var AbrController = function (_EventHandler) {
 
 exports.default = AbrController;
 
-},{"../errors":21,"../event-handler":22,"../events":23,"../helper/buffer-helper":24,"../utils/logger":38,"./ewma-bandwidth-estimator":6}],4:[function(require,module,exports){
+},{"../errors":24,"../event-handler":25,"../events":26,"../helper/buffer-helper":28,"../utils/logger":43,"./ewma-bandwidth-estimator":8}],4:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -642,17 +647,830 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _events = require('../events');
+var _binarySearch = _dereq_('../utils/binary-search');
+
+var _binarySearch2 = _interopRequireDefault(_binarySearch);
+
+var _bufferHelper = _dereq_('../helper/buffer-helper');
+
+var _bufferHelper2 = _interopRequireDefault(_bufferHelper);
+
+var _demuxer = _dereq_('../demux/demuxer');
+
+var _demuxer2 = _interopRequireDefault(_demuxer);
+
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventHandler = require('../event-handler');
+var _eventHandler = _dereq_('../event-handler');
 
 var _eventHandler2 = _interopRequireDefault(_eventHandler);
 
-var _logger = require('../utils/logger');
+var _levelHelper = _dereq_('../helper/level-helper');
 
-var _errors = require('../errors');
+var _levelHelper2 = _interopRequireDefault(_levelHelper);
+
+var _timeRanges = _dereq_('../utils/timeRanges');
+
+var _timeRanges2 = _interopRequireDefault(_timeRanges);
+
+var _errors = _dereq_('../errors');
+
+var _logger = _dereq_('../utils/logger');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Audio Stream Controller
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               */
+
+var State = {
+  STOPPED: 'STOPPED',
+  STARTING: 'STARTING',
+  IDLE: 'IDLE',
+  PAUSED: 'PAUSED',
+  KEY_LOADING: 'KEY_LOADING',
+  FRAG_LOADING: 'FRAG_LOADING',
+  FRAG_LOADING_WAITING_RETRY: 'FRAG_LOADING_WAITING_RETRY',
+  WAITING_TRACK: 'WAITING_TRACK',
+  PARSING: 'PARSING',
+  PARSED: 'PARSED',
+  ENDED: 'ENDED',
+  ERROR: 'ERROR'
+};
+
+var AudioStreamController = function (_EventHandler) {
+  _inherits(AudioStreamController, _EventHandler);
+
+  function AudioStreamController(hls) {
+    _classCallCheck(this, AudioStreamController);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AudioStreamController).call(this, hls, _events2.default.MEDIA_ATTACHED, _events2.default.MEDIA_DETACHING, _events2.default.AUDIO_TRACKS_UPDATED, _events2.default.AUDIO_TRACK_SWITCH, _events2.default.AUDIO_TRACK_LOADED, _events2.default.KEY_LOADED, _events2.default.FRAG_LOADED, _events2.default.FRAG_PARSING_INIT_SEGMENT, _events2.default.FRAG_PARSING_DATA, _events2.default.FRAG_PARSED, _events2.default.ERROR, _events2.default.BUFFER_CREATED, _events2.default.BUFFER_APPENDED, _events2.default.BUFFER_FLUSHED));
+
+    _this.config = hls.config;
+    _this.audioCodecSwap = false;
+    _this.ticks = 0;
+    _this.ontick = _this.tick.bind(_this);
+    return _this;
+  }
+
+  _createClass(AudioStreamController, [{
+    key: 'destroy',
+    value: function destroy() {
+      this.stopLoad();
+      if (this.timer) {
+        clearInterval(this.timer);
+        this.timer = null;
+      }
+      _eventHandler2.default.prototype.destroy.call(this);
+      this.state = State.STOPPED;
+    }
+  }, {
+    key: 'startLoad',
+    value: function startLoad(startPosition) {
+      if (this.tracks) {
+        var media = this.media,
+            lastCurrentTime = this.lastCurrentTime;
+        this.stopLoad();
+        if (!this.timer) {
+          this.timer = setInterval(this.ontick, 100);
+        }
+        this.fragLoadError = 0;
+        if (media && lastCurrentTime) {
+          _logger.logger.log('configure startPosition @' + lastCurrentTime);
+          this.state = State.IDLE;
+        } else {
+          this.lastCurrentTime = this.startPosition ? this.startPosition : startPosition;
+          this.state = State.STARTING;
+        }
+        this.nextLoadPosition = this.startPosition = this.lastCurrentTime;
+        this.tick();
+      } else {
+        this.startPosition = startPosition;
+        this.state = State.STOPPED;
+      }
+    }
+  }, {
+    key: 'stopLoad',
+    value: function stopLoad() {
+      var frag = this.fragCurrent;
+      if (frag) {
+        if (frag.loader) {
+          frag.loader.abort();
+        }
+        this.fragCurrent = null;
+      }
+      this.fragPrevious = null;
+      if (this.demuxer) {
+        this.demuxer.destroy();
+        this.demuxer = null;
+      }
+      this.state = State.STOPPED;
+    }
+  }, {
+    key: 'tick',
+    value: function tick() {
+      this.ticks++;
+      if (this.ticks === 1) {
+        this.doTick();
+        if (this.ticks > 1) {
+          setTimeout(this.tick, 1);
+        }
+        this.ticks = 0;
+      }
+    }
+  }, {
+    key: 'doTick',
+    value: function doTick() {
+      var pos,
+          track,
+          trackDetails,
+          hls = this.hls,
+          config = hls.config;
+      //logger.log('audioStream:' + this.state);
+      switch (this.state) {
+        case State.ERROR:
+        //don't do anything in error state to avoid breaking further ...
+        case State.PAUSED:
+          //don't do anything in paused state either ...
+          break;
+        case State.STARTING:
+          this.state = State.WAITING_TRACK;
+          this.loadedmetadata = false;
+          break;
+        case State.IDLE:
+          // if video not attached AND
+          // start fragment already requested OR start frag prefetch disable
+          // exit loop
+          // => if media not attached but start frag prefetch is enabled and start frag not requested yet, we will not exit loop
+          if (!this.media && (this.startFragRequested || !config.startFragPrefetch)) {
+            break;
+          }
+          // determine next candidate fragment to be loaded, based on current position and
+          //  end of buffer position
+          // if we have not yet loaded any fragment, start loading from start position
+          if (this.loadedmetadata) {
+            pos = this.media.currentTime;
+          } else {
+            pos = this.nextLoadPosition;
+          }
+          var media = this.mediaBuffer ? this.mediaBuffer : this.media;
+          var bufferInfo = _bufferHelper2.default.bufferInfo(media, pos, config.maxBufferHole),
+              bufferLen = bufferInfo.len,
+              bufferEnd = bufferInfo.end,
+              fragPrevious = this.fragPrevious,
+              maxBufLen = config.maxMaxBufferLength;
+
+          // if buffer length is less than maxBufLen try to load a new fragment
+          if (bufferLen < maxBufLen && this.trackId < this.tracks.length) {
+            trackDetails = this.tracks[this.trackId].details;
+            // if track info not retrieved yet, switch state and wait for track retrieval
+            if (typeof trackDetails === 'undefined') {
+              this.state = State.WAITING_TRACK;
+              break;
+            }
+
+            // we just got done loading the final fragment, check if we need to finalize media stream
+            if (!trackDetails.live && fragPrevious && fragPrevious.sn === trackDetails.endSN) {
+              // if we are not seeking or if we are seeking but everything (almost) til the end is buffered, let's signal eos
+              // we don't compare exactly media.duration === bufferInfo.end as there could be some subtle media duration difference when switching
+              // between different renditions. using half frag duration should help cope with these cases.
+              if (!this.media.seeking || this.media.duration - bufferEnd < fragPrevious.duration / 2) {
+                // Finalize the media stream
+                this.hls.trigger(_events2.default.BUFFER_EOS, { type: 'audio' });
+                this.state = State.ENDED;
+                break;
+              }
+            }
+
+            // find fragment index, contiguous with end of buffer position
+            var fragments = trackDetails.fragments,
+                fragLen = fragments.length,
+                start = fragments[0].start,
+                end = fragments[fragLen - 1].start + fragments[fragLen - 1].duration,
+                frag = void 0;
+
+            // if bufferEnd before start of playlist, load first fragment
+            if (bufferEnd < start) {
+              frag = fragments[0];
+            } else {
+              (function () {
+                var foundFrag = void 0;
+                var maxFragLookUpTolerance = config.maxFragLookUpTolerance;
+                if (bufferEnd < end) {
+                  if (bufferEnd > end - maxFragLookUpTolerance) {
+                    maxFragLookUpTolerance = 0;
+                  }
+                  foundFrag = _binarySearch2.default.search(fragments, function (candidate) {
+                    // offset should be within fragment boundary - config.maxFragLookUpTolerance
+                    // this is to cope with situations like
+                    // bufferEnd = 9.991
+                    // frag[Ø] : [0,10]
+                    // frag[1] : [10,20]
+                    // bufferEnd is within frag[0] range ... although what we are expecting is to return frag[1] here
+                    //              frag start               frag start+duration
+                    //                  |-----------------------------|
+                    //              <--->                         <--->
+                    //  ...--------><-----------------------------><---------....
+                    // previous frag         matching fragment         next frag
+                    //  return -1             return 0                 return 1
+                    //logger.log(`level/sn/start/end/bufEnd:${level}/${candidate.sn}/${candidate.start}/${(candidate.start+candidate.duration)}/${bufferEnd}`);
+                    if (candidate.start + candidate.duration - maxFragLookUpTolerance <= bufferEnd) {
+                      return 1;
+                    } else if (candidate.start - maxFragLookUpTolerance > bufferEnd) {
+                      return -1;
+                    }
+                    return 0;
+                  });
+                } else {
+                  // reach end of playlist
+                  foundFrag = fragments[fragLen - 1];
+                }
+                if (foundFrag) {
+                  frag = foundFrag;
+                  start = foundFrag.start;
+                  //logger.log('find SN matching with pos:' +  bufferEnd + ':' + frag.sn);
+                  if (fragPrevious && frag.level === fragPrevious.level && frag.sn === fragPrevious.sn) {
+                    if (frag.sn < trackDetails.endSN) {
+                      frag = fragments[frag.sn + 1 - trackDetails.startSN];
+                      _logger.logger.log('SN just loaded, load next one: ' + frag.sn);
+                    } else {
+                      frag = null;
+                    }
+                  }
+                }
+              })();
+            }
+            if (frag) {
+              //logger.log('      loading frag ' + i +',pos/bufEnd:' + pos.toFixed(3) + '/' + bufferEnd.toFixed(3));
+              if (frag.decryptdata.uri != null && frag.decryptdata.key == null) {
+                _logger.logger.log('Loading key for ' + frag.sn + ' of [' + trackDetails.startSN + ' ,' + trackDetails.endSN + '],track ' + this.trackId);
+                this.state = State.KEY_LOADING;
+                hls.trigger(_events2.default.KEY_LOADING, { frag: frag });
+              } else {
+                _logger.logger.log('Loading ' + frag.sn + ' of [' + trackDetails.startSN + ' ,' + trackDetails.endSN + '],track ' + this.trackId + ', currentTime:' + pos + ',bufferEnd:' + bufferEnd.toFixed(3));
+                // ensure that we are not reloading the same fragments in loop ...
+                if (this.fragLoadIdx !== undefined) {
+                  this.fragLoadIdx++;
+                } else {
+                  this.fragLoadIdx = 0;
+                }
+                if (frag.loadCounter) {
+                  frag.loadCounter++;
+                  var maxThreshold = config.fragLoadingLoopThreshold;
+                  // if this frag has already been loaded 3 times, and if it has been reloaded recently
+                  if (frag.loadCounter > maxThreshold && Math.abs(this.fragLoadIdx - frag.loadIdx) < maxThreshold) {
+                    hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, details: _errors.ErrorDetails.FRAG_LOOP_LOADING_ERROR, fatal: false, frag: frag });
+                    return;
+                  }
+                } else {
+                  frag.loadCounter = 1;
+                }
+                frag.loadIdx = this.fragLoadIdx;
+                this.fragCurrent = frag;
+                this.startFragRequested = true;
+                hls.trigger(_events2.default.FRAG_LOADING, { frag: frag });
+                this.state = State.FRAG_LOADING;
+              }
+            }
+          }
+          break;
+        case State.WAITING_TRACK:
+          track = this.tracks[this.trackId];
+          // check if playlist is already loaded
+          if (track && track.details) {
+            this.state = State.IDLE;
+          }
+          break;
+        case State.FRAG_LOADING_WAITING_RETRY:
+          var now = performance.now();
+          var retryDate = this.retryDate;
+          media = this.media;
+          var isSeeking = media && media.seeking;
+          // if current time is gt than retryDate, or if media seeking let's switch to IDLE state to retry loading
+          if (!retryDate || now >= retryDate || isSeeking) {
+            _logger.logger.log('audioStreamController: retryDate reached, switch back to IDLE state');
+            this.state = State.IDLE;
+          }
+          break;
+        case State.STOPPED:
+        case State.FRAG_LOADING:
+        case State.PARSING:
+        case State.PARSED:
+        case State.ENDED:
+          break;
+        default:
+          break;
+      }
+    }
+  }, {
+    key: 'onMediaAttached',
+    value: function onMediaAttached(data) {
+      var media = this.media = this.mediaBuffer = data.media;
+      this.onvseeking = this.onMediaSeeking.bind(this);
+      this.onvended = this.onMediaEnded.bind(this);
+      media.addEventListener('seeking', this.onvseeking);
+      media.addEventListener('ended', this.onvended);
+      var config = this.config;
+      if (this.tracks && config.autoStartLoad) {
+        this.startLoad(config.startPosition);
+      }
+    }
+  }, {
+    key: 'onMediaDetaching',
+    value: function onMediaDetaching() {
+      var media = this.media;
+      if (media && media.ended) {
+        _logger.logger.log('MSE detaching and video ended, reset startPosition');
+        this.startPosition = this.lastCurrentTime = 0;
+      }
+
+      // reset fragment loading counter on MSE detaching to avoid reporting FRAG_LOOP_LOADING_ERROR after error recovery
+      var tracks = this.tracks;
+      if (tracks) {
+        // reset fragment load counter
+        tracks.forEach(function (track) {
+          if (track.details) {
+            track.details.fragments.forEach(function (fragment) {
+              fragment.loadCounter = undefined;
+            });
+          }
+        });
+      }
+      // remove video listeners
+      if (media) {
+        media.removeEventListener('seeking', this.onvseeking);
+        media.removeEventListener('ended', this.onvended);
+        this.onvseeking = this.onvseeked = this.onvended = null;
+      }
+      this.media = null;
+      this.loadedmetadata = false;
+      this.stopLoad();
+    }
+  }, {
+    key: 'onMediaSeeking',
+    value: function onMediaSeeking() {
+      if (this.state === State.ENDED) {
+        // switch to IDLE state to check for potential new fragment
+        this.state = State.IDLE;
+      }
+      if (this.media) {
+        this.lastCurrentTime = this.media.currentTime;
+      }
+      // avoid reporting fragment loop loading error in case user is seeking several times on same position
+      if (this.fragLoadIdx !== undefined) {
+        this.fragLoadIdx += 2 * this.config.fragLoadingLoopThreshold;
+      }
+      // tick to speed up processing
+      this.tick();
+    }
+  }, {
+    key: 'onMediaEnded',
+    value: function onMediaEnded() {
+      // reset startPosition and lastCurrentTime to restart playback @ stream beginning
+      this.startPosition = this.lastCurrentTime = 0;
+    }
+  }, {
+    key: 'onAudioTracksUpdated',
+    value: function onAudioTracksUpdated(data) {
+      _logger.logger.log('audio tracks updated');
+      this.tracks = data.audioTracks;
+    }
+  }, {
+    key: 'onAudioTrackSwitch',
+    value: function onAudioTrackSwitch(data) {
+      this.trackId = data.id;
+      this.state = State.IDLE;
+
+      this.fragCurrent = null;
+      this.state = State.PAUSED;
+      // destroy useless demuxer when switching audio to main
+      if (data.type === 'main') {
+        if (this.demuxer) {
+          this.demuxer.destroy();
+          this.demuxer = null;
+        }
+      } else {
+        // switching to audio track, start timer if not already started
+        if (!this.timer) {
+          this.timer = setInterval(this.ontick, 100);
+        }
+      }
+      // flush audio source buffer
+      this.hls.trigger(_events2.default.BUFFER_FLUSHING, { startOffset: 0, endOffset: Number.POSITIVE_INFINITY, type: 'audio' });
+      this.tick();
+    }
+  }, {
+    key: 'onAudioTrackLoaded',
+    value: function onAudioTrackLoaded(data) {
+      var details = data.details,
+          trackId = data.id,
+          track = this.tracks[trackId],
+          duration = details.totalduration;
+
+      _logger.logger.log('track ' + trackId + ' loaded [' + details.startSN + ',' + details.endSN + '],duration:' + duration);
+      details.PTSKnown = false;
+      track.details = details;
+
+      // compute start position
+      if (!this.startFragRequested) {
+        // compute start position if set to -1. use it straight away if value is defined
+        if (this.startPosition === -1) {
+          // first, check if start time offset has been set in playlist, if yes, use this value
+          var startTimeOffset = details.startTimeOffset;
+          if (!isNaN(startTimeOffset)) {
+            _logger.logger.log('start time offset found in playlist, adjust startPosition to ' + startTimeOffset);
+            this.startPosition = startTimeOffset;
+          } else {
+            this.startPosition = 0;
+          }
+        }
+        this.nextLoadPosition = this.startPosition;
+      }
+      // only switch batck to IDLE state if we were waiting for track to start downloading a new fragment
+      if (this.state === State.WAITING_TRACK) {
+        this.state = State.IDLE;
+      }
+      //trigger handler right now
+      this.tick();
+    }
+  }, {
+    key: 'onKeyLoaded',
+    value: function onKeyLoaded() {
+      if (this.state === State.KEY_LOADING) {
+        this.state = State.IDLE;
+        this.tick();
+      }
+    }
+  }, {
+    key: 'onFragLoaded',
+    value: function onFragLoaded(data) {
+      var fragCurrent = this.fragCurrent;
+      if (this.state === State.FRAG_LOADING && fragCurrent && data.frag.type === 'audio' && data.frag.level === fragCurrent.level && data.frag.sn === fragCurrent.sn) {
+        this.state = State.PARSING;
+        // transmux the MPEG-TS data to ISO-BMFF segments
+        this.stats = data.stats;
+        var track = this.tracks[this.trackId],
+            details = track.details,
+            duration = details.totalduration,
+            start = fragCurrent.start,
+            trackId = fragCurrent.level,
+            sn = fragCurrent.sn,
+            audioCodec = this.config.defaultAudioCodec || track.audioCodec;
+        this.pendingAppending = 0;
+        if (!this.demuxer) {
+          this.demuxer = new _demuxer2.default(this.hls, 'audio');
+        }
+        _logger.logger.log('Demuxing ' + sn + ' of [' + details.startSN + ' ,' + details.endSN + '],track ' + trackId);
+        this.demuxer.push(data.payload, audioCodec, null, start, fragCurrent.cc, trackId, sn, duration, fragCurrent.decryptdata);
+      }
+      this.fragLoadError = 0;
+    }
+  }, {
+    key: 'onFragParsingInitSegment',
+    value: function onFragParsingInitSegment(data) {
+      var fragCurrent = this.fragCurrent;
+      if (fragCurrent && data.id === 'audio' && data.sn === fragCurrent.sn && data.level === fragCurrent.level && this.state === State.PARSING) {
+        var tracks = data.tracks,
+            track = void 0;
+
+        // include levelCodec in audio and video tracks
+        track = tracks.audio;
+        if (track) {
+          track.levelCodec = 'mp4a.40.2';
+          track.id = data.id;
+          this.hls.trigger(_events2.default.BUFFER_CODECS, tracks);
+          _logger.logger.log('audio track:audio,container:' + track.container + ',codecs[level/parsed]=[' + track.levelCodec + '/' + track.codec + ']');
+          var initSegment = track.initSegment;
+          if (initSegment) {
+            this.pendingAppending++;
+            this.hls.trigger(_events2.default.BUFFER_APPENDING, { type: 'audio', data: initSegment, parent: 'audio', content: 'initSegment' });
+          }
+          //trigger handler right now
+          this.tick();
+        }
+      }
+    }
+  }, {
+    key: 'onFragParsingData',
+    value: function onFragParsingData(data) {
+      var _this2 = this;
+
+      var fragCurrent = this.fragCurrent;
+      if (fragCurrent && data.id === 'audio' && data.sn === fragCurrent.sn && data.level === fragCurrent.level && this.state === State.PARSING) {
+        var track = this.tracks[this.trackId],
+            frag = this.fragCurrent;
+
+        _logger.logger.log('parsed ' + data.type + ',PTS:[' + data.startPTS.toFixed(3) + ',' + data.endPTS.toFixed(3) + '],DTS:[' + data.startDTS.toFixed(3) + '/' + data.endDTS.toFixed(3) + '],nb:' + data.nb);
+        _levelHelper2.default.updateFragPTSDTS(track.details, frag.sn, data.startPTS, data.endPTS);
+
+        [data.data1, data.data2].forEach(function (buffer) {
+          if (buffer) {
+            _this2.pendingAppending++;
+            _this2.hls.trigger(_events2.default.BUFFER_APPENDING, { type: data.type, data: buffer, parent: 'audio', content: 'data' });
+          }
+        });
+        this.nextLoadPosition = data.endPTS;
+        //trigger handler right now
+        this.tick();
+      }
+    }
+  }, {
+    key: 'onFragParsed',
+    value: function onFragParsed(data) {
+      var fragCurrent = this.fragCurrent;
+      if (fragCurrent && data.id === 'audio' && data.sn === fragCurrent.sn && data.level === fragCurrent.level && this.state === State.PARSING) {
+        this.stats.tparsed = performance.now();
+        this.state = State.PARSED;
+        this._checkAppendedParsed();
+      }
+    }
+  }, {
+    key: 'onBufferCreated',
+    value: function onBufferCreated(data) {
+      var audioTrack = data.tracks.audio;
+      if (audioTrack) {
+        this.mediaBuffer = audioTrack.buffer;
+        this.loadedmetadata = true;
+      }
+    }
+  }, {
+    key: 'onBufferAppended',
+    value: function onBufferAppended(data) {
+      if (data.parent === 'audio') {
+        switch (this.state) {
+          case State.PARSING:
+          case State.PARSED:
+            this.pendingAppending--;
+            this._checkAppendedParsed();
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }, {
+    key: '_checkAppendedParsed',
+    value: function _checkAppendedParsed() {
+      //trigger handler right now
+      if (this.state === State.PARSED && this.pendingAppending === 0) {
+        var frag = this.fragCurrent,
+            stats = this.stats;
+        if (frag) {
+          this.fragPrevious = frag;
+          stats.tbuffered = performance.now();
+          this.hls.trigger(_events2.default.FRAG_BUFFERED, { stats: stats, frag: frag, id: 'audio' });
+          var media = this.mediaBuffer ? this.mediaBuffer : this.media;
+          _logger.logger.log('audio buffered : ' + _timeRanges2.default.toString(media.buffered));
+          this.state = State.IDLE;
+        }
+        this.tick();
+      }
+    }
+  }, {
+    key: 'onError',
+    value: function onError(data) {
+      var frag = data.frag;
+      // don't handle frag error not related to audio fragment
+      if (frag && frag.type !== 'audio') {
+        return;
+      }
+      switch (data.details) {
+        case _errors.ErrorDetails.FRAG_LOAD_ERROR:
+        case _errors.ErrorDetails.FRAG_LOAD_TIMEOUT:
+          if (!data.fatal) {
+            var loadError = this.fragLoadError;
+            if (loadError) {
+              loadError++;
+            } else {
+              loadError = 1;
+            }
+            if (loadError <= this.config.fragLoadingMaxRetry) {
+              this.fragLoadError = loadError;
+              // reset load counter to avoid frag loop loading error
+              frag.loadCounter = 0;
+              // exponential backoff capped to 64s
+              var delay = Math.min(Math.pow(2, loadError - 1) * this.config.fragLoadingRetryDelay, 64000);
+              _logger.logger.warn('audioStreamController: frag loading failed, retry in ' + delay + ' ms');
+              this.retryDate = performance.now() + delay;
+              // retry loading state
+              this.state = State.FRAG_LOADING_WAITING_RETRY;
+            } else {
+              _logger.logger.error('audioStreamController: ' + data.details + ' reaches max retry, redispatch as fatal ...');
+              // redispatch same error but with fatal set to true
+              data.fatal = true;
+              this.hls.trigger(_events2.default.ERROR, data);
+              this.state = State.ERROR;
+            }
+          }
+          break;
+        case _errors.ErrorDetails.FRAG_LOOP_LOADING_ERROR:
+        case _errors.ErrorDetails.AUDIO_TRACK_LOAD_ERROR:
+        case _errors.ErrorDetails.AUDIO_TRACK_LOAD_TIMEOUT:
+        case _errors.ErrorDetails.KEY_LOAD_ERROR:
+        case _errors.ErrorDetails.KEY_LOAD_TIMEOUT:
+          //  when in ERROR state, don't switch back to IDLE state in case a non-fatal error is received
+          if (this.state !== State.ERROR) {
+            // if fatal error, stop processing, otherwise move to IDLE to retry loading
+            this.state = data.fatal ? State.ERROR : State.IDLE;
+            _logger.logger.warn('audioStreamController: ' + data.details + ' while loading frag,switch to ' + this.state + ' state ...');
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  }, {
+    key: 'onBufferFlushed',
+    value: function onBufferFlushed() {
+      // increase fragment load Index to avoid frag loop loading error after buffer flush
+      this.fragLoadIdx += 2 * this.config.fragLoadingLoopThreshold;
+      // move to IDLE once flush complete. this should trigger new fragment loading
+      this.state = State.IDLE;
+      // reset reference to frag
+      this.fragPrevious = null;
+      this.tick();
+    }
+  }]);
+
+  return AudioStreamController;
+}(_eventHandler2.default);
+
+exports.default = AudioStreamController;
+
+},{"../demux/demuxer":20,"../errors":24,"../event-handler":25,"../events":26,"../helper/buffer-helper":28,"../helper/level-helper":29,"../utils/binary-search":39,"../utils/logger":43,"../utils/timeRanges":45}],5:[function(_dereq_,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _events = _dereq_('../events');
+
+var _events2 = _interopRequireDefault(_events);
+
+var _eventHandler = _dereq_('../event-handler');
+
+var _eventHandler2 = _interopRequireDefault(_eventHandler);
+
+var _logger = _dereq_('../utils/logger');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * audio track controller
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               */
+
+var AudioTrackController = function (_EventHandler) {
+  _inherits(AudioTrackController, _EventHandler);
+
+  function AudioTrackController(hls) {
+    _classCallCheck(this, AudioTrackController);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(AudioTrackController).call(this, hls, _events2.default.MANIFEST_LOADING, _events2.default.MANIFEST_LOADED, _events2.default.AUDIO_TRACK_LOADED));
+  }
+
+  _createClass(AudioTrackController, [{
+    key: 'destroy',
+    value: function destroy() {
+      _eventHandler2.default.prototype.destroy.call(this);
+    }
+  }, {
+    key: 'onManifestLoading',
+    value: function onManifestLoading() {
+      // reset audio tracks on manifest loading
+      this.tracks = [];
+      this.trackId = -1;
+    }
+  }, {
+    key: 'onManifestLoaded',
+    value: function onManifestLoaded(data) {
+      var _this2 = this;
+
+      var tracks = data.audioTracks || [];
+      var defaultFound = false;
+      this.tracks = tracks;
+      this.hls.trigger(_events2.default.AUDIO_TRACKS_UPDATED, { audioTracks: tracks });
+      // loop through available audio tracks and autoselect default if needed
+      var id = 0;
+      tracks.forEach(function (track) {
+        if (track.default) {
+          _this2.audioTrack = id;
+          defaultFound = true;
+          return;
+        }
+        id++;
+      });
+      if (defaultFound === false && tracks.length) {
+        _logger.logger.log('no default audio track defined, use first audio track as default');
+        this.audioTrack = 0;
+      }
+    }
+  }, {
+    key: 'onAudioTrackLoaded',
+    value: function onAudioTrackLoaded(data) {
+      if (data.id < this.tracks.length) {
+        _logger.logger.log('audioTrack ' + data.id + ' loaded');
+        this.tracks[data.id].details = data.details;
+        // check if current playlist is a live playlist
+        if (data.details.live && !this.timer) {
+          // if live playlist we will have to reload it periodically
+          // set reload period to playlist target duration
+          this.timer = setInterval(this.ontick, 1000 * data.details.targetduration);
+        }
+        if (!data.details.live && this.timer) {
+          // playlist is not live and timer is armed : stopping it
+          clearInterval(this.timer);
+          this.timer = null;
+        }
+      }
+    }
+
+    /** get alternate audio tracks list from playlist **/
+
+  }, {
+    key: 'setAudioTrackInternal',
+    value: function setAudioTrackInternal(newId) {
+      // check if level idx is valid
+      if (newId >= 0 && newId < this.tracks.length) {
+        // stopping live reloading timer if any
+        if (this.timer) {
+          clearInterval(this.timer);
+          this.timer = null;
+        }
+        this.trackId = newId;
+        _logger.logger.log('switching to audioTrack ' + newId);
+        var audioTrack = this.tracks[newId],
+            type = audioTrack.type;
+        this.hls.trigger(_events2.default.AUDIO_TRACK_SWITCH, { id: newId, type: type });
+        // check if we need to load playlist for this audio Track
+        var details = audioTrack.details;
+        if (type !== 'main' && (details === undefined || details.live === true)) {
+          // track not retrieved yet, or live playlist we need to (re)load it
+          _logger.logger.log('(re)loading playlist for audioTrack ' + newId);
+          this.hls.trigger(_events2.default.AUDIO_TRACK_LOADING, { url: audioTrack.url, id: newId });
+        }
+      }
+    }
+  }, {
+    key: 'audioTracks',
+    get: function get() {
+      return this.tracks;
+    }
+
+    /** get index of the selected audio track (index in audio track lists) **/
+
+  }, {
+    key: 'audioTrack',
+    get: function get() {
+      return this.trackId;
+    }
+
+    /** select an audio track, based on its index in audio track lists**/
+    ,
+    set: function set(audioTrackId) {
+      if (this.trackId !== audioTrackId || this.tracks[audioTrackId].details === undefined) {
+        this.setAudioTrackInternal(audioTrackId);
+      }
+    }
+  }]);
+
+  return AudioTrackController;
+}(_eventHandler2.default);
+
+exports.default = AudioTrackController;
+
+},{"../event-handler":25,"../events":26,"../utils/logger":43}],6:[function(_dereq_,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _events = _dereq_('../events');
+
+var _events2 = _interopRequireDefault(_events);
+
+var _eventHandler = _dereq_('../event-handler');
+
+var _eventHandler2 = _interopRequireDefault(_eventHandler);
+
+var _logger = _dereq_('../utils/logger');
+
+var _errors = _dereq_('../errors');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -673,7 +1491,7 @@ var BufferController = function (_EventHandler) {
     // the value that we have set mediasource.duration to
     // (the actual duration may be tweaked slighly by the browser)
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(BufferController).call(this, hls, _events2.default.MEDIA_ATTACHING, _events2.default.MEDIA_DETACHING, _events2.default.BUFFER_RESET, _events2.default.BUFFER_APPENDING, _events2.default.BUFFER_CODECS, _events2.default.BUFFER_EOS, _events2.default.BUFFER_FLUSHING, _events2.default.LEVEL_UPDATED));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(BufferController).call(this, hls, _events2.default.MEDIA_ATTACHING, _events2.default.MEDIA_DETACHING, _events2.default.MANIFEST_PARSED, _events2.default.BUFFER_RESET, _events2.default.BUFFER_APPENDING, _events2.default.BUFFER_CODECS, _events2.default.BUFFER_EOS, _events2.default.BUFFER_FLUSHING, _events2.default.LEVEL_UPDATED));
 
     _this._msDuration = null;
     // the value that we want to set mediaSource.duration to
@@ -682,6 +1500,7 @@ var BufferController = function (_EventHandler) {
     // Source Buffer listeners
     _this.onsbue = _this.onSBUpdateEnd.bind(_this);
     _this.onsbe = _this.onSBUpdateError.bind(_this);
+    _this.pendingTracks = {};
     return _this;
   }
 
@@ -689,6 +1508,18 @@ var BufferController = function (_EventHandler) {
     key: 'destroy',
     value: function destroy() {
       _eventHandler2.default.prototype.destroy.call(this);
+    }
+  }, {
+    key: 'onManifestParsed',
+    value: function onManifestParsed(data) {
+      var audioExpected = data.audio,
+          videoExpected = data.video,
+          sourceBufferNb = 0;
+      if (audioExpected || videoExpected) {
+        sourceBufferNb = (audioExpected ? 1 : 0) + (videoExpected ? 1 : 0);
+        _logger.logger.log(sourceBufferNb + ' sourceBuffer(s) expected');
+      }
+      this.sourceBufferNb = sourceBufferNb;
     }
   }, {
     key: 'onMediaAttaching',
@@ -711,6 +1542,7 @@ var BufferController = function (_EventHandler) {
   }, {
     key: 'onMediaDetaching',
     value: function onMediaDetaching() {
+      _logger.logger.log('media source detaching');
       var ms = this.mediaSource;
       if (ms) {
         if (ms.readyState === 'open') {
@@ -728,17 +1560,17 @@ var BufferController = function (_EventHandler) {
         ms.removeEventListener('sourceended', this.onmse);
         ms.removeEventListener('sourceclose', this.onmsc);
 
-        try {
-          // unlink MediaSource from video tag
-          this.media.src = '';
+        // Detach properly the MediaSource from the HTMLMediaElement as
+        // suggested in https://github.com/w3c/media-source/issues/53.
+        if (this.media) {
           this.media.removeAttribute('src');
-        } catch (err) {
-          _logger.logger.warn('onMediaDetaching:' + err.message + ' while unlinking video.src');
+          this.media.load();
         }
+
         this.mediaSource = null;
         this.media = null;
-        this.pendingTracks = null;
-        this.sourceBuffer = null;
+        this.pendingTracks = {};
+        this.sourceBuffer = {};
       }
       this.onmso = this.onmse = this.onmsc = null;
       this.hls.trigger(_events2.default.MEDIA_DETACHED);
@@ -748,13 +1580,25 @@ var BufferController = function (_EventHandler) {
     value: function onMediaSourceOpen() {
       _logger.logger.log('media source opened');
       this.hls.trigger(_events2.default.MEDIA_ATTACHED, { media: this.media });
-      // once received, don't listen anymore to sourceopen event
-      this.mediaSource.removeEventListener('sourceopen', this.onmso);
-      // if any buffer codecs pending, treat it here.
-      var pendingTracks = this.pendingTracks;
-      if (pendingTracks) {
-        this.onBufferCodecs(pendingTracks);
-        this.pendingTracks = null;
+      var mediaSource = this.mediaSource;
+      if (mediaSource) {
+        // once received, don't listen anymore to sourceopen event
+        mediaSource.removeEventListener('sourceopen', this.onmso);
+      }
+      this.checkPendingTracks();
+    }
+  }, {
+    key: 'checkPendingTracks',
+    value: function checkPendingTracks() {
+      // if any buffer codecs pending, check if we have enough to create sourceBuffers
+      var pendingTracks = this.pendingTracks,
+          pendingTracksNb = Object.keys(pendingTracks).length;
+      // if any pending tracks and (if nb of pending tracks matching expected nb or if unknoown expected nb)
+      if (pendingTracksNb && (this.sourceBufferNb === pendingTracksNb || this.sourceBufferNb === 0)) {
+        // ok, let's create them now !
+        this.createSourceBuffers(pendingTracks);
+        this.pendingTracks = {};
+        // append any pending segments now !
         this.doAppending();
       }
     }
@@ -777,12 +1621,17 @@ var BufferController = function (_EventHandler) {
       }
 
       if (this._needsEos) {
-        this.onBufferEos();
+        this.checkEos();
+      }
+      this.appending = false;
+      this.hls.trigger(_events2.default.BUFFER_APPENDED, { parent: this.parent });
+
+      // don't append in flushing mode
+      if (!this._needsFlush) {
+        this.doAppending();
       }
 
-      this.hls.trigger(_events2.default.BUFFER_APPENDED);
-
-      this.doAppending();
+      this.updateMediaElementDuration();
     }
   }, {
     key: 'onSBUpdateError',
@@ -798,55 +1647,72 @@ var BufferController = function (_EventHandler) {
     key: 'onBufferReset',
     value: function onBufferReset() {
       var sourceBuffer = this.sourceBuffer;
-      if (sourceBuffer) {
-        for (var type in sourceBuffer) {
-          var sb = sourceBuffer[type];
-          try {
-            this.mediaSource.removeSourceBuffer(sb);
-            sb.removeEventListener('updateend', this.onsbue);
-            sb.removeEventListener('error', this.onsbe);
-          } catch (err) {}
-        }
-        this.sourceBuffer = null;
+      for (var type in sourceBuffer) {
+        var sb = sourceBuffer[type];
+        try {
+          this.mediaSource.removeSourceBuffer(sb);
+          sb.removeEventListener('updateend', this.onsbue);
+          sb.removeEventListener('error', this.onsbe);
+        } catch (err) {}
       }
+      this.sourceBuffer = {};
       this.flushRange = [];
+      this.segments = [];
       this.appended = 0;
     }
   }, {
     key: 'onBufferCodecs',
     value: function onBufferCodecs(tracks) {
-      var mediaSource = this.mediaSource;
-
-      // delay sourcebuffer creation if media source not opened yet
-      if (!mediaSource || mediaSource.readyState !== 'open') {
-        this.pendingTracks = tracks;
-        return;
-      }
-
-      if (!this.sourceBuffer) {
-        var sourceBuffer = {};
+      // if source buffer(s) not created yet, appended buffer tracks in this.pendingTracks
+      // if sourcebuffers already created, do nothing ...
+      if (Object.keys(this.sourceBuffer).length === 0) {
         for (var trackName in tracks) {
+          this.pendingTracks[trackName] = tracks[trackName];
+        }
+        var mediaSource = this.mediaSource;
+        if (mediaSource && mediaSource.readyState === 'open') {
+          // try to create sourcebuffers if mediasource opened
+          this.checkPendingTracks();
+        }
+      }
+    }
+  }, {
+    key: 'createSourceBuffers',
+    value: function createSourceBuffers(tracks) {
+      var sourceBuffer = this.sourceBuffer,
+          mediaSource = this.mediaSource;
+
+      for (var trackName in tracks) {
+        if (!sourceBuffer[trackName]) {
           var track = tracks[trackName];
           // use levelCodec as first priority
           var codec = track.levelCodec || track.codec;
           var mimeType = track.container + ';codecs=' + codec;
           _logger.logger.log('creating sourceBuffer with mimeType:' + mimeType);
-          var sb = sourceBuffer[trackName] = mediaSource.addSourceBuffer(mimeType);
-          sb.addEventListener('updateend', this.onsbue);
-          sb.addEventListener('error', this.onsbe);
+          try {
+            var sb = sourceBuffer[trackName] = mediaSource.addSourceBuffer(mimeType);
+            sb.addEventListener('updateend', this.onsbue);
+            sb.addEventListener('error', this.onsbe);
+            track.buffer = sb;
+          } catch (err) {
+            _logger.logger.error('error while trying to add sourceBuffer:' + err.message);
+            this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, details: _errors.ErrorDetails.BUFFER_ADD_CODEC_ERROR, fatal: false, err: err, mimeType: mimeType });
+          }
         }
-        this.sourceBuffer = sourceBuffer;
       }
+      this.hls.trigger(_events2.default.BUFFER_CREATED, { tracks: tracks });
     }
   }, {
     key: 'onBufferAppending',
     value: function onBufferAppending(data) {
-      if (!this.segments) {
-        this.segments = [data];
-      } else {
-        this.segments.push(data);
+      if (!this._needsFlush) {
+        if (!this.segments) {
+          this.segments = [data];
+        } else {
+          this.segments.push(data);
+        }
+        this.doAppending();
       }
-      this.doAppending();
     }
   }, {
     key: 'onBufferAppendFail',
@@ -857,27 +1723,54 @@ var BufferController = function (_EventHandler) {
       // it will be followed by a mediaElement error ...)
       this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, details: _errors.ErrorDetails.BUFFER_APPENDING_ERROR, fatal: false, frag: this.fragCurrent });
     }
+
+    // on BUFFER_EOS mark matching sourcebuffer(s) as ended and trigger checkEos()
+
   }, {
     key: 'onBufferEos',
-    value: function onBufferEos() {
+    value: function onBufferEos(data) {
+      var sb = this.sourceBuffer;
+      var dataType = data.type;
+      for (var type in sb) {
+        if (!dataType || type === dataType) {
+          if (!sb[type].ended) {
+            sb[type].ended = true;
+            _logger.logger.log(type + ' sourceBuffer now EOS');
+          }
+        }
+      }
+      this.checkEos();
+    }
+
+    // if all source buffers are marked as ended, signal endOfStream() to MediaSource.
+
+  }, {
+    key: 'checkEos',
+    value: function checkEos() {
       var sb = this.sourceBuffer,
           mediaSource = this.mediaSource;
       if (!mediaSource || mediaSource.readyState !== 'open') {
+        this._needsEos = false;
         return;
       }
-      if (!(sb.audio && sb.audio.updating || sb.video && sb.video.updating)) {
-        _logger.logger.log('all media data available, signal endOfStream() to MediaSource and stop loading fragment');
-        //Notify the media element that it now has all of the media data
-        mediaSource.endOfStream();
-        this._needsEos = false;
-      } else {
-        this._needsEos = true;
+      for (var type in sb) {
+        if (!sb[type].ended) {
+          return;
+        }
+        if (sb[type].updating) {
+          this._needsEos = true;
+          return;
+        }
       }
+      _logger.logger.log('all media data available, signal endOfStream() to MediaSource and stop loading fragment');
+      //Notify the media element that it now has all of the media data
+      mediaSource.endOfStream();
+      this._needsEos = false;
     }
   }, {
     key: 'onBufferFlushing',
     value: function onBufferFlushing(data) {
-      this.flushRange.push({ start: data.startOffset, end: data.endOffset });
+      this.flushRange.push({ start: data.startOffset, end: data.endOffset, type: data.type });
       // attempt flush immediatly
       this.flushBufferCounter = 0;
       this.doFlush();
@@ -934,7 +1827,7 @@ var BufferController = function (_EventHandler) {
       while (this.flushRange.length) {
         var range = this.flushRange[0];
         // flushBuffer will abort any buffer append in progress and flush Audio/Video Buffer
-        if (this.flushBuffer(range.start, range.end)) {
+        if (this.flushBuffer(range.start, range.end, range.type)) {
           // range flushed, remove from flush array
           this.flushRange.shift();
           this.flushBufferCounter = 0;
@@ -951,10 +1844,8 @@ var BufferController = function (_EventHandler) {
         // let's recompute this.appended, which is used to avoid flush looping
         var appended = 0;
         var sourceBuffer = this.sourceBuffer;
-        if (sourceBuffer) {
-          for (var type in sourceBuffer) {
-            appended += sourceBuffer[type].buffered.length;
-          }
+        for (var type in sourceBuffer) {
+          appended += sourceBuffer[type].buffered.length;
         }
         this.appended = appended;
         this.hls.trigger(_events2.default.BUFFER_FLUSHED);
@@ -966,25 +1857,35 @@ var BufferController = function (_EventHandler) {
       var hls = this.hls,
           sourceBuffer = this.sourceBuffer,
           segments = this.segments;
-      if (sourceBuffer) {
+      if (Object.keys(sourceBuffer).length) {
         if (this.media.error) {
-          segments = [];
+          this.segments = [];
           _logger.logger.error('trying to append although a media error occured, flush segment and abort');
           return;
         }
-        for (var type in sourceBuffer) {
-          if (sourceBuffer[type].updating) {
-            //logger.log('sb update in progress');
-            return;
-          }
+        if (this.appending) {
+          //logger.log(`sb appending in progress`);
+          return;
         }
-        if (segments.length) {
+        if (segments && segments.length) {
           var segment = segments.shift();
           try {
-            //logger.log(`appending ${segment.type} SB, size:${segment.data.length});
-            sourceBuffer[segment.type].appendBuffer(segment.data);
-            this.appendError = 0;
-            this.appended++;
+            var type = segment.type;
+            if (sourceBuffer[type]) {
+              // reset sourceBuffer ended flag before appending segment
+              sourceBuffer[type].ended = false;
+              //logger.log(`appending ${segment.content} ${segment.type} SB, size:${segment.data.length}, ${segment.parent}`);
+              this.parent = segment.parent;
+              sourceBuffer[type].appendBuffer(segment.data);
+              this.appendError = 0;
+              this.appended++;
+              this.appending = true;
+            } else {
+              // in case we don't have any source buffer matching with this segment type,
+              // it means that Mediasource fails to create sourcebuffer
+              // discard this segment, and trigger update end
+              this.onSBUpdateEnd();
+            }
           } catch (err) {
             // in case any error occured while appending, put back segment in segments table
             _logger.logger.error('error while trying to append buffer:' + err.message);
@@ -1032,49 +1933,62 @@ var BufferController = function (_EventHandler) {
 
   }, {
     key: 'flushBuffer',
-    value: function flushBuffer(startOffset, endOffset) {
-      var sb, i, bufStart, bufEnd, flushStart, flushEnd;
-      //logger.log('flushBuffer,pos/start/end: ' + this.media.currentTime + '/' + startOffset + '/' + endOffset);
-      // safeguard to avoid infinite looping : don't try to flush more than the nb of appended segments
-      if (this.flushBufferCounter < this.appended && this.sourceBuffer) {
-        for (var type in this.sourceBuffer) {
-          sb = this.sourceBuffer[type];
-          if (!sb.updating) {
-            for (i = 0; i < sb.buffered.length; i++) {
-              bufStart = sb.buffered.start(i);
-              bufEnd = sb.buffered.end(i);
-              // workaround firefox not able to properly flush multiple buffered range.
-              if (navigator.userAgent.toLowerCase().indexOf('firefox') !== -1 && endOffset === Number.POSITIVE_INFINITY) {
-                flushStart = startOffset;
-                flushEnd = endOffset;
-              } else {
-                flushStart = Math.max(bufStart, startOffset);
-                flushEnd = Math.min(bufEnd, endOffset);
-              }
-              /* sometimes sourcebuffer.remove() does not flush
-                 the exact expected time range.
-                 to avoid rounding issues/infinite loop,
-                 only flush buffer range of length greater than 500ms.
-              */
-              if (Math.min(flushEnd, bufEnd) - flushStart > 0.5) {
-                this.flushBufferCounter++;
-                _logger.logger.log('flush ' + type + ' [' + flushStart + ',' + flushEnd + '], of [' + bufStart + ',' + bufEnd + '], pos:' + this.media.currentTime);
-                sb.remove(flushStart, flushEnd);
-                return false;
-              }
+    value: function flushBuffer(startOffset, endOffset, typeIn) {
+      var sb,
+          i,
+          bufStart,
+          bufEnd,
+          flushStart,
+          flushEnd,
+          sourceBuffer = this.sourceBuffer;
+      if (Object.keys(sourceBuffer).length) {
+        _logger.logger.log('flushBuffer,pos/start/end: ' + this.media.currentTime + '/' + startOffset + '/' + endOffset);
+        // safeguard to avoid infinite looping : don't try to flush more than the nb of appended segments
+        if (this.flushBufferCounter < this.appended) {
+          for (var type in sourceBuffer) {
+            // check if sourcebuffer type is defined (typeIn): if yes, let's only flush this one
+            // if no, let's flush all sourcebuffers
+            if (typeIn && type !== typeIn) {
+              continue;
             }
-          } else {
-            //logger.log('abort ' + type + ' append in progress');
-            // this will abort any appending in progress
-            //sb.abort();
-            _logger.logger.warn('cannot flush, sb updating in progress');
-            return false;
+            sb = sourceBuffer[type];
+            if (!sb.updating) {
+              for (i = 0; i < sb.buffered.length; i++) {
+                bufStart = sb.buffered.start(i);
+                bufEnd = sb.buffered.end(i);
+                // workaround firefox not able to properly flush multiple buffered range.
+                if (navigator.userAgent.toLowerCase().indexOf('firefox') !== -1 && endOffset === Number.POSITIVE_INFINITY) {
+                  flushStart = startOffset;
+                  flushEnd = endOffset;
+                } else {
+                  flushStart = Math.max(bufStart, startOffset);
+                  flushEnd = Math.min(bufEnd, endOffset);
+                }
+                /* sometimes sourcebuffer.remove() does not flush
+                   the exact expected time range.
+                   to avoid rounding issues/infinite loop,
+                   only flush buffer range of length greater than 500ms.
+                */
+                if (Math.min(flushEnd, bufEnd) - flushStart > 0.5) {
+                  this.flushBufferCounter++;
+                  _logger.logger.log('flush ' + type + ' [' + flushStart + ',' + flushEnd + '], of [' + bufStart + ',' + bufEnd + '], pos:' + this.media.currentTime);
+                  sb.remove(flushStart, flushEnd);
+                  return false;
+                }
+              }
+            } else {
+              //logger.log('abort ' + type + ' append in progress');
+              // this will abort any appending in progress
+              //sb.abort();
+              _logger.logger.warn('cannot flush, sb updating in progress');
+              return false;
+            }
           }
+        } else {
+          _logger.logger.warn('abort flushing too many retries');
         }
-      } else {
-        _logger.logger.warn('abort flushing too many retries');
+        _logger.logger.log('buffer flushed');
       }
-      _logger.logger.log('buffer flushed');
       // everything flushed !
       return true;
     }
@@ -1085,7 +1999,7 @@ var BufferController = function (_EventHandler) {
 
 exports.default = BufferController;
 
-},{"../errors":21,"../event-handler":22,"../events":23,"../utils/logger":38}],5:[function(require,module,exports){
+},{"../errors":24,"../event-handler":25,"../events":26,"../utils/logger":43}],7:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1094,11 +2008,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventHandler = require('../event-handler');
+var _eventHandler = _dereq_('../event-handler');
 
 var _eventHandler2 = _interopRequireDefault(_eventHandler);
 
@@ -1118,18 +2032,28 @@ var CapLevelController = function (_EventHandler) {
   function CapLevelController(hls) {
     _classCallCheck(this, CapLevelController);
 
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(CapLevelController).call(this, hls, _events2.default.MEDIA_ATTACHING, _events2.default.MANIFEST_PARSED));
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(CapLevelController).call(this, hls, _events2.default.FPS_DROP_LEVEL_CAPPING, _events2.default.MEDIA_ATTACHING, _events2.default.MANIFEST_PARSED));
   }
 
   _createClass(CapLevelController, [{
     key: 'destroy',
     value: function destroy() {
       if (this.hls.config.capLevelToPlayerSize) {
-        this.media = null;
+        this.media = this.restrictedLevels = null;
         this.autoLevelCapping = Number.POSITIVE_INFINITY;
         if (this.timer) {
           this.timer = clearInterval(this.timer);
         }
+      }
+    }
+  }, {
+    key: 'onFpsDropLevelCapping',
+    value: function onFpsDropLevelCapping(data) {
+      if (!this.restrictedLevels) {
+        this.restrictedLevels = [];
+      }
+      if (!this.isLevelRestricted(data.droppedLevel)) {
+        this.restrictedLevels.push(data.droppedLevel);
       }
     }
   }, {
@@ -1173,7 +2097,7 @@ var CapLevelController = function (_EventHandler) {
   }, {
     key: 'getMaxLevel',
     value: function getMaxLevel(capLevelIndex) {
-      var result = void 0,
+      var result = 0,
           i = void 0,
           level = void 0,
           mWidth = this.mediaWidth,
@@ -1183,6 +2107,9 @@ var CapLevelController = function (_EventHandler) {
 
       for (i = 0; i <= capLevelIndex; i++) {
         level = this.levels[i];
+        if (this.isLevelRestricted(i)) {
+          break;
+        }
         result = i;
         lWidth = level.width;
         lHeight = level.height;
@@ -1191,6 +2118,11 @@ var CapLevelController = function (_EventHandler) {
         }
       }
       return result;
+    }
+  }, {
+    key: 'isLevelRestricted',
+    value: function isLevelRestricted(level) {
+      return this.restrictedLevels && this.restrictedLevels.indexOf(level) !== -1 ? true : false;
     }
   }, {
     key: 'contentScaleFactor',
@@ -1228,7 +2160,7 @@ var CapLevelController = function (_EventHandler) {
 
 exports.default = CapLevelController;
 
-},{"../event-handler":22,"../events":23}],6:[function(require,module,exports){
+},{"../event-handler":25,"../events":26}],8:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1243,7 +2175,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * different half-lives.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
-var _ewma = require('../utils/ewma');
+var _ewma = _dereq_('../utils/ewma');
 
 var _ewma2 = _interopRequireDefault(_ewma);
 
@@ -1297,7 +2229,7 @@ var EwmaBandWidthEstimator = function () {
 
 exports.default = EwmaBandWidthEstimator;
 
-},{"../utils/ewma":37}],7:[function(require,module,exports){
+},{"../utils/ewma":42}],9:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1306,17 +2238,124 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventHandler = require('../event-handler');
+var _eventHandler = _dereq_('../event-handler');
 
 var _eventHandler2 = _interopRequireDefault(_eventHandler);
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
-var _errors = require('../errors');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * FPS Controller
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               */
+
+var FPSController = function (_EventHandler) {
+  _inherits(FPSController, _EventHandler);
+
+  function FPSController(hls) {
+    _classCallCheck(this, FPSController);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(FPSController).call(this, hls, _events2.default.MEDIA_ATTACHING));
+  }
+
+  _createClass(FPSController, [{
+    key: 'destroy',
+    value: function destroy() {
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
+      this.isVideoPlaybackQualityAvailable = false;
+    }
+  }, {
+    key: 'onMediaAttaching',
+    value: function onMediaAttaching(data) {
+      if (this.hls.config.capLevelOnFPSDrop) {
+        this.video = data.media instanceof HTMLVideoElement ? data.media : null;
+        if (typeof this.video.getVideoPlaybackQuality === 'function') {
+          this.isVideoPlaybackQualityAvailable = true;
+        }
+        clearInterval(this.timer);
+        this.timer = setInterval(this.checkFPSInterval.bind(this), this.hls.config.fpsDroppedMonitoringPeriod);
+      }
+    }
+  }, {
+    key: 'checkFPS',
+    value: function checkFPS(video, decodedFrames, droppedFrames) {
+      var currentTime = performance.now();
+      if (decodedFrames) {
+        if (this.lastTime) {
+          var currentPeriod = currentTime - this.lastTime,
+              currentDropped = droppedFrames - this.lastDroppedFrames,
+              currentDecoded = decodedFrames - this.lastDecodedFrames,
+              droppedFPS = 1000 * currentDropped / currentPeriod;
+          this.hls.trigger(_events2.default.FPS_DROP, { currentDropped: currentDropped, currentDecoded: currentDecoded, totalDroppedFrames: droppedFrames });
+          if (droppedFPS > 0) {
+            //logger.log('checkFPS : droppedFPS/decodedFPS:' + droppedFPS/(1000 * currentDecoded / currentPeriod));
+            if (currentDropped > this.hls.config.fpsDroppedMonitoringThreshold * currentDecoded) {
+              var currentLevel = this.hls.currentLevel;
+              _logger.logger.warn('drop FPS ratio greater than max allowed value for currentLevel: ' + currentLevel);
+              if (currentLevel > 0 && (this.hls.autoLevelCapping === -1 || this.hls.autoLevelCapping >= currentLevel)) {
+                currentLevel = currentLevel - 1;
+                this.hls.trigger(_events2.default.FPS_DROP_LEVEL_CAPPING, { level: currentLevel, droppedLevel: this.hls.currentLevel });
+                this.hls.autoLevelCapping = currentLevel;
+                this.hls.streamController.nextLevelSwitch();
+              }
+            }
+          }
+        }
+        this.lastTime = currentTime;
+        this.lastDroppedFrames = droppedFrames;
+        this.lastDecodedFrames = decodedFrames;
+      }
+    }
+  }, {
+    key: 'checkFPSInterval',
+    value: function checkFPSInterval() {
+      if (this.video) {
+        if (this.isVideoPlaybackQualityAvailable) {
+          var videoPlaybackQuality = this.video.getVideoPlaybackQuality();
+          this.checkFPS(this.video, videoPlaybackQuality.totalVideoFrames, videoPlaybackQuality.droppedVideoFrames);
+        } else {
+          this.checkFPS(this.video, this.video.webkitDecodedFrameCount, this.video.webkitDroppedFrameCount);
+        }
+      }
+    }
+  }]);
+
+  return FPSController;
+}(_eventHandler2.default);
+
+exports.default = FPSController;
+
+},{"../event-handler":25,"../events":26,"../utils/logger":43}],10:[function(_dereq_,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _events = _dereq_('../events');
+
+var _events2 = _interopRequireDefault(_events);
+
+var _eventHandler = _dereq_('../event-handler');
+
+var _eventHandler2 = _interopRequireDefault(_eventHandler);
+
+var _logger = _dereq_('../utils/logger');
+
+var _errors = _dereq_('../errors');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1381,7 +2420,7 @@ var LevelController = function (_EventHandler) {
         if (level.videoCodec) {
           videoCodecFound = true;
         }
-        if (level.audioCodec) {
+        if (level.audioCodec || level.attrs && level.attrs.AUDIO) {
           audioCodecFound = true;
         }
         var redundantLevelId = bitrateSet[level.bitrate];
@@ -1436,7 +2475,7 @@ var LevelController = function (_EventHandler) {
             break;
           }
         }
-        hls.trigger(_events2.default.MANIFEST_PARSED, { levels: this._levels, firstLevel: this._firstLevel, stats: data.stats });
+        hls.trigger(_events2.default.MANIFEST_PARSED, { levels: this._levels, firstLevel: this._firstLevel, stats: data.stats, audio: audioCodecFound, video: videoCodecFound });
       } else {
         hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, details: _errors.ErrorDetails.MANIFEST_INCOMPATIBLE_CODECS_ERROR, fatal: true, url: hls.url, reason: 'no level with compatible codecs found in manifest' });
       }
@@ -1456,9 +2495,10 @@ var LevelController = function (_EventHandler) {
         this._level = newLevel;
         _logger.logger.log('switching to level ' + newLevel);
         this.hls.trigger(_events2.default.LEVEL_SWITCH, { level: newLevel });
-        var level = levels[newLevel];
-        // check if we need to load playlist for this level
-        if (level.details === undefined || level.details.live === true) {
+        var level = levels[newLevel],
+            levelDetails = level.details;
+        // check if we need to load playlist for this level. don't reload live playlist more than once per second
+        if (!levelDetails || levelDetails.live === true && performance.now() - levelDetails.tload > 1000) {
           // level not retrieved yet, or live playlist we need to (re)load it
           _logger.logger.log('(re)loading playlist for level ' + newLevel);
           var urlId = level.urlId;
@@ -1492,7 +2532,7 @@ var LevelController = function (_EventHandler) {
           break;
         case _errors.ErrorDetails.LEVEL_LOAD_ERROR:
         case _errors.ErrorDetails.LEVEL_LOAD_TIMEOUT:
-          levelId = data.level;
+          levelId = data.context.level;
           levelError = true;
           break;
         default:
@@ -1545,7 +2585,7 @@ var LevelController = function (_EventHandler) {
         var newDetails = data.details;
         // if current playlist is a live playlist, arm a timer to reload it
         if (newDetails.live) {
-          var reloadInterval = 1000 * newDetails.targetduration,
+          var reloadInterval = 1000 * (newDetails.averagetargetduration ? newDetails.averagetargetduration : newDetails.targetduration),
               curLevel = this._levels[data.level],
               curDetails = curLevel.details;
           if (curDetails && newDetails.endSN === curDetails.endSN) {
@@ -1650,7 +2690,7 @@ var LevelController = function (_EventHandler) {
 
 exports.default = LevelController;
 
-},{"../errors":21,"../event-handler":22,"../events":23,"../utils/logger":38}],8:[function(require,module,exports){
+},{"../errors":24,"../event-handler":25,"../events":26,"../utils/logger":43}],11:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1659,33 +2699,37 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _demuxer = require('../demux/demuxer');
-
-var _demuxer2 = _interopRequireDefault(_demuxer);
-
-var _events = require('../events');
-
-var _events2 = _interopRequireDefault(_events);
-
-var _eventHandler = require('../event-handler');
-
-var _eventHandler2 = _interopRequireDefault(_eventHandler);
-
-var _logger = require('../utils/logger');
-
-var _binarySearch = require('../utils/binary-search');
+var _binarySearch = _dereq_('../utils/binary-search');
 
 var _binarySearch2 = _interopRequireDefault(_binarySearch);
 
-var _bufferHelper = require('../helper/buffer-helper');
+var _bufferHelper = _dereq_('../helper/buffer-helper');
 
 var _bufferHelper2 = _interopRequireDefault(_bufferHelper);
 
-var _levelHelper = require('../helper/level-helper');
+var _demuxer = _dereq_('../demux/demuxer');
+
+var _demuxer2 = _interopRequireDefault(_demuxer);
+
+var _events = _dereq_('../events');
+
+var _events2 = _interopRequireDefault(_events);
+
+var _eventHandler = _dereq_('../event-handler');
+
+var _eventHandler2 = _interopRequireDefault(_eventHandler);
+
+var _levelHelper = _dereq_('../helper/level-helper');
 
 var _levelHelper2 = _interopRequireDefault(_levelHelper);
 
-var _errors = require('../errors');
+var _timeRanges = _dereq_('../utils/timeRanges');
+
+var _timeRanges2 = _interopRequireDefault(_timeRanges);
+
+var _errors = _dereq_('../errors');
+
+var _logger = _dereq_('../utils/logger');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1718,7 +2762,7 @@ var StreamController = function (_EventHandler) {
   function StreamController(hls) {
     _classCallCheck(this, StreamController);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(StreamController).call(this, hls, _events2.default.MEDIA_ATTACHED, _events2.default.MEDIA_DETACHING, _events2.default.MANIFEST_LOADING, _events2.default.MANIFEST_PARSED, _events2.default.LEVEL_LOADED, _events2.default.KEY_LOADED, _events2.default.FRAG_LOADED, _events2.default.FRAG_LOAD_EMERGENCY_ABORTED, _events2.default.FRAG_PARSING_INIT_SEGMENT, _events2.default.FRAG_PARSING_DATA, _events2.default.FRAG_PARSED, _events2.default.ERROR, _events2.default.BUFFER_APPENDED, _events2.default.BUFFER_FLUSHED));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(StreamController).call(this, hls, _events2.default.MEDIA_ATTACHED, _events2.default.MEDIA_DETACHING, _events2.default.MANIFEST_LOADING, _events2.default.MANIFEST_PARSED, _events2.default.LEVEL_LOADED, _events2.default.KEY_LOADED, _events2.default.FRAG_LOADED, _events2.default.FRAG_LOAD_EMERGENCY_ABORTED, _events2.default.FRAG_PARSING_INIT_SEGMENT, _events2.default.FRAG_PARSING_DATA, _events2.default.FRAG_PARSED, _events2.default.ERROR, _events2.default.AUDIO_TRACK_SWITCH, _events2.default.BUFFER_CREATED, _events2.default.BUFFER_APPENDED, _events2.default.BUFFER_FLUSHED));
 
     _this.config = hls.config;
     _this.audioCodecSwap = false;
@@ -1745,7 +2789,7 @@ var StreamController = function (_EventHandler) {
         var media = this.media,
             lastCurrentTime = this.lastCurrentTime;
         this.stopLoad();
-        this.demuxer = new _demuxer2.default(this.hls);
+        this.demuxer = new _demuxer2.default(this.hls, 'main');
         if (!this.timer) {
           this.timer = setInterval(this.ontick, 100);
         }
@@ -1801,21 +2845,9 @@ var StreamController = function (_EventHandler) {
   }, {
     key: 'doTick',
     value: function doTick() {
-      var pos,
-          level,
-          levelDetails,
-          hls = this.hls,
-          config = hls.config,
-          media = this.media,
-          isSeeking = media && media.seeking;
-      //logger.log(this.state);
       switch (this.state) {
-        case State.ERROR:
-        //don't do anything in error state to avoid breaking further ...
-        case State.PAUSED:
-          //don't do anything in paused state either ...
-          break;
         case State.STARTING:
+          var hls = this.hls;
           // determine load level
           var startLevel = hls.startLevel;
           if (startLevel === -1) {
@@ -1830,220 +2862,14 @@ var StreamController = function (_EventHandler) {
           this.loadedmetadata = false;
           break;
         case State.IDLE:
-          // if video not attached AND
-          // start fragment already requested OR start frag prefetch disable
-          // exit loop
-          // => if media not attached but start frag prefetch is enabled and start frag not requested yet, we will not exit loop
-          if (!media && (this.startFragRequested || !config.startFragPrefetch)) {
-            break;
-          }
-          // determine next candidate fragment to be loaded, based on current position and
-          //  end of buffer position
-          //  ensure 60s of buffer upfront
-          // if we have not yet loaded any fragment, start loading from start position
-          if (this.loadedmetadata) {
-            pos = media.currentTime;
-          } else {
-            pos = this.nextLoadPosition;
-          }
-          level = hls.nextLoadLevel;
-          var bufferInfo = _bufferHelper2.default.bufferInfo(media, pos, config.maxBufferHole),
-              bufferLen = bufferInfo.len,
-              bufferEnd = bufferInfo.end,
-              fragPrevious = this.fragPrevious,
-              maxBufLen;
-          // compute max Buffer Length that we could get from this load level, based on level bitrate. don't buffer more than 60 MB and more than 30s
-          if (this.levels[level].hasOwnProperty('bitrate')) {
-            maxBufLen = Math.max(8 * config.maxBufferSize / this.levels[level].bitrate, config.maxBufferLength);
-            maxBufLen = Math.min(maxBufLen, config.maxMaxBufferLength);
-          } else {
-            maxBufLen = config.maxBufferLength;
-          }
-          // if buffer length is less than maxBufLen try to load a new fragment
-          if (bufferLen < maxBufLen) {
-            // set next load level : this will trigger a playlist load if needed
-            hls.nextLoadLevel = level;
-            this.level = level;
-            levelDetails = this.levels[level].details;
-            // if level info not retrieved yet, switch state and wait for level retrieval
-            // if live playlist, ensure that new playlist has been refreshed to avoid loading/try to load
-            // a useless and outdated fragment (that might even introduce load error if it is already out of the live playlist)
-            if (typeof levelDetails === 'undefined' || levelDetails.live && this.levelLastLoaded !== level) {
-              this.state = State.WAITING_LEVEL;
-              break;
-            }
-            // find fragment index, contiguous with end of buffer position
-            var fragments = levelDetails.fragments,
-                fragLen = fragments.length,
-                start = fragments[0].start,
-                end = fragments[fragLen - 1].start + fragments[fragLen - 1].duration,
-                frag = void 0;
-
-            // in case of live playlist we need to ensure that requested position is not located before playlist start
-            if (levelDetails.live) {
-              // check if requested position is within seekable boundaries :
-              //logger.log(`start/pos/bufEnd/seeking:${start.toFixed(3)}/${pos.toFixed(3)}/${bufferEnd.toFixed(3)}/${media.seeking}`);
-              var maxLatency = config.liveMaxLatencyDuration !== undefined ? config.liveMaxLatencyDuration : config.liveMaxLatencyDurationCount * levelDetails.targetduration;
-
-              if (bufferEnd < Math.max(start, end - maxLatency)) {
-                var targetLatency = config.liveSyncDuration !== undefined ? config.liveSyncDuration : config.liveSyncDurationCount * levelDetails.targetduration;
-                var liveSyncPosition = start + Math.max(0, levelDetails.totalduration - targetLatency);
-                _logger.logger.log('buffer end: ' + bufferEnd + ' is located too far from the end of live sliding playlist, reset currentTime to : ' + liveSyncPosition.toFixed(3));
-                bufferEnd = liveSyncPosition;
-                if (media && media.readyState && media.duration > liveSyncPosition) {
-                  media.currentTime = liveSyncPosition;
-                }
-              }
-
-              // if end of buffer greater than live edge, don't load any fragment
-              // this could happen if live playlist intermittently slides in the past.
-              // level 1 loaded [182580161,182580167]
-              // level 1 loaded [182580162,182580169]
-              // Loading 182580168 of [182580162 ,182580169],level 1 ..
-              // Loading 182580169 of [182580162 ,182580169],level 1 ..
-              // level 1 loaded [182580162,182580168] <============= here we should have bufferEnd > end. in that case break to avoid reloading 182580168
-              // level 1 loaded [182580164,182580171]
-              //
-              if (levelDetails.PTSKnown && bufferEnd > end) {
-                break;
-              }
-
-              if (this.startFragRequested && !levelDetails.PTSKnown) {
-                /* we are switching level on live playlist, but we don't have any PTS info for that quality level ...
-                   try to load frag matching with next SN.
-                   even if SN are not synchronized between playlists, loading this frag will help us
-                   compute playlist sliding and find the right one after in case it was not the right consecutive one */
-                if (fragPrevious) {
-                  var targetSN = fragPrevious.sn + 1;
-                  if (targetSN >= levelDetails.startSN && targetSN <= levelDetails.endSN) {
-                    frag = fragments[targetSN - levelDetails.startSN];
-                    _logger.logger.log('live playlist, switching playlist, load frag with next SN: ' + frag.sn);
-                  }
-                }
-                if (!frag) {
-                  /* we have no idea about which fragment should be loaded.
-                     so let's load mid fragment. it will help computing playlist sliding and find the right one
-                  */
-                  frag = fragments[Math.min(fragLen - 1, Math.round(fragLen / 2))];
-                  _logger.logger.log('live playlist, switching playlist, unknown, load middle frag : ' + frag.sn);
-                }
-              }
-            } else {
-              // VoD playlist: if bufferEnd before start of playlist, load first fragment
-              if (bufferEnd < start) {
-                frag = fragments[0];
-              }
-            }
-            if (!frag) {
-              (function () {
-                var maxFragLookUpTolerance = config.maxFragLookUpTolerance;
-                if (bufferEnd < end) {
-                  // no frag look up tolerance in case bufferEnd close to end, or media seeking
-                  if (bufferEnd > end - maxFragLookUpTolerance || isSeeking) {
-                    maxFragLookUpTolerance = 0;
-                  }
-                  frag = _binarySearch2.default.search(fragments, function (candidate) {
-                    // offset should be within fragment boundary - config.maxFragLookUpTolerance
-                    // this is to cope with situations like
-                    // bufferEnd = 9.991
-                    // frag[Ø] : [0,10]
-                    // frag[1] : [10,20]
-                    // bufferEnd is within frag[0] range ... although what we are expecting is to return frag[1] here
-                    //              frag start               frag start+duration
-                    //                  |-----------------------------|
-                    //              <--->                         <--->
-                    //  ...--------><-----------------------------><---------....
-                    // previous frag         matching fragment         next frag
-                    //  return -1             return 0                 return 1
-                    //logger.log(`level/sn/start/end/bufEnd:${level}/${candidate.sn}/${candidate.start}/${(candidate.start+candidate.duration)}/${bufferEnd}`);
-                    if (candidate.start + candidate.duration - maxFragLookUpTolerance <= bufferEnd) {
-                      return 1;
-                    } else if (candidate.start - maxFragLookUpTolerance > bufferEnd) {
-                      return -1;
-                    }
-                    return 0;
-                  });
-                } else {
-                  // reach end of playlist
-                  frag = fragments[fragLen - 1];
-                }
-              })();
-            }
-            if (frag) {
-              start = frag.start;
-              //logger.log('find SN matching with pos:' +  bufferEnd + ':' + frag.sn);
-              if (fragPrevious && frag.level === fragPrevious.level && frag.sn === fragPrevious.sn) {
-                if (frag.sn < levelDetails.endSN) {
-                  var deltaPTS = fragPrevious.deltaPTS,
-                      curSNIdx = frag.sn - levelDetails.startSN;
-                  // if there is a significant delta between audio and video, larger than max allowed hole,
-                  // and if previous remuxed fragment did not start with a keyframe. (fragPrevious.dropped)
-                  // let's try to load previous fragment again to get last keyframe
-                  // then we will reload again current fragment (that way we should be able to fill the buffer hole ...)
-                  if (deltaPTS && deltaPTS > config.maxBufferHole && fragPrevious.dropped) {
-                    frag = fragments[curSNIdx - 1];
-                    _logger.logger.warn('SN just loaded, with large PTS gap between audio and video, maybe frag is not starting with a keyframe ? load previous one to try to overcome this');
-                    // decrement previous frag load counter to avoid frag loop loading error when next fragment will get reloaded
-                    fragPrevious.loadCounter--;
-                  } else {
-                    frag = fragments[curSNIdx + 1];
-                    _logger.logger.log('SN just loaded, load next one: ' + frag.sn);
-                  }
-                  // ensure frag is not undefined
-                  if (!frag) {
-                    break;
-                  }
-                } else {
-                  // have we reached end of VOD playlist ?
-                  if (!levelDetails.live) {
-                    // Finalize the media stream
-                    this.hls.trigger(_events2.default.BUFFER_EOS);
-                    // We might be loading the last fragment but actually the media
-                    // is currently processing a seek command and waiting for new data to resume at another point.
-                    // Going to ended state while media is seeking can spawn an infinite buffering broken state.
-                    if (!isSeeking) {
-                      this.state = State.ENDED;
-                    }
-                  }
-                  break;
-                }
-              }
-              //logger.log('      loading frag ' + i +',pos/bufEnd:' + pos.toFixed(3) + '/' + bufferEnd.toFixed(3));
-              if (frag.decryptdata.uri != null && frag.decryptdata.key == null) {
-                _logger.logger.log('Loading key for ' + frag.sn + ' of [' + levelDetails.startSN + ' ,' + levelDetails.endSN + '],level ' + level);
-                this.state = State.KEY_LOADING;
-                hls.trigger(_events2.default.KEY_LOADING, { frag: frag });
-              } else {
-                _logger.logger.log('Loading ' + frag.sn + ' of [' + levelDetails.startSN + ' ,' + levelDetails.endSN + '],level ' + level + ', currentTime:' + pos + ',bufferEnd:' + bufferEnd.toFixed(3));
-                // ensure that we are not reloading the same fragments in loop ...
-                if (this.fragLoadIdx !== undefined) {
-                  this.fragLoadIdx++;
-                } else {
-                  this.fragLoadIdx = 0;
-                }
-                if (frag.loadCounter) {
-                  frag.loadCounter++;
-                  var maxThreshold = config.fragLoadingLoopThreshold;
-                  // if this frag has already been loaded 3 times, and if it has been reloaded recently
-                  if (frag.loadCounter > maxThreshold && Math.abs(this.fragLoadIdx - frag.loadIdx) < maxThreshold) {
-                    hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, details: _errors.ErrorDetails.FRAG_LOOP_LOADING_ERROR, fatal: false, frag: frag });
-                    return;
-                  }
-                } else {
-                  frag.loadCounter = 1;
-                }
-                frag.loadIdx = this.fragLoadIdx;
-                this.fragCurrent = frag;
-                this.startFragRequested = true;
-                frag.autoLevel = hls.autoLevelEnabled;
-                hls.trigger(_events2.default.FRAG_LOADING, { frag: frag });
-                this.state = State.FRAG_LOADING;
-              }
-            }
+          // when this returns false there was an error and we shall return immediatly
+          // from current tick
+          if (!this._doTickIdle()) {
+            return;
           }
           break;
         case State.WAITING_LEVEL:
-          level = this.levels[this.level];
+          var level = this.levels[this.level];
           // check if playlist is already loaded
           if (level && level.details) {
             this.state = State.IDLE;
@@ -2053,11 +2879,13 @@ var StreamController = function (_EventHandler) {
           var now = performance.now();
           var retryDate = this.retryDate;
           // if current time is gt than retryDate, or if media seeking let's switch to IDLE state to retry loading
-          if (!retryDate || now >= retryDate || isSeeking) {
+          if (!retryDate || now >= retryDate || this.media && this.media.seeking) {
             _logger.logger.log('mediaController: retryDate reached, switch back to IDLE state');
             this.state = State.IDLE;
           }
           break;
+        case State.ERROR:
+        case State.PAUSED:
         case State.STOPPED:
         case State.FRAG_LOADING:
         case State.PARSING:
@@ -2071,6 +2899,315 @@ var StreamController = function (_EventHandler) {
       this._checkBuffer();
       // check/update current fragment
       this._checkFragmentChanged();
+    }
+
+    // Ironically the "idle" state is the on we do the most logic in it seems ....
+    // NOTE: Maybe we could rather schedule a check for buffer length after half of the currently
+    //       played segment, or on pause/play/seek instead of naively checking every 100ms?
+
+  }, {
+    key: '_doTickIdle',
+    value: function _doTickIdle() {
+      var hls = this.hls,
+          config = hls.config,
+          media = this.media;
+
+      // if video not attached AND
+      // start fragment already requested OR start frag prefetch disable
+      // exit loop
+      // => if media not attached but start frag prefetch is enabled and start frag not requested yet, we will not exit loop
+      if (!media && (this.startFragRequested || !config.startFragPrefetch)) {
+        return true;
+      }
+
+      // if we have not yet loaded any fragment, start loading from start position
+      var pos = void 0;
+      if (this.loadedmetadata) {
+        pos = media.currentTime;
+      } else {
+        pos = this.nextLoadPosition;
+      }
+      // determine next load level
+      var level = hls.nextLoadLevel;
+
+      // compute max Buffer Length that we could get from this load level, based on level bitrate. don't buffer more than 60 MB and more than 30s
+      var maxBufLen = void 0;
+      if (this.levels[level].hasOwnProperty('bitrate')) {
+        maxBufLen = Math.max(8 * config.maxBufferSize / this.levels[level].bitrate, config.maxBufferLength);
+        maxBufLen = Math.min(maxBufLen, config.maxMaxBufferLength);
+      } else {
+        maxBufLen = config.maxBufferLength;
+      }
+
+      // determine next candidate fragment to be loaded, based on current position and end of buffer position
+      // ensure up to `config.maxMaxBufferLength` of buffer upfront
+
+      var bufferInfo = _bufferHelper2.default.bufferInfo(this.mediaBuffer ? this.mediaBuffer : media, pos, config.maxBufferHole),
+          bufferLen = bufferInfo.len;
+      // Stay idle if we are still with buffer margins
+      if (bufferLen >= maxBufLen) {
+        return true;
+      }
+
+      // if buffer length is less than maxBufLen try to load a new fragment ...
+      _logger.logger.trace('buffer length of ' + bufferLen.toFixed(3) + ' is below max of ' + maxBufLen.toFixed(3) + '. checking for more payload ...');
+
+      // set next load level : this will trigger a playlist load if needed
+      hls.nextLoadLevel = level;
+      this.level = level;
+
+      var levelDetails = this.levels[level].details;
+      // if level info not retrieved yet, switch state and wait for level retrieval
+      // if live playlist, ensure that new playlist has been refreshed to avoid loading/try to load
+      // a useless and outdated fragment (that might even introduce load error if it is already out of the live playlist)
+      if (typeof levelDetails === 'undefined' || levelDetails.live && this.levelLastLoaded !== level) {
+        this.state = State.WAITING_LEVEL;
+        return true;
+      }
+
+      // we just got done loading the final fragment, check if we need to finalize media stream
+      var fragPrevious = this.fragPrevious;
+      if (!levelDetails.live && fragPrevious && fragPrevious.sn === levelDetails.endSN) {
+        // if we are not seeking or if we are seeking but everything (almost) til the end is buffered, let's signal eos
+        // we don't compare exactly media.duration === bufferInfo.end as there could be some subtle media duration difference when switching
+        // between different renditions. using half frag duration should help cope with these cases.
+        if (!media.seeking || media.duration - bufferInfo.end < fragPrevious.duration / 2) {
+          // Finalize the media stream
+          var data = {};
+          if (this.audioTrackType === 'AUDIO') {
+            data.type = 'video';
+          }
+          this.hls.trigger(_events2.default.BUFFER_EOS, data);
+          this.state = State.ENDED;
+          return true;
+        }
+      }
+
+      // if we have the levelDetails for the selected variant, lets continue enrichen our stream (load keys/fragments or trigger EOS, etc..)
+      return this._fetchPayloadOrEos({ pos: pos, bufferInfo: bufferInfo, levelDetails: levelDetails });
+    }
+  }, {
+    key: '_fetchPayloadOrEos',
+    value: function _fetchPayloadOrEos(_ref) {
+      var pos = _ref.pos;
+      var bufferInfo = _ref.bufferInfo;
+      var levelDetails = _ref.levelDetails;
+
+      var fragPrevious = this.fragPrevious,
+          level = this.level;
+
+      // find fragment index, contiguous with end of buffer position
+      var fragments = levelDetails.fragments,
+          fragLen = fragments.length,
+          start = fragments[0].start,
+          end = fragments[fragLen - 1].start + fragments[fragLen - 1].duration,
+          bufferEnd = bufferInfo.end,
+          frag = void 0;
+
+      // in case of live playlist we need to ensure that requested position is not located before playlist start
+      if (levelDetails.live) {
+        frag = this._ensureFragmentAtLivePoint({ levelDetails: levelDetails, bufferEnd: bufferEnd, start: start, end: end, fragPrevious: fragPrevious, fragments: fragments, fragLen: fragLen });
+        // if it explicitely returns null don't load any fragment and exit function now
+        if (frag === null) {
+          return false;
+        }
+      } else {
+        // VoD playlist: if bufferEnd before start of playlist, load first fragment
+        if (bufferEnd < start) {
+          frag = fragments[0];
+        }
+      }
+      if (!frag) {
+        frag = this._findFragment({ start: start, fragPrevious: fragPrevious, fragLen: fragLen, fragments: fragments, bufferEnd: bufferEnd, end: end, levelDetails: levelDetails });
+      }
+      if (frag) {
+        return this._loadFragmentOrKey({ frag: frag, level: level, levelDetails: levelDetails, pos: pos, bufferEnd: bufferEnd });
+      }
+      return true;
+    }
+  }, {
+    key: '_ensureFragmentAtLivePoint',
+    value: function _ensureFragmentAtLivePoint(_ref2) {
+      var levelDetails = _ref2.levelDetails;
+      var bufferEnd = _ref2.bufferEnd;
+      var start = _ref2.start;
+      var end = _ref2.end;
+      var fragPrevious = _ref2.fragPrevious;
+      var fragments = _ref2.fragments;
+      var fragLen = _ref2.fragLen;
+
+      var config = this.hls.config;
+
+      var frag = void 0;
+
+      // check if requested position is within seekable boundaries :
+      //logger.log(`start/pos/bufEnd/seeking:${start.toFixed(3)}/${pos.toFixed(3)}/${bufferEnd.toFixed(3)}/${this.media.seeking}`);
+      var maxLatency = config.liveMaxLatencyDuration !== undefined ? config.liveMaxLatencyDuration : config.liveMaxLatencyDurationCount * levelDetails.targetduration;
+
+      if (bufferEnd < Math.max(start, end - maxLatency)) {
+        var liveSyncPosition = this.liveSyncPosition = this.computeLivePosition(start, levelDetails);
+        _logger.logger.log('buffer end: ' + bufferEnd + ' is located too far from the end of live sliding playlist, reset currentTime to : ' + liveSyncPosition.toFixed(3));
+        bufferEnd = liveSyncPosition;
+        var media = this.media;
+        if (media && media.readyState && media.duration > liveSyncPosition) {
+          media.currentTime = liveSyncPosition;
+        }
+      }
+
+      // if end of buffer greater than live edge, don't load any fragment
+      // this could happen if live playlist intermittently slides in the past.
+      // level 1 loaded [182580161,182580167]
+      // level 1 loaded [182580162,182580169]
+      // Loading 182580168 of [182580162 ,182580169],level 1 ..
+      // Loading 182580169 of [182580162 ,182580169],level 1 ..
+      // level 1 loaded [182580162,182580168] <============= here we should have bufferEnd > end. in that case break to avoid reloading 182580168
+      // level 1 loaded [182580164,182580171]
+      //
+      if (levelDetails.PTSKnown && bufferEnd > end) {
+        return null;
+      }
+
+      if (this.startFragRequested && !levelDetails.PTSKnown) {
+        /* we are switching level on live playlist, but we don't have any PTS info for that quality level ...
+           try to load frag matching with next SN.
+           even if SN are not synchronized between playlists, loading this frag will help us
+           compute playlist sliding and find the right one after in case it was not the right consecutive one */
+        if (fragPrevious) {
+          var targetSN = fragPrevious.sn + 1;
+          if (targetSN >= levelDetails.startSN && targetSN <= levelDetails.endSN) {
+            frag = fragments[targetSN - levelDetails.startSN];
+            _logger.logger.log('live playlist, switching playlist, load frag with next SN: ' + frag.sn);
+          }
+        }
+        if (!frag) {
+          /* we have no idea about which fragment should be loaded.
+             so let's load mid fragment. it will help computing playlist sliding and find the right one
+          */
+          frag = fragments[Math.min(fragLen - 1, Math.round(fragLen / 2))];
+          _logger.logger.log('live playlist, switching playlist, unknown, load middle frag : ' + frag.sn);
+        }
+      }
+      return frag;
+    }
+  }, {
+    key: '_findFragment',
+    value: function _findFragment(_ref3) {
+      var start = _ref3.start;
+      var fragPrevious = _ref3.fragPrevious;
+      var fragLen = _ref3.fragLen;
+      var fragments = _ref3.fragments;
+      var bufferEnd = _ref3.bufferEnd;
+      var end = _ref3.end;
+      var levelDetails = _ref3.levelDetails;
+
+      var config = this.hls.config;
+
+      var frag = void 0,
+          foundFrag = void 0,
+          maxFragLookUpTolerance = config.maxFragLookUpTolerance;
+
+      if (bufferEnd < end) {
+        if (bufferEnd > end - maxFragLookUpTolerance) {
+          maxFragLookUpTolerance = 0;
+        }
+        foundFrag = _binarySearch2.default.search(fragments, function (candidate) {
+          // offset should be within fragment boundary - config.maxFragLookUpTolerance
+          // this is to cope with situations like
+          // bufferEnd = 9.991
+          // frag[Ø] : [0,10]
+          // frag[1] : [10,20]
+          // bufferEnd is within frag[0] range ... although what we are expecting is to return frag[1] here
+          //              frag start               frag start+duration
+          //                  |-----------------------------|
+          //              <--->                         <--->
+          //  ...--------><-----------------------------><---------....
+          // previous frag         matching fragment         next frag
+          //  return -1             return 0                 return 1
+          //logger.log(`level/sn/start/end/bufEnd:${level}/${candidate.sn}/${candidate.start}/${(candidate.start+candidate.duration)}/${bufferEnd}`);
+          if (candidate.start + candidate.duration - maxFragLookUpTolerance <= bufferEnd) {
+            return 1;
+          } // if maxFragLookUpTolerance will have negative value then don't return -1 for first element
+          else if (candidate.start - maxFragLookUpTolerance > bufferEnd && candidate.start) {
+              return -1;
+            }
+          return 0;
+        });
+      } else {
+        // reach end of playlist
+        foundFrag = fragments[fragLen - 1];
+      }
+      if (foundFrag) {
+        frag = foundFrag;
+        start = foundFrag.start;
+        //logger.log('find SN matching with pos:' +  bufferEnd + ':' + frag.sn);
+        if (fragPrevious && frag.level === fragPrevious.level && frag.sn === fragPrevious.sn) {
+          if (frag.sn < levelDetails.endSN) {
+            var deltaPTS = fragPrevious.deltaPTS,
+                curSNIdx = frag.sn - levelDetails.startSN;
+            // if there is a significant delta between audio and video, larger than max allowed hole,
+            // and if previous remuxed fragment did not start with a keyframe. (fragPrevious.dropped)
+            // let's try to load previous fragment again to get last keyframe
+            // then we will reload again current fragment (that way we should be able to fill the buffer hole ...)
+            if (deltaPTS && deltaPTS > config.maxBufferHole && fragPrevious.dropped && curSNIdx) {
+              frag = fragments[curSNIdx - 1];
+              _logger.logger.warn('SN just loaded, with large PTS gap between audio and video, maybe frag is not starting with a keyframe ? load previous one to try to overcome this');
+              // decrement previous frag load counter to avoid frag loop loading error when next fragment will get reloaded
+              fragPrevious.loadCounter--;
+            } else {
+              frag = fragments[curSNIdx + 1];
+              _logger.logger.log('SN just loaded, load next one: ' + frag.sn);
+            }
+          } else {
+            frag = null;
+          }
+        }
+      }
+      return frag;
+    }
+  }, {
+    key: '_loadFragmentOrKey',
+    value: function _loadFragmentOrKey(_ref4) {
+      var frag = _ref4.frag;
+      var level = _ref4.level;
+      var levelDetails = _ref4.levelDetails;
+      var pos = _ref4.pos;
+      var bufferEnd = _ref4.bufferEnd;
+
+      var hls = this.hls,
+          config = hls.config;
+
+      //logger.log('loading frag ' + i +',pos/bufEnd:' + pos.toFixed(3) + '/' + bufferEnd.toFixed(3));
+      if (frag.decryptdata.uri != null && frag.decryptdata.key == null) {
+        _logger.logger.log('Loading key for ' + frag.sn + ' of [' + levelDetails.startSN + ' ,' + levelDetails.endSN + '],level ' + level);
+        this.state = State.KEY_LOADING;
+        hls.trigger(_events2.default.KEY_LOADING, { frag: frag });
+      } else {
+        _logger.logger.log('Loading ' + frag.sn + ' of [' + levelDetails.startSN + ' ,' + levelDetails.endSN + '],level ' + level + ', currentTime:' + pos + ',bufferEnd:' + bufferEnd.toFixed(3));
+        // ensure that we are not reloading the same fragments in loop ...
+        if (this.fragLoadIdx !== undefined) {
+          this.fragLoadIdx++;
+        } else {
+          this.fragLoadIdx = 0;
+        }
+        if (frag.loadCounter) {
+          frag.loadCounter++;
+          var maxThreshold = config.fragLoadingLoopThreshold;
+          // if this frag has already been loaded 3 times, and if it has been reloaded recently
+          if (frag.loadCounter > maxThreshold && Math.abs(this.fragLoadIdx - frag.loadIdx) < maxThreshold) {
+            hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, details: _errors.ErrorDetails.FRAG_LOOP_LOADING_ERROR, fatal: false, frag: frag });
+            return false;
+          }
+        } else {
+          frag.loadCounter = 1;
+        }
+        frag.loadIdx = this.fragLoadIdx;
+        frag.autoLevel = hls.autoLevelEnabled;
+        this.fragCurrent = frag;
+        this.startFragRequested = true;
+        hls.trigger(_events2.default.FRAG_LOADING, { frag: frag });
+        this.state = State.FRAG_LOADING;
+        return true;
+      }
     }
   }, {
     key: 'getBufferRange',
@@ -2177,8 +3314,6 @@ var StreamController = function (_EventHandler) {
         fragCurrent.loader.abort();
       }
       this.fragCurrent = null;
-      // increase fragment load Index to avoid frag loop loading error after buffer flush
-      this.fragLoadIdx += 2 * this.config.fragLoadingLoopThreshold;
       this.state = State.PAUSED;
       // flush everything
       this.hls.trigger(_events2.default.BUFFER_FLUSHING, { startOffset: 0, endOffset: Number.POSITIVE_INFINITY });
@@ -2186,17 +3321,20 @@ var StreamController = function (_EventHandler) {
 
     /*
        on immediate level switch end, after new fragment has been buffered :
-        - nudge video decoder by slightly adjusting video currentTime
+        - nudge video decoder by slightly adjusting video currentTime (if currentTime buffered)
         - resume the playback if needed
     */
 
   }, {
     key: 'immediateLevelSwitchEnd',
     value: function immediateLevelSwitchEnd() {
-      this.immediateSwitch = false;
       var media = this.media;
-      if (media && media.readyState) {
-        media.currentTime -= 0.0001;
+      if (media && media.buffered.length) {
+        this.immediateSwitch = false;
+        if (this.isBuffered(media.currentTime)) {
+          // only nudge if currentTime is buffered
+          media.currentTime -= 0.0001;
+        }
         if (!this.previouslyPaused) {
           media.play();
         }
@@ -2261,7 +3399,7 @@ var StreamController = function (_EventHandler) {
   }, {
     key: 'onMediaAttached',
     value: function onMediaAttached(data) {
-      var media = this.media = data.media;
+      var media = this.media = this.mediaBuffer = data.media;
       this.onvseeking = this.onMediaSeeking.bind(this);
       this.onvseeked = this.onMediaSeeked.bind(this);
       this.onvended = this.onMediaEnded.bind(this);
@@ -2308,31 +3446,40 @@ var StreamController = function (_EventHandler) {
   }, {
     key: 'onMediaSeeking',
     value: function onMediaSeeking() {
+      var media = this.media,
+          currentTime = media ? media.currentTime : undefined;
+      _logger.logger.log('media seeking to ' + currentTime);
       if (this.state === State.FRAG_LOADING) {
-        // check if currently loaded fragment is inside buffer.
-        //if outside, cancel fragment loading, otherwise do nothing
-        if (_bufferHelper2.default.bufferInfo(this.media, this.media.currentTime, this.config.maxBufferHole).len === 0) {
-          _logger.logger.log('seeking outside of buffer while fragment load in progress, cancel fragment load');
-          var fragCurrent = this.fragCurrent;
-          if (fragCurrent) {
+        var bufferInfo = _bufferHelper2.default.bufferInfo(media, currentTime, this.config.maxBufferHole),
+            fragCurrent = this.fragCurrent;
+        // check if we are seeking to a unbuffered area AND if frag loading is in progress
+        if (bufferInfo.len === 0 && fragCurrent) {
+          var tolerance = this.config.maxFragLookUpTolerance,
+              fragStartOffset = fragCurrent.start - tolerance,
+              fragEndOffset = fragCurrent.start + fragCurrent.duration + tolerance;
+          // check if we seek position will be out of currently loaded frag range : if out cancel frag load, if in, don't do anything
+          if (currentTime < fragStartOffset || currentTime > fragEndOffset) {
             if (fragCurrent.loader) {
+              _logger.logger.log('seeking outside of buffer while fragment load in progress, cancel fragment load');
               fragCurrent.loader.abort();
             }
             this.fragCurrent = null;
+            this.fragPrevious = null;
+            // switch to IDLE state to load new fragment
+            this.state = State.IDLE;
+          } else {
+            _logger.logger.log('seeking outside of buffer but within currently loaded fragment range');
           }
-          this.fragPrevious = null;
-          // switch to IDLE state to load new fragment
-          this.state = State.IDLE;
         }
       } else if (this.state === State.ENDED) {
         // switch to IDLE state to check for potential new fragment
         this.state = State.IDLE;
       }
-      if (this.media) {
-        this.lastCurrentTime = this.media.currentTime;
+      if (media) {
+        this.lastCurrentTime = currentTime;
       }
       // avoid reporting fragment loop loading error in case user is seeking several times on same position
-      if (this.fragLoadIdx !== undefined) {
+      if (this.state !== State.FRAG_LOADING && this.fragLoadIdx !== undefined) {
         this.fragLoadIdx += 2 * this.config.fragLoadingLoopThreshold;
       }
       // tick to speed up processing
@@ -2341,6 +3488,7 @@ var StreamController = function (_EventHandler) {
   }, {
     key: 'onMediaSeeked',
     value: function onMediaSeeked() {
+      _logger.logger.log('media seeked to ' + this.media.currentTime);
       // tick to speed up FRAGMENT_PLAYING triggering
       this.tick();
     }
@@ -2359,6 +3507,7 @@ var StreamController = function (_EventHandler) {
       this.hls.trigger(_events2.default.BUFFER_RESET);
       this.bufferRange = [];
       this.stalled = false;
+      this.startPosition = this.lastCurrentTime = 0;
     }
   }, {
     key: 'onManifestParsed',
@@ -2408,6 +3557,7 @@ var StreamController = function (_EventHandler) {
           // we already have details for that level, merge them
           _levelHelper2.default.mergeDetails(curDetails, newDetails);
           sliding = newDetails.fragments[0].start;
+          this.liveSyncPosition = this.computeLivePosition(sliding, curDetails);
           if (newDetails.PTSKnown) {
             _logger.logger.log('live playlist sliding:' + sliding.toFixed(3));
           } else {
@@ -2430,13 +3580,17 @@ var StreamController = function (_EventHandler) {
           // first, check if start time offset has been set in playlist, if yes, use this value
           var startTimeOffset = newDetails.startTimeOffset;
           if (!isNaN(startTimeOffset)) {
+            if (startTimeOffset < 0) {
+              _logger.logger.log('negative start time offset ' + startTimeOffset + ', count from end of last fragment');
+              startTimeOffset = sliding + duration + startTimeOffset;
+            }
             _logger.logger.log('start time offset found in playlist, adjust startPosition to ' + startTimeOffset);
             this.startPosition = startTimeOffset;
           } else {
             // if live playlist, set start position to be fragment N-this.config.liveSyncDurationCount (usually 3)
             if (newDetails.live) {
-              var targetLatency = this.config.liveSyncDuration !== undefined ? this.config.liveSyncDuration : this.config.liveSyncDurationCount * newDetails.targetduration;
-              this.startPosition = Math.max(0, sliding + duration - targetLatency);
+              this.startPosition = this.computeLivePosition(sliding, newDetails);
+              _logger.logger.log('configure startPosition to ' + this.startPosition);
             } else {
               this.startPosition = 0;
             }
@@ -2463,8 +3617,7 @@ var StreamController = function (_EventHandler) {
     key: 'onFragLoaded',
     value: function onFragLoaded(data) {
       var fragCurrent = this.fragCurrent;
-      if (this.state === State.FRAG_LOADING && fragCurrent && data.frag.level === fragCurrent.level && data.frag.sn === fragCurrent.sn) {
-
+      if (this.state === State.FRAG_LOADING && fragCurrent && data.frag.type === 'main' && data.frag.level === fragCurrent.level && data.frag.sn === fragCurrent.sn) {
         _logger.logger.log('Loaded  ' + fragCurrent.sn + ' of level ' + fragCurrent.level);
         if (this.fragBitrateTest === true) {
           // switch back to IDLE state ... we just loaded a fragment to determine adequate start bitrate and initialize autoswitch algo
@@ -2472,7 +3625,7 @@ var StreamController = function (_EventHandler) {
           this.fragBitrateTest = false;
           this.startFragRequested = false;
           data.stats.tparsed = data.stats.tbuffered = performance.now();
-          this.hls.trigger(_events2.default.FRAG_BUFFERED, { stats: data.stats, frag: fragCurrent });
+          this.hls.trigger(_events2.default.FRAG_BUFFERED, { stats: data.stats, frag: fragCurrent, id: 'main' });
         } else {
           this.state = State.PARSING;
           // transmux the MPEG-TS data to ISO-BMFF segments
@@ -2480,10 +3633,10 @@ var StreamController = function (_EventHandler) {
           var currentLevel = this.levels[this.level],
               details = currentLevel.details,
               duration = details.totalduration,
-              start = fragCurrent.startDTS !== undefined && !isNaN(fragCurrent.startDTS) ? fragCurrent.startDTS : fragCurrent.start,
+              start = fragCurrent.startDTS !== undefined ? fragCurrent.startDTS : fragCurrent.start,
               level = fragCurrent.level,
               sn = fragCurrent.sn,
-              audioCodec = currentLevel.audioCodec || this.config.defaultAudioCodec;
+              audioCodec = this.config.defaultAudioCodec || currentLevel.audioCodec;
           if (this.audioCodecSwap) {
             _logger.logger.log('swapping playlist audio codec');
             if (audioCodec === undefined) {
@@ -2500,9 +3653,10 @@ var StreamController = function (_EventHandler) {
           this.pendingAppending = 0;
           _logger.logger.log('Demuxing ' + sn + ' of [' + details.startSN + ' ,' + details.endSN + '],level ' + level + ', cc ' + fragCurrent.cc);
           var demuxer = this.demuxer;
-          if (demuxer) {
-            demuxer.push(data.payload, audioCodec, currentLevel.videoCodec, start, fragCurrent.cc, level, sn, duration, fragCurrent.decryptdata);
+          if (!demuxer) {
+            demuxer = this.demuxer = new _demuxer2.default(this.hls, 'main');
           }
+          demuxer.push(data.payload, audioCodec, currentLevel.videoCodec, start, fragCurrent.cc, level, sn, duration, fragCurrent.decryptdata);
         }
       }
       this.fragLoadError = 0;
@@ -2510,11 +3664,16 @@ var StreamController = function (_EventHandler) {
   }, {
     key: 'onFragParsingInitSegment',
     value: function onFragParsingInitSegment(data) {
-      if (this.state === State.PARSING) {
+      var fragCurrent = this.fragCurrent;
+      if (fragCurrent && data.id === 'main' && data.sn === fragCurrent.sn && data.level === fragCurrent.level && this.state === State.PARSING) {
         var tracks = data.tracks,
             trackName,
             track;
 
+        // if audio track is expected to come from audio stream controller, discard any coming from main
+        if (tracks.audio && this.audioTrackType === 'AUDIO') {
+          delete tracks.audio;
+        }
         // include levelCodec in audio and video tracks
         track = tracks.audio;
         if (track) {
@@ -2546,10 +3705,12 @@ var StreamController = function (_EventHandler) {
             _logger.logger.log('Android: force audio codec to' + audioCodec);
           }
           track.levelCodec = audioCodec;
+          track.id = data.id;
         }
         track = tracks.video;
         if (track) {
           track.levelCodec = this.levels[this.level].videoCodec;
+          track.id = data.id;
         }
 
         // if remuxer specify that a unique track needs to generated,
@@ -2579,11 +3740,11 @@ var StreamController = function (_EventHandler) {
         // loop through tracks that are going to be provided to bufferController
         for (trackName in tracks) {
           track = tracks[trackName];
-          _logger.logger.log('track:' + trackName + ',container:' + track.container + ',codecs[level/parsed]=[' + track.levelCodec + '/' + track.codec + ']');
+          _logger.logger.log('main track:' + trackName + ',container:' + track.container + ',codecs[level/parsed]=[' + track.levelCodec + '/' + track.codec + ']');
           var initSegment = track.initSegment;
           if (initSegment) {
             this.pendingAppending++;
-            this.hls.trigger(_events2.default.BUFFER_APPENDING, { type: trackName, data: initSegment });
+            this.hls.trigger(_events2.default.BUFFER_APPENDING, { type: trackName, data: initSegment, parent: 'main', content: 'initSegment' });
           }
         }
         //trigger handler right now
@@ -2595,8 +3756,9 @@ var StreamController = function (_EventHandler) {
     value: function onFragParsingData(data) {
       var _this2 = this;
 
-      if (this.state === State.PARSING) {
-        this.tparse2 = Date.now();
+      var fragCurrent = this.fragCurrent;
+      if (fragCurrent && data.id === 'main' && data.sn === fragCurrent.sn && data.level === fragCurrent.level && (data.type !== 'audio' || this.audioTrackType !== 'AUDIO') && // filter out main audio if audio track is loaded through audio stream controller
+      this.state === State.PARSING) {
         var level = this.levels[this.level],
             frag = this.fragCurrent;
 
@@ -2614,7 +3776,7 @@ var StreamController = function (_EventHandler) {
         [data.data1, data.data2].forEach(function (buffer) {
           if (buffer) {
             _this2.pendingAppending++;
-            hls.trigger(_events2.default.BUFFER_APPENDING, { type: data.type, data: buffer });
+            hls.trigger(_events2.default.BUFFER_APPENDING, { type: data.type, data: buffer, parent: 'main', content: 'data' });
           }
         });
 
@@ -2623,30 +3785,92 @@ var StreamController = function (_EventHandler) {
 
         //trigger handler right now
         this.tick();
-      } else {
-        _logger.logger.warn('not in PARSING state but ' + this.state + ', ignoring FRAG_PARSING_DATA event');
       }
     }
   }, {
     key: 'onFragParsed',
-    value: function onFragParsed() {
-      if (this.state === State.PARSING) {
+    value: function onFragParsed(data) {
+      var fragCurrent = this.fragCurrent;
+      if (fragCurrent && data.id === 'main' && data.sn === fragCurrent.sn && data.level === fragCurrent.level && this.state === State.PARSING) {
         this.stats.tparsed = performance.now();
         this.state = State.PARSED;
         this._checkAppendedParsed();
       }
     }
   }, {
+    key: 'onAudioTrackSwitch',
+    value: function onAudioTrackSwitch(data) {
+      var audioTrackType = data.type;
+      // if we switch on main audio, ensure that main fragment scheduling is synced with media.buffered
+      if (audioTrackType === 'main') {
+        if (this.mediaBuffer !== this.media) {
+          _logger.logger.log('switching on main audio, use media.buffered to schedule main fragment loading');
+          this.mediaBuffer = this.media;
+          var fragCurrent = this.fragCurrent;
+          // we need to refill audio buffer from main: cancel any frag loading to speed up audio switch
+          if (fragCurrent.loader) {
+            _logger.logger.log('switching to main audio track, cancel main fragment load');
+            fragCurrent.loader.abort();
+          }
+          this.fragCurrent = null;
+          this.fragPrevious = null;
+          // destroy demuxer to force init segment generation (following audio switch)
+          if (this.demuxer) {
+            this.demuxer.destroy();
+            this.demuxer = null;
+          }
+          // switch to IDLE state to load new fragment
+          this.state = State.IDLE;
+        }
+      } else {
+        // if we switch on alternate audio, ensure that main fragment scheduling is synced with video sourcebuffer buffered
+        if (this.videoBuffer && this.mediaBuffer !== this.videoBuffer) {
+          _logger.logger.log('switching on alternate audio, use video.buffered to schedule main fragment loading');
+          this.mediaBuffer = this.videoBuffer;
+        }
+      }
+      this.audioTrackType = audioTrackType;
+    }
+  }, {
+    key: 'onBufferCreated',
+    value: function onBufferCreated(data) {
+      var tracks = data.tracks,
+          mediaTrack = void 0,
+          name = void 0,
+          alternate = false;
+      for (var type in tracks) {
+        var track = tracks[type];
+        if (track.id === 'main') {
+          name = type;
+          mediaTrack = track;
+          // keep video source buffer reference
+          if (type === 'video') {
+            this.videoBuffer = tracks[type].buffer;
+          }
+        } else {
+          alternate = true;
+        }
+      }
+      if (alternate && mediaTrack) {
+        _logger.logger.log('alternate track found, use ' + name + '.buffered to schedule main fragment loading');
+        this.mediaBuffer = mediaTrack.buffer;
+      } else {
+        this.mediaBuffer = this.media;
+      }
+    }
+  }, {
     key: 'onBufferAppended',
-    value: function onBufferAppended() {
-      switch (this.state) {
-        case State.PARSING:
-        case State.PARSED:
-          this.pendingAppending--;
-          this._checkAppendedParsed();
-          break;
-        default:
-          break;
+    value: function onBufferAppended(data) {
+      if (data.parent === 'main') {
+        switch (this.state) {
+          case State.PARSING:
+          case State.PARSED:
+            this.pendingAppending--;
+            this._checkAppendedParsed();
+            break;
+          default:
+            break;
+        }
       }
     }
   }, {
@@ -2659,9 +3883,11 @@ var StreamController = function (_EventHandler) {
         if (frag) {
           this.fragPrevious = frag;
           stats.tbuffered = performance.now();
-          this.fragLastKbps = Math.round(8 * stats.length / (stats.tbuffered - stats.tfirst));
-          this.hls.trigger(_events2.default.FRAG_BUFFERED, { stats: stats, frag: frag });
-          _logger.logger.log('media buffered : ' + this.timeRangesToString(this.media.buffered));
+          // we should get rid of this.fragLastKbps
+          this.fragLastKbps = Math.round(8 * stats.total / (stats.tbuffered - stats.tfirst));
+          this.hls.trigger(_events2.default.FRAG_BUFFERED, { stats: stats, frag: frag, id: 'main' });
+          var media = this.mediaBuffer ? this.mediaBuffer : this.media;
+          _logger.logger.log('main buffered : ' + _timeRanges2.default.toString(media.buffered));
           this.state = State.IDLE;
         }
         this.tick();
@@ -2670,6 +3896,11 @@ var StreamController = function (_EventHandler) {
   }, {
     key: 'onError',
     value: function onError(data) {
+      var frag = data.frag;
+      // don't handle frag error not related to main fragment
+      if (frag && frag.type !== 'main') {
+        return;
+      }
       switch (data.details) {
         case _errors.ErrorDetails.FRAG_LOAD_ERROR:
         case _errors.ErrorDetails.FRAG_LOAD_TIMEOUT:
@@ -2680,10 +3911,12 @@ var StreamController = function (_EventHandler) {
             } else {
               loadError = 1;
             }
-            if (loadError <= this.config.fragLoadingMaxRetry) {
+            if (loadError <= this.config.fragLoadingMaxRetry ||
+            // keep retrying / don't raise fatal network error if current position is buffered
+            this.media && this.isBuffered(this.media.currentTime)) {
               this.fragLoadError = loadError;
               // reset load counter to avoid frag loop loading error
-              data.frag.loadCounter = 0;
+              frag.loadCounter = 0;
               // exponential backoff capped to 64s
               var delay = Math.min(Math.pow(2, loadError - 1) * this.config.fragLoadingRetryDelay, 64000);
               _logger.logger.warn('mediaController: frag loading failed, retry in ' + delay + ' ms');
@@ -2737,24 +3970,23 @@ var StreamController = function (_EventHandler) {
         // adjust currentTime to start position on loaded metadata
         if (!this.loadedmetadata && buffered.length) {
           this.loadedmetadata = true;
-          // only adjust currentTime if startPosition not equal to 0
-          var startPosition = this.startPosition;
-          // if currentTime === 0 AND not matching with expected startPosition
-          if (!currentTime && currentTime !== startPosition) {
-            if (startPosition) {
-              _logger.logger.log('target start position:' + startPosition);
-              // at that stage, there should be only one buffered range, as we reach that code after first fragment has been
-              var bufferStart = buffered.start(0),
-                  bufferEnd = buffered.end(0);
-              // if startPosition not buffered, let's seek to buffered.start(0)
-              if (startPosition < bufferStart || startPosition > bufferEnd) {
-                startPosition = bufferStart;
-                _logger.logger.log('target start position not buffered, seek to buffered.start(0) ' + bufferStart);
-              }
-              _logger.logger.log('adjust currentTime from ' + currentTime + ' to ' + startPosition);
-              media.currentTime = startPosition;
+          // only adjust currentTime if different from startPosition or if startPosition not buffered
+          // at that stage, there should be only one buffered range, as we reach that code after first fragment has been buffered
+          var startPosition = this.startPosition,
+              startPositionBuffered = this.isBuffered(startPosition);
+          // if currentTime not matching with expected startPosition or startPosition not buffered
+          if (currentTime !== startPosition || !startPositionBuffered) {
+            _logger.logger.log('target start position:' + startPosition);
+            // if startPosition not buffered, let's seek to buffered.start(0)
+            if (!startPositionBuffered) {
+              startPosition = buffered.start(0);
+              _logger.logger.log('target start position not buffered, seek to buffered.start(0) ' + startPosition);
             }
+            _logger.logger.log('adjust currentTime from ' + currentTime + ' to ' + startPosition);
+            media.currentTime = startPosition;
           }
+        } else if (this.immediateSwitch) {
+          this.immediateLevelSwitchEnd();
         } else {
           var bufferInfo = _bufferHelper2.default.bufferInfo(media, currentTime, 0),
               expectedPlaying = !(media.paused || // not playing when media is paused
@@ -2829,10 +4061,8 @@ var StreamController = function (_EventHandler) {
       }
       this.bufferRange = newRange;
 
-      // handle end of immediate switching if needed
-      if (this.immediateSwitch) {
-        this.immediateLevelSwitchEnd();
-      }
+      // increase fragment load Index to avoid frag loop loading error after buffer flush
+      this.fragLoadIdx += 2 * this.config.fragLoadingLoopThreshold;
       // move to IDLE once flush complete. this should trigger new fragment loading
       this.state = State.IDLE;
       // reset reference to frag
@@ -2844,14 +4074,23 @@ var StreamController = function (_EventHandler) {
       this.audioCodecSwap = !this.audioCodecSwap;
     }
   }, {
-    key: 'timeRangesToString',
-    value: function timeRangesToString(r) {
-      var log = '',
-          len = r.length;
-      for (var i = 0; i < len; i++) {
-        log += '[' + r.start(i) + ',' + r.end(i) + ']';
+    key: 'computeLivePosition',
+    value: function computeLivePosition(sliding, levelDetails) {
+      var targetLatency = this.config.liveSyncDuration !== undefined ? this.config.liveSyncDuration : this.config.liveSyncDurationCount * levelDetails.targetduration;
+      return sliding + Math.max(0, levelDetails.totalduration - targetLatency);
+    }
+  }, {
+    key: 'state',
+    set: function set(nextState) {
+      if (this.state !== nextState) {
+        var previousState = this.state;
+        this._state = nextState;
+        _logger.logger.log('engine state transition from ' + previousState + ' to ' + nextState);
+        this.hls.trigger(_events2.default.STREAM_STATE_TRANSITION, { previousState: previousState, nextState: nextState });
       }
-      return log;
+    },
+    get: function get() {
+      return this._state;
     }
   }, {
     key: 'currentLevel',
@@ -2884,6 +4123,14 @@ var StreamController = function (_EventHandler) {
         return -1;
       }
     }
+  }, {
+    key: 'liveSyncPosition',
+    get: function get() {
+      return this._liveSyncPosition;
+    },
+    set: function set(value) {
+      this._liveSyncPosition = value;
+    }
   }]);
 
   return StreamController;
@@ -2891,7 +4138,7 @@ var StreamController = function (_EventHandler) {
 
 exports.default = StreamController;
 
-},{"../demux/demuxer":17,"../errors":21,"../event-handler":22,"../events":23,"../helper/buffer-helper":24,"../helper/level-helper":25,"../utils/binary-search":35,"../utils/logger":38}],9:[function(require,module,exports){
+},{"../demux/demuxer":20,"../errors":24,"../event-handler":25,"../events":26,"../helper/buffer-helper":28,"../helper/level-helper":29,"../utils/binary-search":39,"../utils/logger":43,"../utils/timeRanges":45}],12:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2900,17 +4147,17 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventHandler = require('../event-handler');
+var _eventHandler = _dereq_('../event-handler');
 
 var _eventHandler2 = _interopRequireDefault(_eventHandler);
 
-var _cea708Interpreter = require('../utils/cea-708-interpreter');
+var _cea608Parser = _dereq_('../utils/cea-608-parser');
 
-var _cea708Interpreter2 = _interopRequireDefault(_cea708Interpreter);
+var _cea608Parser2 = _interopRequireDefault(_cea608Parser);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2928,18 +4175,59 @@ var TimelineController = function (_EventHandler) {
   function TimelineController(hls) {
     _classCallCheck(this, TimelineController);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TimelineController).call(this, hls, _events2.default.MEDIA_ATTACHING, _events2.default.MEDIA_DETACHING, _events2.default.FRAG_PARSING_USERDATA, _events2.default.MANIFEST_LOADING, _events2.default.FRAG_LOADED));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TimelineController).call(this, hls, _events2.default.MEDIA_ATTACHING, _events2.default.MEDIA_DETACHING, _events2.default.FRAG_PARSING_USERDATA, _events2.default.MANIFEST_LOADING, _events2.default.FRAG_LOADED, _events2.default.LEVEL_SWITCH));
 
     _this.hls = hls;
     _this.config = hls.config;
+    _this.enabled = true;
+    _this.Cues = hls.config.cueHandler;
 
     if (_this.config.enableCEA708Captions) {
-      _this.cea708Interpreter = new _cea708Interpreter2.default();
+      var self = _this;
+
+      var channel1 = {
+        'newCue': function newCue(startTime, endTime, screen) {
+          if (!self.textTrack1) {
+            self.textTrack1 = self.createTextTrack('captions', 'Unknown CC1', 'en');
+            //            self.textTrack1.mode = 'showing';
+          }
+
+          self.Cues.newCue(self.textTrack1, startTime, endTime, screen);
+        }
+      };
+
+      var channel2 = {
+        'newCue': function newCue(startTime, endTime, screen) {
+          if (!self.textTrack2) {
+            self.textTrack2 = self.createTextTrack('captions', 'Unknown CC2', 'es');
+          }
+
+          self.Cues.newCue(self.textTrack2, startTime, endTime, screen);
+        }
+      };
+
+      _this.cea608Parser = new _cea608Parser2.default(0, channel1, channel2);
     }
     return _this;
   }
 
   _createClass(TimelineController, [{
+    key: 'clearCurrentCues',
+    value: function clearCurrentCues(track) {
+      if (track && track.cues) {
+        while (track.cues.length > 0) {
+          track.removeCue(track.cues[0]);
+        }
+      }
+    }
+  }, {
+    key: 'createTextTrack',
+    value: function createTextTrack(kind, label, lang) {
+      if (this.media) {
+        return this.media.addTextTrack(kind, label, lang);
+      }
+    }
+  }, {
     key: 'destroy',
     value: function destroy() {
       _eventHandler2.default.prototype.destroy.call(this);
@@ -2947,40 +4235,79 @@ var TimelineController = function (_EventHandler) {
   }, {
     key: 'onMediaAttaching',
     value: function onMediaAttaching(data) {
-      var media = this.media = data.media;
-      this.cea708Interpreter.attach(media);
+      this.media = data.media;
     }
   }, {
     key: 'onMediaDetaching',
-    value: function onMediaDetaching() {
-      this.cea708Interpreter.detach();
-    }
+    value: function onMediaDetaching() {}
   }, {
     key: 'onManifestLoading',
     value: function onManifestLoading() {
-      this.lastPts = Number.POSITIVE_INFINITY;
+      this.lastPts = Number.NEGATIVE_INFINITY;
+    }
+  }, {
+    key: 'onLevelSwitch',
+    value: function onLevelSwitch() {
+      if (this.hls.currentLevel.closedCaptions === 'NONE') {
+        this.enabled = false;
+      } else {
+        this.enabled = true;
+      }
     }
   }, {
     key: 'onFragLoaded',
     value: function onFragLoaded(data) {
-      var pts = data.frag.start; //Number.POSITIVE_INFINITY;
-
-      // if this is a frag for a previously loaded timerange, remove all captions
-      // TODO: consider just removing captions for the timerange
-      if (pts <= this.lastPts) {
-        this.cea708Interpreter.clear();
+      if (data.frag.type === 'main') {
+        var pts = data.frag.start; //Number.POSITIVE_INFINITY;
+        // if this is a frag for a previously loaded timerange, remove all captions
+        // TODO: consider just removing captions for the timerange
+        if (pts <= this.lastPts) {
+          this.clearCurrentCues(this.textTrack1);
+          this.clearCurrentCues(this.textTrack2);
+        }
+        this.lastPts = pts;
       }
-
-      this.lastPts = pts;
     }
   }, {
     key: 'onFragParsingUserdata',
     value: function onFragParsingUserdata(data) {
       // push all of the CEA-708 messages into the interpreter
       // immediately. It will create the proper timestamps based on our PTS value
-      for (var i = 0; i < data.samples.length; i++) {
-        this.cea708Interpreter.push(data.samples[i].pts, data.samples[i].bytes);
+      if (this.enabled) {
+        for (var i = 0; i < data.samples.length; i++) {
+          var ccdatas = this.extractCea608Data(data.samples[i].bytes);
+          this.cea608Parser.addData(data.samples[i].pts, ccdatas);
+        }
       }
+    }
+  }, {
+    key: 'extractCea608Data',
+    value: function extractCea608Data(byteArray) {
+      var count = byteArray[0] & 31;
+      var position = 2;
+      var tmpByte, ccbyte1, ccbyte2, ccValid, ccType;
+      var actualCCBytes = [];
+
+      for (var j = 0; j < count; j++) {
+        tmpByte = byteArray[position++];
+        ccbyte1 = 0x7F & byteArray[position++];
+        ccbyte2 = 0x7F & byteArray[position++];
+        ccValid = (4 & tmpByte) === 0 ? false : true;
+        ccType = 3 & tmpByte;
+
+        if (ccbyte1 === 0 && ccbyte2 === 0) {
+          continue;
+        }
+
+        if (ccValid) {
+          if (ccType === 0) // || ccType === 1
+            {
+              actualCCBytes.push(ccbyte1);
+              actualCCBytes.push(ccbyte2);
+            }
+        }
+      }
+      return actualCCBytes;
     }
   }]);
 
@@ -2989,7 +4316,7 @@ var TimelineController = function (_EventHandler) {
 
 exports.default = TimelineController;
 
-},{"../event-handler":22,"../events":23,"../utils/cea-708-interpreter":36}],10:[function(require,module,exports){
+},{"../event-handler":25,"../events":26,"../utils/cea-608-parser":40}],13:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3233,7 +4560,7 @@ var AES = function () {
 
 exports.default = AES;
 
-},{}],11:[function(require,module,exports){
+},{}],14:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3278,7 +4605,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * official policies, either expressed or implied, of the authors.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
-var _aes = require('./aes');
+var _aes = _dereq_('./aes');
 
 var _aes2 = _interopRequireDefault(_aes);
 
@@ -3419,7 +4746,7 @@ var AES128Decrypter = function () {
 
 exports.default = AES128Decrypter;
 
-},{"./aes":10}],12:[function(require,module,exports){
+},{"./aes":13}],15:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3430,13 +4757,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * AES128 decryption.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
-var _aes128Decrypter = require('./aes128-decrypter');
+var _aes128Decrypter = _dereq_('./aes128-decrypter');
 
 var _aes128Decrypter2 = _interopRequireDefault(_aes128Decrypter);
 
-var _errors = require('../errors');
+var _errors = _dereq_('../errors');
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3516,7 +4843,7 @@ var Decrypter = function () {
 
 exports.default = Decrypter;
 
-},{"../errors":21,"../utils/logger":38,"./aes128-decrypter":11}],13:[function(require,module,exports){
+},{"../errors":24,"../utils/logger":43,"./aes128-decrypter":14}],16:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3528,13 +4855,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
 
-var _adts = require('./adts');
+var _adts = _dereq_('./adts');
 
 var _adts2 = _interopRequireDefault(_adts);
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
-var _id = require('../demux/id3');
+var _id = _dereq_('../demux/id3');
 
 var _id2 = _interopRequireDefault(_id);
 
@@ -3543,22 +4870,29 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var AACDemuxer = function () {
-  function AACDemuxer(observer, remuxerClass) {
+  function AACDemuxer(observer, id, remuxerClass, config) {
     _classCallCheck(this, AACDemuxer);
 
     this.observer = observer;
+    this.id = id;
     this.remuxerClass = remuxerClass;
-    this.remuxer = new this.remuxerClass(observer);
-    this._aacTrack = { container: 'audio/adts', type: 'audio', id: -1, sequenceNumber: 0, samples: [], len: 0 };
+    this.config = config;
+    this.remuxer = new this.remuxerClass(observer, id, config);
+    this.insertDiscontinuity();
   }
 
   _createClass(AACDemuxer, [{
+    key: 'insertDiscontinuity',
+    value: function insertDiscontinuity() {
+      this._aacTrack = { container: 'audio/adts', type: 'audio', id: -1, sequenceNumber: 0, samples: [], len: 0 };
+    }
+  }, {
     key: 'push',
 
 
     // feed incoming data to the front of the parsing pipeline
     value: function push(data, audioCodec, videoCodec, timeOffset, cc, level, sn, duration) {
-      var track = this._aacTrack,
+      var track,
           id3 = new _id2.default(data),
           pts = 90 * id3.timeStamp,
           config,
@@ -3570,6 +4904,26 @@ var AACDemuxer = function () {
           stamp,
           len,
           aacSample;
+
+      var contiguous = false;
+      if (cc !== this.lastCC) {
+        _logger.logger.log(this.id + ' discontinuity detected');
+        this.lastCC = cc;
+        this.insertDiscontinuity();
+        this.remuxer.switchLevel();
+        this.remuxer.insertDiscontinuity();
+      } else if (level !== this.lastLevel) {
+        _logger.logger.log('audio track switch detected');
+        this.lastLevel = level;
+        this.remuxer.switchLevel();
+        this.insertDiscontinuity();
+      } else if (sn === this.lastSN + 1) {
+        contiguous = true;
+      }
+      track = this._aacTrack;
+      this.lastSN = sn;
+      this.lastLevel = level;
+
       // look for ADTS header (0xFFFx)
       for (offset = id3.length, len = data.length; offset < len - 1; offset++) {
         if (data[offset] === 0xff && (data[offset + 1] & 0xf0) === 0xf0) {
@@ -3614,7 +4968,7 @@ var AACDemuxer = function () {
           break;
         }
       }
-      this.remuxer.remux(this._aacTrack, { samples: [] }, { samples: [{ pts: pts, dts: pts, unit: id3.payload }] }, { samples: [] }, timeOffset);
+      this.remuxer.remux(level, sn, this._aacTrack, { samples: [] }, { samples: [{ pts: pts, dts: pts, unit: id3.payload }] }, { samples: [] }, timeOffset, contiguous);
     }
   }, {
     key: 'destroy',
@@ -3644,7 +4998,7 @@ var AACDemuxer = function () {
 
 exports.default = AACDemuxer;
 
-},{"../demux/id3":19,"../utils/logger":38,"./adts":14}],14:[function(require,module,exports){
+},{"../demux/id3":22,"../utils/logger":43,"./adts":17}],17:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3656,9 +5010,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
-var _errors = require('../errors');
+var _errors = _dereq_('../errors');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -3791,7 +5145,7 @@ var ADTS = function () {
 
 exports.default = ADTS;
 
-},{"../errors":21,"../utils/logger":38}],15:[function(require,module,exports){
+},{"../errors":24,"../utils/logger":43}],18:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3802,25 +5156,25 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       *   probe fragments and instantiate appropriate demuxer depending on content type (TSDemuxer, AACDemuxer, ...)
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _errors = require('../errors');
+var _errors = _dereq_('../errors');
 
-var _aacdemuxer = require('../demux/aacdemuxer');
+var _aacdemuxer = _dereq_('../demux/aacdemuxer');
 
 var _aacdemuxer2 = _interopRequireDefault(_aacdemuxer);
 
-var _tsdemuxer = require('../demux/tsdemuxer');
+var _tsdemuxer = _dereq_('../demux/tsdemuxer');
 
 var _tsdemuxer2 = _interopRequireDefault(_tsdemuxer);
 
-var _mp4Remuxer = require('../remux/mp4-remuxer');
+var _mp4Remuxer = _dereq_('../remux/mp4-remuxer');
 
 var _mp4Remuxer2 = _interopRequireDefault(_mp4Remuxer);
 
-var _passthroughRemuxer = require('../remux/passthrough-remuxer');
+var _passthroughRemuxer = _dereq_('../remux/passthrough-remuxer');
 
 var _passthroughRemuxer2 = _interopRequireDefault(_passthroughRemuxer);
 
@@ -3829,10 +5183,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var DemuxerInline = function () {
-  function DemuxerInline(hls, typeSupported) {
+  function DemuxerInline(hls, id, typeSupported) {
+    var config = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
     _classCallCheck(this, DemuxerInline);
 
     this.hls = hls;
+    this.id = id;
+    this.config = this.hls.config || config;
     this.typeSupported = typeSupported;
   }
 
@@ -3849,18 +5207,19 @@ var DemuxerInline = function () {
     value: function push(data, audioCodec, videoCodec, timeOffset, cc, level, sn, duration) {
       var demuxer = this.demuxer;
       if (!demuxer) {
-        var hls = this.hls;
+        var hls = this.hls,
+            id = this.id;
         // probe for content type
         if (_tsdemuxer2.default.probe(data)) {
           if (this.typeSupported.mp2t === true) {
-            demuxer = new _tsdemuxer2.default(hls, _passthroughRemuxer2.default);
+            demuxer = new _tsdemuxer2.default(hls, id, _passthroughRemuxer2.default, this.config);
           } else {
-            demuxer = new _tsdemuxer2.default(hls, _mp4Remuxer2.default);
+            demuxer = new _tsdemuxer2.default(hls, id, _mp4Remuxer2.default, this.config);
           }
         } else if (_aacdemuxer2.default.probe(data)) {
-          demuxer = new _aacdemuxer2.default(hls, _mp4Remuxer2.default);
+          demuxer = new _aacdemuxer2.default(hls, id, _mp4Remuxer2.default, this.config);
         } else {
-          hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, details: _errors.ErrorDetails.FRAG_PARSING_ERROR, fatal: true, reason: 'no demux matching with content found' });
+          hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, id: id, details: _errors.ErrorDetails.FRAG_PARSING_ERROR, fatal: true, reason: 'no demux matching with content found' });
           return;
         }
         this.demuxer = demuxer;
@@ -3874,22 +5233,22 @@ var DemuxerInline = function () {
 
 exports.default = DemuxerInline;
 
-},{"../demux/aacdemuxer":13,"../demux/tsdemuxer":20,"../errors":21,"../events":23,"../remux/mp4-remuxer":32,"../remux/passthrough-remuxer":33}],16:[function(require,module,exports){
+},{"../demux/aacdemuxer":16,"../demux/tsdemuxer":23,"../errors":24,"../events":26,"../remux/mp4-remuxer":36,"../remux/passthrough-remuxer":37}],19:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _demuxerInline = require('../demux/demuxer-inline');
+var _demuxerInline = _dereq_('../demux/demuxer-inline');
 
 var _demuxerInline2 = _interopRequireDefault(_demuxerInline);
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _events3 = require('events');
+var _events3 = _dereq_('events');
 
 var _events4 = _interopRequireDefault(_events3);
 
@@ -3918,7 +5277,7 @@ var DemuxerWorker = function DemuxerWorker(self) {
     //console.log('demuxer cmd:' + data.cmd);
     switch (data.cmd) {
       case 'init':
-        self.demuxer = new _demuxerInline2.default(observer, data.typeSupported);
+        self.demuxer = new _demuxerInline2.default(observer, data.id, data.typeSupported, JSON.parse(data.config));
         break;
       case 'demux':
         self.demuxer.push(new Uint8Array(data.data), data.audioCodec, data.videoCodec, data.timeOffset, data.cc, data.level, data.sn, data.duration);
@@ -3928,33 +5287,25 @@ var DemuxerWorker = function DemuxerWorker(self) {
     }
   });
 
-  // listen to events triggered by Demuxer
-  observer.on(_events2.default.FRAG_PARSING_INIT_SEGMENT, function (ev, data) {
-    self.postMessage({ event: ev, tracks: data.tracks, unique: data.unique });
-  });
+  var forwardMessage = function forwardMessage(ev, data) {
+    self.postMessage({ event: ev, data: data });
+  };
 
+  // forward events to main thread
+  observer.on(_events2.default.FRAG_PARSING_INIT_SEGMENT, forwardMessage);
+  observer.on(_events2.default.FRAG_PARSED, forwardMessage);
+  observer.on(_events2.default.ERROR, forwardMessage);
+  observer.on(_events2.default.FRAG_PARSING_METADATA, forwardMessage);
+  observer.on(_events2.default.FRAG_PARSING_USERDATA, forwardMessage);
+
+  // special case for FRAG_PARSING_DATA: pass data1/data2 as transferable object (no copy)
   observer.on(_events2.default.FRAG_PARSING_DATA, function (ev, data) {
-    var objData = { event: ev, type: data.type, startPTS: data.startPTS, endPTS: data.endPTS, startDTS: data.startDTS, endDTS: data.endDTS, data1: data.data1.buffer, data2: data.data2.buffer, nb: data.nb, dropped: data.dropped };
-    // pass data1/data2 as transferable object (no copy)
-    self.postMessage(objData, [objData.data1, objData.data2]);
-  });
-
-  observer.on(_events2.default.FRAG_PARSED, function (event) {
-    self.postMessage({ event: event });
-  });
-
-  observer.on(_events2.default.ERROR, function (event, data) {
-    self.postMessage({ event: event, data: data });
-  });
-
-  observer.on(_events2.default.FRAG_PARSING_METADATA, function (event, data) {
-    var objData = { event: event, samples: data.samples };
-    self.postMessage(objData);
-  });
-
-  observer.on(_events2.default.FRAG_PARSING_USERDATA, function (event, data) {
-    var objData = { event: event, samples: data.samples };
-    self.postMessage(objData);
+    var data1 = data.data1.buffer,
+        data2 = data.data2.buffer;
+    // remove data1 and data2 reference from data to avoid copying them ...
+    delete data.data1;
+    delete data.data2;
+    self.postMessage({ event: ev, data: data, data1: data1, data2: data2 }, [data1, data2]);
   });
 }; /* demuxer web worker.
     *  - listen to worker message, and trigger DemuxerInline upon reception of Fragments.
@@ -3963,7 +5314,7 @@ var DemuxerWorker = function DemuxerWorker(self) {
 
 exports.default = DemuxerWorker;
 
-},{"../demux/demuxer-inline":15,"../events":23,"events":1}],17:[function(require,module,exports){
+},{"../demux/demuxer-inline":18,"../events":26,"events":1}],20:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3972,33 +5323,36 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _demuxerInline = require('../demux/demuxer-inline');
+var _demuxerInline = _dereq_('../demux/demuxer-inline');
 
 var _demuxerInline2 = _interopRequireDefault(_demuxerInline);
 
-var _demuxerWorker = require('../demux/demuxer-worker');
+var _demuxerWorker = _dereq_('../demux/demuxer-worker');
 
 var _demuxerWorker2 = _interopRequireDefault(_demuxerWorker);
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
-var _decrypter = require('../crypt/decrypter');
+var _decrypter = _dereq_('../crypt/decrypter');
 
 var _decrypter2 = _interopRequireDefault(_decrypter);
+
+var _errors = _dereq_('../errors');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Demuxer = function () {
-  function Demuxer(hls) {
+  function Demuxer(hls, id) {
     _classCallCheck(this, Demuxer);
 
     this.hls = hls;
+    this.id = id;
     var typeSupported = {
       mp4: MediaSource.isTypeSupported('video/mp4'),
       mp2t: hls.config.enableMP2TPassThrough && MediaSource.isTypeSupported('video/mp2t')
@@ -4006,17 +5360,20 @@ var Demuxer = function () {
     if (hls.config.enableWorker && typeof Worker !== 'undefined') {
       _logger.logger.log('demuxing in webworker');
       try {
-        var work = require('webworkify');
-        this.w = work(_demuxerWorker2.default);
+        var work = _dereq_('webworkify');
+        var w = this.w = work(_demuxerWorker2.default);
         this.onwmsg = this.onWorkerMessage.bind(this);
-        this.w.addEventListener('message', this.onwmsg);
-        this.w.postMessage({ cmd: 'init', typeSupported: typeSupported });
+        w.addEventListener('message', this.onwmsg);
+        w.onerror = function (event) {
+          hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.OTHER_ERROR, details: _errors.ErrorDetails.INTERNAL_EXCEPTION, fatal: true, event: 'demuxerWorker', err: { message: event.message + ' (' + event.filename + ':' + event.lineno + ')' } });
+        };
+        w.postMessage({ cmd: 'init', typeSupported: typeSupported, id: id, config: JSON.stringify(hls.config) });
       } catch (err) {
         _logger.logger.error('error while initializing DemuxerWorker, fallback on DemuxerInline');
-        this.demuxer = new _demuxerInline2.default(hls, typeSupported);
+        this.demuxer = new _demuxerInline2.default(hls, id, typeSupported);
       }
     } else {
-      this.demuxer = new _demuxerInline2.default(hls, typeSupported);
+      this.demuxer = new _demuxerInline2.default(hls, id, typeSupported);
     }
     this.demuxInitialized = true;
   }
@@ -4024,27 +5381,36 @@ var Demuxer = function () {
   _createClass(Demuxer, [{
     key: 'destroy',
     value: function destroy() {
-      if (this.w) {
-        this.w.removeEventListener('message', this.onwmsg);
-        this.w.terminate();
+      var w = this.w;
+      if (w) {
+        w.removeEventListener('message', this.onwmsg);
+        w.terminate();
         this.w = null;
       } else {
-        this.demuxer.destroy();
-        this.demuxer = null;
+        var demuxer = this.demuxer;
+        if (demuxer) {
+          demuxer.destroy();
+          this.demuxer = null;
+        }
       }
-      if (this.decrypter) {
-        this.decrypter.destroy();
+      var decrypter = this.decrypter;
+      if (decrypter) {
+        decrypter.destroy();
         this.decrypter = null;
       }
     }
   }, {
     key: 'pushDecrypted',
     value: function pushDecrypted(data, audioCodec, videoCodec, timeOffset, cc, level, sn, duration) {
-      if (this.w) {
+      var w = this.w;
+      if (w) {
         // post fragment payload as transferable objects (no copy)
-        this.w.postMessage({ cmd: 'demux', data: data, audioCodec: audioCodec, videoCodec: videoCodec, timeOffset: timeOffset, cc: cc, level: level, sn: sn, duration: duration }, [data]);
+        w.postMessage({ cmd: 'demux', data: data, audioCodec: audioCodec, videoCodec: videoCodec, timeOffset: timeOffset, cc: cc, level: level, sn: sn, duration: duration }, [data]);
       } else {
-        this.demuxer.push(new Uint8Array(data), audioCodec, videoCodec, timeOffset, cc, level, sn, duration);
+        var demuxer = this.demuxer;
+        if (demuxer) {
+          demuxer.push(new Uint8Array(data), audioCodec, videoCodec, timeOffset, cc, level, sn, duration);
+        }
       }
     }
   }, {
@@ -4066,40 +5432,17 @@ var Demuxer = function () {
   }, {
     key: 'onWorkerMessage',
     value: function onWorkerMessage(ev) {
-      var data = ev.data;
+      var data = ev.data,
+          hls = this.hls;
       //console.log('onWorkerMessage:' + data.event);
       switch (data.event) {
-        case _events2.default.FRAG_PARSING_INIT_SEGMENT:
-          var obj = {};
-          obj.tracks = data.tracks;
-          obj.unique = data.unique;
-          this.hls.trigger(_events2.default.FRAG_PARSING_INIT_SEGMENT, obj);
-          break;
+        // special case for FRAG_PARSING_DATA: data1 and data2 are transferable objects
         case _events2.default.FRAG_PARSING_DATA:
-          this.hls.trigger(_events2.default.FRAG_PARSING_DATA, {
-            data1: new Uint8Array(data.data1),
-            data2: new Uint8Array(data.data2),
-            startPTS: data.startPTS,
-            endPTS: data.endPTS,
-            startDTS: data.startDTS,
-            endDTS: data.endDTS,
-            type: data.type,
-            nb: data.nb,
-            dropped: data.dropped
-          });
-          break;
-        case _events2.default.FRAG_PARSING_METADATA:
-          this.hls.trigger(_events2.default.FRAG_PARSING_METADATA, {
-            samples: data.samples
-          });
-          break;
-        case _events2.default.FRAG_PARSING_USERDATA:
-          this.hls.trigger(_events2.default.FRAG_PARSING_USERDATA, {
-            samples: data.samples
-          });
-          break;
+          data.data.data1 = new Uint8Array(data.data1);
+          data.data.data2 = new Uint8Array(data.data2);
+        /* falls through */
         default:
-          this.hls.trigger(data.event, data.data);
+          hls.trigger(data.event, data.data);
           break;
       }
     }
@@ -4110,7 +5453,7 @@ var Demuxer = function () {
 
 exports.default = Demuxer;
 
-},{"../crypt/decrypter":12,"../demux/demuxer-inline":15,"../demux/demuxer-worker":16,"../events":23,"../utils/logger":38,"webworkify":2}],18:[function(require,module,exports){
+},{"../crypt/decrypter":15,"../demux/demuxer-inline":18,"../demux/demuxer-worker":19,"../errors":24,"../events":26,"../utils/logger":43,"webworkify":2}],21:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4121,7 +5464,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * Parser for exponential Golomb codes, a variable-bitwidth number encoding scheme used by h264.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -4474,7 +5817,7 @@ var ExpGolomb = function () {
 
 exports.default = ExpGolomb;
 
-},{"../utils/logger":38}],19:[function(require,module,exports){
+},{"../utils/logger":43}],22:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4486,7 +5829,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -4627,7 +5970,7 @@ var ID3 = function () {
 
 exports.default = ID3;
 
-},{"../utils/logger":38}],20:[function(require,module,exports){
+},{"../utils/logger":43}],23:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4648,34 +5991,36 @@ var _createClass = function () { function defineProperties(target, props) { for 
 // import Hex from '../utils/hex';
 
 
-var _adts = require('./adts');
+var _adts = _dereq_('./adts');
 
 var _adts2 = _interopRequireDefault(_adts);
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _expGolomb = require('./exp-golomb');
+var _expGolomb = _dereq_('./exp-golomb');
 
 var _expGolomb2 = _interopRequireDefault(_expGolomb);
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
-var _errors = require('../errors');
+var _errors = _dereq_('../errors');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var TSDemuxer = function () {
-  function TSDemuxer(observer, remuxerClass) {
+  function TSDemuxer(observer, id, remuxerClass, config) {
     _classCallCheck(this, TSDemuxer);
 
     this.observer = observer;
+    this.id = id;
     this.remuxerClass = remuxerClass;
+    this.config = config;
     this.lastCC = 0;
-    this.remuxer = new this.remuxerClass(observer);
+    this.remuxer = new this.remuxerClass(observer, id, config);
   }
 
   _createClass(TSDemuxer, [{
@@ -4739,7 +6084,15 @@ var TSDemuxer = function () {
       var pmtParsed = this.pmtParsed,
           avcId = this._avcTrack.id,
           aacId = this._aacTrack.id,
-          id3Id = this._id3Track.id;
+          id3Id = this._id3Track.id,
+          pmtId = this._pmtId;
+
+      var parsePAT = this._parsePAT,
+          parsePMT = this._parsePMT,
+          parsePES = this._parsePES,
+          parseAVCPES = this._parseAVCPES.bind(this),
+          parseAACPES = this._parseAACPES.bind(this),
+          parseID3PES = this._parseID3PES.bind(this);
 
       // don't parse last TS packet if incomplete
       len -= len % 188;
@@ -4760,17 +6113,17 @@ var TSDemuxer = function () {
           } else {
             offset = start + 4;
           }
-          if (pmtParsed) {
-            if (pid === avcId) {
+          switch (pid) {
+            case avcId:
               if (stt) {
                 if (avcData) {
-                  this._parseAVCPES(this._parsePES(avcData));
+                  parseAVCPES(parsePES(avcData));
                   if (codecsOnly) {
                     // if we have video codec info AND
                     // if audio PID is undefined OR if we have audio codec info,
                     // we have all codec info !
                     if (this._avcTrack.codec && (aacId === -1 || this._aacTrack.codec)) {
-                      this.remux(data);
+                      this.remux(level, sn, data);
                       return;
                     }
                   }
@@ -4781,16 +6134,17 @@ var TSDemuxer = function () {
                 avcData.data.push(data.subarray(offset, start + 188));
                 avcData.size += start + 188 - offset;
               }
-            } else if (pid === aacId) {
+              break;
+            case aacId:
               if (stt) {
                 if (aacData) {
-                  this._parseAACPES(this._parsePES(aacData));
+                  parseAACPES(parsePES(aacData));
                   if (codecsOnly) {
                     // here we now that we have audio codec info
                     // if video PID is undefined OR if we have video codec info,
                     // we have all codec infos !
                     if (this._aacTrack.codec && (avcId === -1 || this._avcTrack.codec)) {
-                      this.remux(data);
+                      this.remux(level, sn, data);
                       return;
                     }
                   }
@@ -4801,10 +6155,11 @@ var TSDemuxer = function () {
                 aacData.data.push(data.subarray(offset, start + 188));
                 aacData.size += start + 188 - offset;
               }
-            } else if (pid === id3Id) {
+              break;
+            case id3Id:
               if (stt) {
                 if (id3Data) {
-                  this._parseID3PES(this._parsePES(id3Data));
+                  parseID3PES(parsePES(id3Data));
                 }
                 id3Data = { data: [], size: 0 };
               }
@@ -4812,50 +6167,56 @@ var TSDemuxer = function () {
                 id3Data.data.push(data.subarray(offset, start + 188));
                 id3Data.size += start + 188 - offset;
               }
-            }
-          } else {
-            if (stt) {
-              offset += data[offset] + 1;
-            }
-            if (pid === 0) {
-              this._parsePAT(data, offset);
-            } else if (pid === this._pmtId) {
-              this._parsePMT(data, offset);
-              pmtParsed = this.pmtParsed = true;
-              avcId = this._avcTrack.id;
-              aacId = this._aacTrack.id;
-              id3Id = this._id3Track.id;
-              if (unknownPIDs) {
+              break;
+            case 0:
+              if (stt) {
+                offset += data[offset] + 1;
+              }
+              pmtId = this._pmtId = parsePAT(data, offset);
+              break;
+            case pmtId:
+              if (stt) {
+                offset += data[offset] + 1;
+              }
+              var parsedPIDs = parsePMT(data, offset);
+              avcId = this._avcTrack.id = parsedPIDs.avc;
+              aacId = this._aacTrack.id = parsedPIDs.aac;
+              id3Id = this._id3Track.id = parsedPIDs.id3;
+              if (unknownPIDs && !pmtParsed) {
                 _logger.logger.log('reparse from beginning');
                 unknownPIDs = false;
                 // we set it to -188, the += 188 in the for loop will reset start to 0
                 start = -188;
               }
-            } else {
-              _logger.logger.log('unknown PID found before PAT/PMT');
+              pmtParsed = this.pmtParsed = true;
+              break;
+            case 17:
+            case 0x1fff:
+              break;
+            default:
               unknownPIDs = true;
-            }
+              break;
           }
         } else {
-          this.observer.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, details: _errors.ErrorDetails.FRAG_PARSING_ERROR, fatal: false, reason: 'TS packet did not start with 0x47' });
+          this.observer.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, id: this.id, details: _errors.ErrorDetails.FRAG_PARSING_ERROR, fatal: false, reason: 'TS packet did not start with 0x47' });
         }
       }
       // parse last PES packet
       if (avcData) {
-        this._parseAVCPES(this._parsePES(avcData));
+        parseAVCPES(parsePES(avcData));
       }
       if (aacData) {
-        this._parseAACPES(this._parsePES(aacData));
+        parseAACPES(parsePES(aacData));
       }
       if (id3Data) {
-        this._parseID3PES(this._parsePES(id3Data));
+        parseID3PES(parsePES(id3Data));
       }
-      this.remux(null);
+      this.remux(level, sn, null);
     }
   }, {
     key: 'remux',
-    value: function remux(data) {
-      this.remuxer.remux(this._aacTrack, this._avcTrack, this._id3Track, this._txtTrack, this.timeOffset, this.contiguous, data);
+    value: function remux(level, sn, data) {
+      this.remuxer.remux(level, sn, this._aacTrack, this._avcTrack, this._id3Track, this._txtTrack, this.timeOffset, this.contiguous, data);
     }
   }, {
     key: 'destroy',
@@ -4868,13 +6229,17 @@ var TSDemuxer = function () {
     key: '_parsePAT',
     value: function _parsePAT(data, offset) {
       // skip the PSI header and parse the first PMT entry
-      this._pmtId = (data[offset + 10] & 0x1F) << 8 | data[offset + 11];
+      return (data[offset + 10] & 0x1F) << 8 | data[offset + 11];
       //logger.log('PMT PID:'  + this._pmtId);
     }
   }, {
     key: '_parsePMT',
     value: function _parsePMT(data, offset) {
-      var sectionLength, tableEnd, programInfoLength, pid;
+      var sectionLength,
+          tableEnd,
+          programInfoLength,
+          pid,
+          result = { aac: -1, avc: -1, id3: -1 };
       sectionLength = (data[offset + 1] & 0x0f) << 8 | data[offset + 2];
       tableEnd = offset + 3 + sectionLength - 4;
       // to determine where the table is, we have to figure out how
@@ -4888,17 +6253,26 @@ var TSDemuxer = function () {
           // ISO/IEC 13818-7 ADTS AAC (MPEG-2 lower bit-rate audio)
           case 0x0f:
             //logger.log('AAC PID:'  + pid);
-            this._aacTrack.id = pid;
+            if (result.aac === -1) {
+              result.aac = pid;
+            }
             break;
           // Packetized metadata (ID3)
           case 0x15:
             //logger.log('ID3 PID:'  + pid);
-            this._id3Track.id = pid;
+            if (result.id3 === -1) {
+              result.id3 = pid;
+            }
             break;
           // ITU-T Rec. H.264 and ISO/IEC 14496-10 (lower bit-rate video)
           case 0x1b:
             //logger.log('AVC PID:'  + pid);
-            this._avcTrack.id = pid;
+            if (result.avc === -1) {
+              result.avc = pid;
+            }
+            break;
+          case 0x24:
+            _logger.logger.warn('HEVC stream type found, not supported for now');
             break;
           default:
             _logger.logger.log('unkown stream type:' + data[offset]);
@@ -4908,6 +6282,7 @@ var TSDemuxer = function () {
         // skip past the elementary stream descriptors, if present
         offset += ((data[offset + 3] & 0x0F) << 8 | data[offset + 4]) + 5;
       }
+      return result;
     }
   }, {
     key: '_parsePES',
@@ -4923,6 +6298,16 @@ var TSDemuxer = function () {
           pesDts,
           payloadStartOffset,
           data = stream.data;
+      // we might need up to 19 bytes to read PES header
+      // if first chunk of data is less than 19 bytes, let's merge it with following ones until we get 19 bytes
+      // usually only one merge is needed (and this is rare ...)
+      while (data[0].length < 19 && data.length > 1) {
+        var newData = new Uint8Array(data[0].length + data[1].length);
+        newData.set(data[0]);
+        newData.set(data[1], data[0].length);
+        data[0] = newData;
+        data.splice(1, 1);
+      }
       //retrieve PTS/DTS from first fragment
       frag = data[0];
       pesPrefix = (frag[0] << 16) + (frag[1] << 8) + frag[2];
@@ -5021,10 +6406,11 @@ var TSDemuxer = function () {
 
       var pushAccesUnit = function () {
         if (units2.length) {
-          // only push AVC sample if keyframe already found in this fragment OR
-          //    keyframe found in last fragment (track.sps) AND
-          //        samples already appended (we already found a keyframe in this fragment) OR fragment is contiguous
-          if (key === true || track.sps && (samples.length || this.contiguous)) {
+          // only push AVC sample if starting with a keyframe is not mandatory OR
+          //    if keyframe already found in this fragment OR
+          //       keyframe found in last fragment (track.sps) AND
+          //          samples already appended (we already found a keyframe in this fragment) OR fragment is contiguous
+          if (!this.config.forceKeyFrameOnDiscontinuity || key === true || track.sps && (samples.length || this.contiguous)) {
             avcSample = { units: { units: units2, length: length }, pts: pes.pts, dts: pes.dts, key: key };
             samples.push(avcSample);
             track.len += length;
@@ -5061,51 +6447,70 @@ var TSDemuxer = function () {
             if (debug) {
               debugString += 'SEI ';
             }
-            expGolombDecoder = new _expGolomb2.default(unit.data);
+            expGolombDecoder = new _expGolomb2.default(_this.discardEPB(unit.data));
 
             // skip frameType
             expGolombDecoder.readUByte();
 
-            var payloadType = expGolombDecoder.readUByte();
+            var payloadType = 0;
+            var payloadSize = 0;
+            var endOfCaptions = false;
+            var b = 0;
 
-            // TODO: there can be more than one payload in an SEI packet...
-            // TODO: need to read type and size in a while loop to get them all
-            if (payloadType === 4) {
-              var payloadSize = 0;
-
+            while (!endOfCaptions && expGolombDecoder.bytesAvailable > 1) {
+              payloadType = 0;
               do {
-                payloadSize = expGolombDecoder.readUByte();
-              } while (payloadSize === 255);
+                b = expGolombDecoder.readUByte();
+                payloadType += b;
+              } while (b === 0xFF);
 
-              var countryCode = expGolombDecoder.readUByte();
+              // Parse payload size.
+              payloadSize = 0;
+              do {
+                b = expGolombDecoder.readUByte();
+                payloadSize += b;
+              } while (b === 0xFF);
 
-              if (countryCode === 181) {
-                var providerCode = expGolombDecoder.readUShort();
+              // TODO: there can be more than one payload in an SEI packet...
+              // TODO: need to read type and size in a while loop to get them all
+              if (payloadType === 4 && expGolombDecoder.bytesAvailable !== 0) {
 
-                if (providerCode === 49) {
-                  var userStructure = expGolombDecoder.readUInt();
+                endOfCaptions = true;
 
-                  if (userStructure === 0x47413934) {
-                    var userDataType = expGolombDecoder.readUByte();
+                var countryCode = expGolombDecoder.readUByte();
 
-                    // Raw CEA-608 bytes wrapped in CEA-708 packet
-                    if (userDataType === 3) {
-                      var firstByte = expGolombDecoder.readUByte();
-                      var secondByte = expGolombDecoder.readUByte();
+                if (countryCode === 181) {
+                  var providerCode = expGolombDecoder.readUShort();
 
-                      var totalCCs = 31 & firstByte;
-                      var byteArray = [firstByte, secondByte];
+                  if (providerCode === 49) {
+                    var userStructure = expGolombDecoder.readUInt();
 
-                      for (i = 0; i < totalCCs; i++) {
-                        // 3 bytes per CC
-                        byteArray.push(expGolombDecoder.readUByte());
-                        byteArray.push(expGolombDecoder.readUByte());
-                        byteArray.push(expGolombDecoder.readUByte());
+                    if (userStructure === 0x47413934) {
+                      var userDataType = expGolombDecoder.readUByte();
+
+                      // Raw CEA-608 bytes wrapped in CEA-708 packet
+                      if (userDataType === 3) {
+                        var firstByte = expGolombDecoder.readUByte();
+                        var secondByte = expGolombDecoder.readUByte();
+
+                        var totalCCs = 31 & firstByte;
+                        var byteArray = [firstByte, secondByte];
+
+                        for (i = 0; i < totalCCs; i++) {
+                          // 3 bytes per CC
+                          byteArray.push(expGolombDecoder.readUByte());
+                          byteArray.push(expGolombDecoder.readUByte());
+                          byteArray.push(expGolombDecoder.readUByte());
+                        }
+
+                        _this._insertSampleInOrder(_this._txtTrack.samples, { type: 3, pts: pes.pts, bytes: byteArray });
                       }
-
-                      _this._txtTrack.samples.push({ type: 3, pts: pes.pts, bytes: byteArray });
                     }
                   }
+                }
+              } else if (payloadSize < expGolombDecoder.bytesAvailable) {
+                for (i = 0; i < payloadSize; i++) {
+                  expGolombDecoder.readUByte();
                 }
               }
             }
@@ -5166,6 +6571,25 @@ var TSDemuxer = function () {
         _logger.logger.log(debugString);
       }
       pushAccesUnit();
+    }
+  }, {
+    key: '_insertSampleInOrder',
+    value: function _insertSampleInOrder(arr, data) {
+      var len = arr.length;
+      if (len > 0) {
+        if (data.pts >= arr[len - 1].pts) {
+          arr.push(data);
+        } else {
+          for (var pos = len - 1; pos >= 0; pos--) {
+            if (data.pts < arr[pos].pts) {
+              arr.splice(pos, 0, data);
+              break;
+            }
+          }
+        }
+      } else {
+        arr.push(data);
+      }
     }
   }, {
     key: '_parseAVCNALu',
@@ -5270,6 +6694,52 @@ var TSDemuxer = function () {
       }
       return units;
     }
+
+    /**
+     * remove Emulation Prevention bytes from a RBSP
+     */
+
+  }, {
+    key: 'discardEPB',
+    value: function discardEPB(data) {
+      var length = data.byteLength,
+          EPBPositions = [],
+          i = 1,
+          newLength,
+          newData;
+
+      // Find all `Emulation Prevention Bytes`
+      while (i < length - 2) {
+        if (data[i] === 0 && data[i + 1] === 0 && data[i + 2] === 0x03) {
+          EPBPositions.push(i + 2);
+          i += 2;
+        } else {
+          i++;
+        }
+      }
+
+      // If no Emulation Prevention Bytes were found just return the original
+      // array
+      if (EPBPositions.length === 0) {
+        return data;
+      }
+
+      // Create a new array to hold the NAL unit data
+      newLength = length - EPBPositions.length;
+      newData = new Uint8Array(newLength);
+      var sourceIndex = 0;
+
+      for (i = 0; i < newLength; sourceIndex++, i++) {
+        if (sourceIndex === EPBPositions[0]) {
+          // Skip this byte
+          sourceIndex++;
+          // Remove this position index
+          EPBPositions.shift();
+        }
+        newData[i] = data[sourceIndex];
+      }
+      return newData;
+    }
   }, {
     key: '_parseAACPES',
     value: function _parseAACPES(pes) {
@@ -5313,7 +6783,7 @@ var TSDemuxer = function () {
           reason = 'no ADTS header found in AAC PES';
           fatal = true;
         }
-        this.observer.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, details: _errors.ErrorDetails.FRAG_PARSING_ERROR, fatal: fatal, reason: reason });
+        this.observer.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, id: this.id, details: _errors.ErrorDetails.FRAG_PARSING_ERROR, fatal: fatal, reason: reason });
         if (fatal) {
           return;
         }
@@ -5397,7 +6867,7 @@ var TSDemuxer = function () {
 
 exports.default = TSDemuxer;
 
-},{"../errors":21,"../events":23,"../utils/logger":38,"./adts":14,"./exp-golomb":18}],21:[function(require,module,exports){
+},{"../errors":24,"../events":26,"../utils/logger":43,"./adts":17,"./exp-golomb":21}],24:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5413,21 +6883,25 @@ var ErrorTypes = exports.ErrorTypes = {
 };
 
 var ErrorDetails = exports.ErrorDetails = {
-  // Identifier for a manifest load error - data: { url : faulty URL, response : XHR response}
+  // Identifier for a manifest load error - data: { url : faulty URL, response : { code: error code, text: error text }}
   MANIFEST_LOAD_ERROR: 'manifestLoadError',
-  // Identifier for a manifest load timeout - data: { url : faulty URL, response : XHR response}
+  // Identifier for a manifest load timeout - data: { url : faulty URL, response : { code: error code, text: error text }}
   MANIFEST_LOAD_TIMEOUT: 'manifestLoadTimeOut',
   // Identifier for a manifest parsing error - data: { url : faulty URL, reason : error reason}
   MANIFEST_PARSING_ERROR: 'manifestParsingError',
   // Identifier for a manifest with only incompatible codecs error - data: { url : faulty URL, reason : error reason}
   MANIFEST_INCOMPATIBLE_CODECS_ERROR: 'manifestIncompatibleCodecsError',
-  // Identifier for playlist load error - data: { url : faulty URL, response : XHR response}
+  // Identifier for a level load error - data: { url : faulty URL, response : { code: error code, text: error text }}
   LEVEL_LOAD_ERROR: 'levelLoadError',
-  // Identifier for playlist load timeout - data: { url : faulty URL, response : XHR response}
+  // Identifier for a level load timeout - data: { url : faulty URL, response : { code: error code, text: error text }}
   LEVEL_LOAD_TIMEOUT: 'levelLoadTimeOut',
   // Identifier for a level switch error - data: { level : faulty level Id, event : error description}
   LEVEL_SWITCH_ERROR: 'levelSwitchError',
-  // Identifier for fragment load error - data: { frag : fragment object, response : XHR response}
+  // Identifier for an audio track load error - data: { url : faulty URL, response : { code: error code, text: error text }}
+  AUDIO_TRACK_LOAD_ERROR: 'audioTrackLoadError',
+  // Identifier for an audio track load timeout - data: { url : faulty URL, response : { code: error code, text: error text }}
+  AUDIO_TRACK_LOAD_TIMEOUT: 'audioTrackLoadTimeOut',
+  // Identifier for fragment load error - data: { frag : fragment object, response : { code: error code, text: error text }}
   FRAG_LOAD_ERROR: 'fragLoadError',
   // Identifier for fragment loop loading error - data: { frag : fragment object}
   FRAG_LOOP_LOADING_ERROR: 'fragLoopLoadingError',
@@ -5437,10 +6911,12 @@ var ErrorDetails = exports.ErrorDetails = {
   FRAG_DECRYPT_ERROR: 'fragDecryptError',
   // Identifier for a fragment parsing error event - data: parsing error description
   FRAG_PARSING_ERROR: 'fragParsingError',
-  // Identifier for decrypt key load error - data: { frag : fragment object, response : XHR response}
+  // Identifier for decrypt key load error - data: { frag : fragment object, response : { code: error code, text: error text }}
   KEY_LOAD_ERROR: 'keyLoadError',
   // Identifier for decrypt key load timeout error - data: { frag : fragment object}
   KEY_LOAD_TIMEOUT: 'keyLoadTimeOut',
+  // Triggered when an exception occurs while adding a sourceBuffer to MediaSource - data : {  err : exception , mimeType : mimeType }
+  BUFFER_ADD_CODEC_ERROR: 'bufferAddCodecError',
   // Identifier for a buffer append error - data: append error description
   BUFFER_APPEND_ERROR: 'bufferAppendError',
   // Identifier for a buffer appending error event - data: appending error description
@@ -5455,7 +6931,7 @@ var ErrorDetails = exports.ErrorDetails = {
   INTERNAL_EXCEPTION: 'internalException'
 };
 
-},{}],22:[function(require,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5470,11 +6946,11 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
-var _logger = require('./utils/logger');
+var _logger = _dereq_('./utils/logger');
 
-var _errors = require('./errors');
+var _errors = _dereq_('./errors');
 
-var _events = require('./events');
+var _events = _dereq_('./events');
 
 var _events2 = _interopRequireDefault(_events);
 
@@ -5531,9 +7007,9 @@ var EventHandler = function () {
       }
     }
 
-    /*
-    * arguments: event (string), data (any)
-    */
+    /**
+     * arguments: event (string), data (any)
+     */
 
   }, {
     key: 'onEvent',
@@ -5564,7 +7040,7 @@ var EventHandler = function () {
 
 exports.default = EventHandler;
 
-},{"./errors":21,"./events":23,"./utils/logger":38}],23:[function(require,module,exports){
+},{"./errors":24,"./events":26,"./utils/logger":43}],26:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = {
@@ -5580,9 +7056,11 @@ module.exports = {
   BUFFER_RESET: 'hlsBufferReset',
   // fired when we know about the codecs that we need buffers for to push into - data: {tracks : { container, codec, levelCodec, initSegment, metadata }}
   BUFFER_CODECS: 'hlsBufferCodecs',
+  // fired when sourcebuffers have been created data: { tracks : tracks}
+  BUFFER_CREATED: 'hlsBufferCreated',
   // fired when we append a segment to the buffer - data: { segment: segment object }
   BUFFER_APPENDING: 'hlsBufferAppending',
-  // fired when we are done with appending a media segment to the buffer
+  // fired when we are done with appending a media segment to the buffer data : { parent : segment parent that triggered BUFFER_APPENDING }
   BUFFER_APPENDED: 'hlsBufferAppended',
   // fired when the stream is finished and we want to notify the media buffer that there will be no more data
   BUFFER_EOS: 'hlsBufferEos',
@@ -5592,7 +7070,7 @@ module.exports = {
   BUFFER_FLUSHED: 'hlsBufferFlushed',
   // fired to signal that a manifest loading starts - data: { url : manifestURL}
   MANIFEST_LOADING: 'hlsManifestLoading',
-  // fired after manifest has been loaded - data: { levels : [available quality levels] , url : manifestURL, stats : { trequest, tfirst, tload, mtime}}
+  // fired after manifest has been loaded - data: { levels : [available quality levels] , audioTracks : [ available audio tracks], url : manifestURL, stats : { trequest, tfirst, tload, mtime}}
   MANIFEST_LOADED: 'hlsManifestLoaded',
   // fired after manifest has been parsed - data: { levels : [available quality levels] , firstLevel : index of first quality level appearing in Manifest}
   MANIFEST_PARSED: 'hlsManifestParsed',
@@ -5606,6 +7084,14 @@ module.exports = {
   LEVEL_PTS_UPDATED: 'hlsLevelPtsUpdated',
   // fired when a level switch is requested - data: { level : id of new level }
   LEVEL_SWITCH: 'hlsLevelSwitch',
+  // fired to notify that audio track lists has been updated data: { audioTracks : audioTracks}
+  AUDIO_TRACKS_UPDATED: 'hlsAudioTracksUpdated',
+  // fired when an audio track switch occurs - data: {  id : audio track id}
+  AUDIO_TRACK_SWITCH: 'hlsAudioTrackSwitch',
+  // fired when an audio track loading starts - data: { url : audio track URL  id : audio track id}
+  AUDIO_TRACK_LOADING: 'hlsAudioTrackLoading',
+  // fired when an audio track loading  finishes - data: { details : levelDetails object, id : audio track id, stats : { trequest, tfirst, tload, mtime} }
+  AUDIO_TRACK_LOADED: 'hlsAudioTrackLoaded',
   // fired when a fragment loading starts - data: { frag : fragment object}
   FRAG_LOADING: 'hlsFragLoading',
   // fired when a fragment loading is progressing - data: { frag : fragment object, { trequest, tfirst, loaded}}
@@ -5614,22 +7100,24 @@ module.exports = {
   FRAG_LOAD_EMERGENCY_ABORTED: 'hlsFragLoadEmergencyAborted',
   // fired when a fragment loading is completed - data: { frag : fragment object, payload : fragment payload, stats : { trequest, tfirst, tload, length}}
   FRAG_LOADED: 'hlsFragLoaded',
-  // fired when Init Segment has been extracted from fragment - data: { moov : moov MP4 box, codecs : codecs found while parsing fragment}
+  // fired when Init Segment has been extracted from fragment - data: { id : demuxer id, level : levelId, sn : sequence number, moov : moov MP4 box, codecs : codecs found while parsing fragment}
   FRAG_PARSING_INIT_SEGMENT: 'hlsFragParsingInitSegment',
-  // fired when parsing sei text is completed - data: { samples : [ sei samples pes ] }
+  // fired when parsing sei text is completed - data: { id : demuxer id, , level : levelId, sn : sequence number, samples : [ sei samples pes ] }
   FRAG_PARSING_USERDATA: 'hlsFragParsingUserdata',
-  // fired when parsing id3 is completed - data: { samples : [ id3 samples pes ] }
+  // fired when parsing id3 is completed - data: { id : demuxer id, , level : levelId, sn : sequence number, samples : [ id3 samples pes ] }
   FRAG_PARSING_METADATA: 'hlsFragParsingMetadata',
-  // fired when data have been extracted from fragment - data: { data1 : moof MP4 box or TS fragments, data2 : mdat MP4 box or null}
+  // fired when data have been extracted from fragment - data: { id : demuxer id, level : levelId, sn : sequence number, data1 : moof MP4 box or TS fragments, data2 : mdat MP4 box or null}
   FRAG_PARSING_DATA: 'hlsFragParsingData',
-  // fired when fragment parsing is completed - data: undefined
+  // fired when fragment parsing is completed - data: { id : demuxer id; level : levelId, sn : sequence number, }
   FRAG_PARSED: 'hlsFragParsed',
-  // fired when fragment remuxed MP4 boxes have all been appended into SourceBuffer - data: { frag : fragment object, stats : { trequest, tfirst, tload, tparsed, tbuffered, length} }
+  // fired when fragment remuxed MP4 boxes have all been appended into SourceBuffer - data: { id : demuxer id,frag : fragment object, stats : { trequest, tfirst, tload, tparsed, tbuffered, length} }
   FRAG_BUFFERED: 'hlsFragBuffered',
-  // fired when fragment matching with current media position is changing - data : { frag : fragment object }
+  // fired when fragment matching with current media position is changing - data : { id : demuxer id, frag : fragment object }
   FRAG_CHANGED: 'hlsFragChanged',
   // Identifier for a FPS drop event - data: {curentDropped, currentDecoded, totalDroppedFrames}
   FPS_DROP: 'hlsFpsDrop',
+  //triggered when FPS drop triggers auto level capping - data: {level, droppedlevel}
+  FPS_DROP_LEVEL_CAPPING: 'hlsFpsDropLevelCapping',
   // Identifier for an error event - data: { type : error type, details : error details, fatal : if true, hls.js cannot/will not try to recover, if false, hls.js will try to recover,other error specific data}
   ERROR: 'hlsError',
   // fired when hls.js instance starts destroying. Different from MEDIA_DETACHED as one could want to detach and reattach a media to the instance of hls.js to handle mid-rolls for example
@@ -5637,10 +7125,57 @@ module.exports = {
   // fired when a decrypt key loading starts - data: { frag : fragment object}
   KEY_LOADING: 'hlsKeyLoading',
   // fired when a decrypt key loading is completed - data: { frag : fragment object, payload : key payload, stats : { trequest, tfirst, tload, length}}
-  KEY_LOADED: 'hlsKeyLoaded'
+  KEY_LOADED: 'hlsKeyLoaded',
+  // fired upon stream controller state transitions - data: {previousState, nextState}
+  STREAM_STATE_TRANSITION: 'hlsStreamStateTransition'
 };
 
-},{}],24:[function(require,module,exports){
+},{}],27:[function(_dereq_,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ *  AAC helper
+ */
+
+var AAC = function () {
+  function AAC() {
+    _classCallCheck(this, AAC);
+  }
+
+  _createClass(AAC, null, [{
+    key: "getSilentFrame",
+    value: function getSilentFrame(channelCount) {
+      if (channelCount === 1) {
+        return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x23, 0x80]);
+      } else if (channelCount === 2) {
+        return new Uint8Array([0x21, 0x00, 0x49, 0x90, 0x02, 0x19, 0x00, 0x23, 0x80]);
+      } else if (channelCount === 3) {
+        return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x8e]);
+      } else if (channelCount === 4) {
+        return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x80, 0x2c, 0x80, 0x08, 0x02, 0x38]);
+      } else if (channelCount === 5) {
+        return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x82, 0x30, 0x04, 0x99, 0x00, 0x21, 0x90, 0x02, 0x38]);
+      } else if (channelCount === 6) {
+        return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x82, 0x30, 0x04, 0x99, 0x00, 0x21, 0x90, 0x02, 0x00, 0xb2, 0x00, 0x20, 0x08, 0xe0]);
+      }
+      return null;
+    }
+  }]);
+
+  return AAC;
+}();
+
+exports.default = AAC;
+
+},{}],28:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5743,7 +7278,7 @@ var BufferHelper = function () {
 
 exports.default = BufferHelper;
 
-},{}],25:[function(require,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5754,7 +7289,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * Level Helper class, providing methods dealing with playlist sliding and drift
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -5904,7 +7439,7 @@ var LevelHelper = function () {
 
 exports.default = LevelHelper;
 
-},{"../utils/logger":38}],26:[function(require,module,exports){
+},{"../utils/logger":43}],30:[function(_dereq_,module,exports){
 /**
  * HLS interface
  */
@@ -5915,60 +7450,76 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-//import FPSController from './controller/fps-controller';
+//import FetchLoader from './utils/fetch-loader';
 
 
-var _events = require('./events');
+var _events = _dereq_('./events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _errors = require('./errors');
+var _errors = _dereq_('./errors');
 
-var _playlistLoader = require('./loader/playlist-loader');
+var _playlistLoader = _dereq_('./loader/playlist-loader');
 
 var _playlistLoader2 = _interopRequireDefault(_playlistLoader);
 
-var _fragmentLoader = require('./loader/fragment-loader');
+var _fragmentLoader = _dereq_('./loader/fragment-loader');
 
 var _fragmentLoader2 = _interopRequireDefault(_fragmentLoader);
 
-var _abrController = require('./controller/abr-controller');
+var _abrController = _dereq_('./controller/abr-controller');
 
 var _abrController2 = _interopRequireDefault(_abrController);
 
-var _bufferController = require('./controller/buffer-controller');
+var _bufferController = _dereq_('./controller/buffer-controller');
 
 var _bufferController2 = _interopRequireDefault(_bufferController);
 
-var _capLevelController = require('./controller/cap-level-controller');
+var _capLevelController = _dereq_('./controller/cap-level-controller');
 
 var _capLevelController2 = _interopRequireDefault(_capLevelController);
 
-var _streamController = require('./controller/stream-controller');
+var _audioStreamController = _dereq_('./controller/audio-stream-controller');
+
+var _audioStreamController2 = _interopRequireDefault(_audioStreamController);
+
+var _streamController = _dereq_('./controller/stream-controller');
 
 var _streamController2 = _interopRequireDefault(_streamController);
 
-var _levelController = require('./controller/level-controller');
+var _levelController = _dereq_('./controller/level-controller');
 
 var _levelController2 = _interopRequireDefault(_levelController);
 
-var _timelineController = require('./controller/timeline-controller');
+var _timelineController = _dereq_('./controller/timeline-controller');
 
 var _timelineController2 = _interopRequireDefault(_timelineController);
 
-var _logger = require('./utils/logger');
+var _fpsController = _dereq_('./controller/fps-controller');
 
-var _xhrLoader = require('./utils/xhr-loader');
+var _fpsController2 = _interopRequireDefault(_fpsController);
+
+var _audioTrackController = _dereq_('./controller/audio-track-controller');
+
+var _audioTrackController2 = _interopRequireDefault(_audioTrackController);
+
+var _logger = _dereq_('./utils/logger');
+
+var _xhrLoader = _dereq_('./utils/xhr-loader');
 
 var _xhrLoader2 = _interopRequireDefault(_xhrLoader);
 
-var _events3 = require('events');
+var _events3 = _dereq_('events');
 
 var _events4 = _interopRequireDefault(_events3);
 
-var _keyLoader = require('./loader/key-loader');
+var _keyLoader = _dereq_('./loader/key-loader');
 
 var _keyLoader2 = _interopRequireDefault(_keyLoader);
+
+var _cues = _dereq_('./utils/cues');
+
+var _cues2 = _interopRequireDefault(_cues);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -5979,6 +7530,12 @@ var Hls = function () {
     key: 'isSupported',
     value: function isSupported() {
       return window.MediaSource && typeof window.MediaSource.isTypeSupported === 'function' && window.MediaSource.isTypeSupported('video/mp4; codecs="avc1.42E01E,mp4a.40.2"');
+    }
+  }, {
+    key: 'version',
+    get: function get() {
+      // replaced with browserify-versionify transform
+      return '0.6.2-6';
     }
   }, {
     key: 'Events',
@@ -6003,6 +7560,7 @@ var Hls = function () {
           autoStartLoad: true,
           startPosition: -1,
           debug: false,
+          capLevelOnFPSDrop: false,
           capLevelToPlayerSize: false,
           maxBufferLength: 30,
           maxBufferSize: 60 * 1000 * 1000,
@@ -6021,27 +7579,36 @@ var Hls = function () {
           manifestLoadingTimeOut: 10000,
           manifestLoadingMaxRetry: 1,
           manifestLoadingRetryDelay: 1000,
+          manifestLoadingMaxRetryTimeout: 64000,
           levelLoadingTimeOut: 10000,
           levelLoadingMaxRetry: 4,
           levelLoadingRetryDelay: 1000,
+          levelLoadingMaxRetryTimeout: 64000,
           fragLoadingTimeOut: 20000,
           fragLoadingMaxRetry: 6,
           fragLoadingRetryDelay: 1000,
+          fragLoadingMaxRetryTimeout: 64000,
           fragLoadingLoopThreshold: 3,
           startFragPrefetch: false,
-          // fpsDroppedMonitoringPeriod: 5000,
-          // fpsDroppedMonitoringThreshold: 0.2,
+          fpsDroppedMonitoringPeriod: 5000,
+          fpsDroppedMonitoringThreshold: 0.2,
           appendErrorMaxRetry: 3,
           loader: _xhrLoader2.default,
+          //loader: FetchLoader,
           fLoader: undefined,
           pLoader: undefined,
           abrController: _abrController2.default,
           bufferController: _bufferController2.default,
           capLevelController: _capLevelController2.default,
+          fpsController: _fpsController2.default,
           streamController: _streamController2.default,
+          audioStreamController: _audioStreamController2.default,
           timelineController: _timelineController2.default,
+          cueHandler: _cues2.default,
           enableCEA708Captions: true,
           enableMP2TPassThrough: false,
+          stretchShortVideoTrack: false,
+          forceKeyFrameOnDiscontinuity: true,
           abrEwmaFastLive: 5,
           abrEwmaSlowLive: 9,
           abrEwmaFastVoD: 4,
@@ -6112,10 +7679,12 @@ var Hls = function () {
     this.abrController = new config.abrController(this);
     this.bufferController = new config.bufferController(this);
     this.capLevelController = new config.capLevelController(this);
+    this.fpsController = new config.fpsController(this);
     this.streamController = new config.streamController(this);
+    this.audioStreamController = new config.audioStreamController(this);
     this.timelineController = new config.timelineController(this);
+    this.audioTrackController = new _audioTrackController2.default(this);
     this.keyLoader = new _keyLoader2.default(this);
-    //this.fpsController = new FPSController(this);
   }
 
   _createClass(Hls, [{
@@ -6130,10 +7699,12 @@ var Hls = function () {
       this.abrController.destroy();
       this.bufferController.destroy();
       this.capLevelController.destroy();
+      this.fpsController.destroy();
       this.streamController.destroy();
+      this.audioStreamController.destroy();
       this.timelineController.destroy();
+      this.audioTrackController.destroy();
       this.keyLoader.destroy();
-      //this.fpsController.destroy();
       this.url = null;
       this.observer.removeAllListeners();
     }
@@ -6167,6 +7738,7 @@ var Hls = function () {
       _logger.logger.log('startLoad');
       this.levelController.startLoad();
       this.streamController.startLoad(startPosition);
+      this.audioStreamController.startLoad(startPosition);
     }
   }, {
     key: 'stopLoad',
@@ -6174,6 +7746,7 @@ var Hls = function () {
       _logger.logger.log('stopLoad');
       this.levelController.stopLoad();
       this.streamController.stopLoad();
+      this.audioStreamController.stopLoad();
     }
   }, {
     key: 'swapAudioCodec',
@@ -6327,6 +7900,33 @@ var Hls = function () {
     get: function get() {
       return this.levelController.manualLevel;
     }
+
+    /** get alternate audio tracks list from playlist **/
+
+  }, {
+    key: 'audioTracks',
+    get: function get() {
+      return this.audioTrackController.audioTracks;
+    }
+
+    /** get index of the selected audio track (index in audio track lists) **/
+
+  }, {
+    key: 'audioTrack',
+    get: function get() {
+      return this.audioTrackController.audioTrack;
+    }
+
+    /** select an audio track, based on its index in audio track lists**/
+    ,
+    set: function set(audioTrackId) {
+      this.audioTrackController.audioTrack = audioTrackId;
+    }
+  }, {
+    key: 'liveSyncPosition',
+    get: function get() {
+      return this.streamController.liveSyncPosition;
+    }
   }]);
 
   return Hls;
@@ -6334,15 +7934,15 @@ var Hls = function () {
 
 exports.default = Hls;
 
-},{"./controller/abr-controller":3,"./controller/buffer-controller":4,"./controller/cap-level-controller":5,"./controller/level-controller":7,"./controller/stream-controller":8,"./controller/timeline-controller":9,"./errors":21,"./events":23,"./loader/fragment-loader":28,"./loader/key-loader":29,"./loader/playlist-loader":30,"./utils/logger":38,"./utils/xhr-loader":40,"events":1}],27:[function(require,module,exports){
+},{"./controller/abr-controller":3,"./controller/audio-stream-controller":4,"./controller/audio-track-controller":5,"./controller/buffer-controller":6,"./controller/cap-level-controller":7,"./controller/fps-controller":9,"./controller/level-controller":10,"./controller/stream-controller":11,"./controller/timeline-controller":12,"./errors":24,"./events":26,"./loader/fragment-loader":32,"./loader/key-loader":33,"./loader/playlist-loader":34,"./utils/cues":41,"./utils/logger":43,"./utils/xhr-loader":47,"events":1}],31:[function(_dereq_,module,exports){
 'use strict';
 
 // This is mostly for support of the es6 module export
 // syntax with the babel compiler, it looks like it doesnt support
 // function exports like we are used to in node/commonjs
-module.exports = require('./hls.js').default;
+module.exports = _dereq_('./hls.js').default;
 
-},{"./hls.js":26}],28:[function(require,module,exports){
+},{"./hls.js":30}],32:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6351,15 +7951,17 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventHandler = require('../event-handler');
+var _eventHandler = _dereq_('../event-handler');
 
 var _eventHandler2 = _interopRequireDefault(_eventHandler);
 
-var _errors = require('../errors');
+var _errors = _dereq_('../errors');
+
+var _logger = _dereq_('../utils/logger');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -6377,58 +7979,93 @@ var FragmentLoader = function (_EventHandler) {
   function FragmentLoader(hls) {
     _classCallCheck(this, FragmentLoader);
 
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(FragmentLoader).call(this, hls, _events2.default.FRAG_LOADING));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(FragmentLoader).call(this, hls, _events2.default.FRAG_LOADING));
+
+    _this.loaders = {};
+    return _this;
   }
 
   _createClass(FragmentLoader, [{
     key: 'destroy',
     value: function destroy() {
-      if (this.loader) {
-        this.loader.destroy();
-        this.loader = null;
+      for (var loaderName in this.loaders) {
+        var loader = this.loaders[loaderName];
+        if (loader) {
+          loader.destroy();
+        }
       }
+      this.loaders = {};
       _eventHandler2.default.prototype.destroy.call(this);
     }
   }, {
     key: 'onFragLoading',
     value: function onFragLoading(data) {
-      var frag = data.frag;
-      this.frag = frag;
-      this.frag.loaded = 0;
-      var config = this.hls.config;
-      frag.loader = this.loader = typeof config.fLoader !== 'undefined' ? new config.fLoader(config) : new config.loader(config);
-      this.loader.load(frag.url, 'arraybuffer', this.loadsuccess.bind(this), this.loaderror.bind(this), this.loadtimeout.bind(this), config.fragLoadingTimeOut, 1, 0, this.loadprogress.bind(this), frag);
+      var frag = data.frag,
+          type = frag.type,
+          loader = this.loaders[type],
+          config = this.hls.config;
+
+      frag.loaded = 0;
+      if (loader) {
+        _logger.logger.warn('abort previous fragment loader for type:' + type);
+        loader.abort();
+      }
+      loader = this.loaders[type] = frag.loader = typeof config.fLoader !== 'undefined' ? new config.fLoader(config) : new config.loader(config);
+
+      var loaderContext = void 0,
+          loaderConfig = void 0,
+          loaderCallbacks = void 0;
+      loaderContext = { url: frag.url, frag: frag, responseType: 'arraybuffer', progressData: false };
+      var start = frag.byteRangeStartOffset,
+          end = frag.byteRangeEndOffset;
+      if (!isNaN(start) && !isNaN(end)) {
+        loaderContext.rangeStart = start;
+        loaderContext.rangeEnd = end;
+      }
+      loaderConfig = { timeout: config.fragLoadingTimeOut, maxRetry: 0, retryDelay: 0, maxRetryDelay: config.fragLoadingMaxRetryTimeout };
+      loaderCallbacks = { onSuccess: this.loadsuccess.bind(this), onError: this.loaderror.bind(this), onTimeout: this.loadtimeout.bind(this), onProgress: this.loadprogress.bind(this) };
+      loader.load(loaderContext, loaderConfig, loaderCallbacks);
     }
   }, {
     key: 'loadsuccess',
-    value: function loadsuccess(event, stats) {
-      var payload = event.currentTarget.response;
-      stats.length = payload.byteLength;
+    value: function loadsuccess(response, stats, context) {
+      var payload = response.data,
+          frag = context.frag;
       // detach fragment loader on load success
-      this.frag.loader = undefined;
-      this.hls.trigger(_events2.default.FRAG_LOADED, { payload: payload, frag: this.frag, stats: stats });
+      frag.loader = undefined;
+      this.loaders[frag.type] = undefined;
+      this.hls.trigger(_events2.default.FRAG_LOADED, { payload: payload, frag: frag, stats: stats });
     }
   }, {
     key: 'loaderror',
-    value: function loaderror(event) {
-      if (this.loader) {
-        this.loader.abort();
+    value: function loaderror(response, context) {
+      var loader = context.loader;
+      if (loader) {
+        loader.abort();
       }
-      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: _errors.ErrorDetails.FRAG_LOAD_ERROR, fatal: false, frag: this.frag, response: event });
+      this.loaders[context.type] = undefined;
+      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: _errors.ErrorDetails.FRAG_LOAD_ERROR, fatal: false, frag: context.frag, response: response });
     }
   }, {
     key: 'loadtimeout',
-    value: function loadtimeout() {
-      if (this.loader) {
-        this.loader.abort();
+    value: function loadtimeout(stats, context) {
+      var loader = context.loader;
+      if (loader) {
+        loader.abort();
       }
-      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: _errors.ErrorDetails.FRAG_LOAD_TIMEOUT, fatal: false, frag: this.frag });
+      this.loaders[context.type] = undefined;
+      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: _errors.ErrorDetails.FRAG_LOAD_TIMEOUT, fatal: false, frag: context.frag });
     }
+
+    // data will be used for progressive parsing
+
   }, {
     key: 'loadprogress',
-    value: function loadprogress(event, stats) {
-      this.frag.loaded = stats.loaded;
-      this.hls.trigger(_events2.default.FRAG_LOAD_PROGRESS, { frag: this.frag, stats: stats });
+    value: function loadprogress(stats, context, data) {
+      // jshint ignore:line
+      var frag = context.frag;
+      frag.loaded = stats.loaded;
+      this.hls.trigger(_events2.default.FRAG_LOAD_PROGRESS, { frag: frag, stats: stats });
     }
   }]);
 
@@ -6437,7 +8074,7 @@ var FragmentLoader = function (_EventHandler) {
 
 exports.default = FragmentLoader;
 
-},{"../errors":21,"../event-handler":22,"../events":23}],29:[function(require,module,exports){
+},{"../errors":24,"../event-handler":25,"../events":26,"../utils/logger":43}],33:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6446,15 +8083,17 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventHandler = require('../event-handler');
+var _eventHandler = _dereq_('../event-handler');
 
 var _eventHandler2 = _interopRequireDefault(_eventHandler);
 
-var _errors = require('../errors');
+var _errors = _dereq_('../errors');
+
+var _logger = _dereq_('../utils/logger');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -6474,6 +8113,7 @@ var KeyLoader = function (_EventHandler) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(KeyLoader).call(this, hls, _events2.default.KEY_LOADING));
 
+    _this.loaders = {};
     _this.decryptkey = null;
     _this.decrypturl = null;
     return _this;
@@ -6482,25 +8122,42 @@ var KeyLoader = function (_EventHandler) {
   _createClass(KeyLoader, [{
     key: 'destroy',
     value: function destroy() {
-      if (this.loader) {
-        this.loader.destroy();
-        this.loader = null;
+      for (var loaderName in this.loaders) {
+        var loader = this.loaders[loaderName];
+        if (loader) {
+          loader.destroy();
+        }
       }
+      this.loaders = {};
       _eventHandler2.default.prototype.destroy.call(this);
     }
   }, {
     key: 'onKeyLoading',
     value: function onKeyLoading(data) {
-      var frag = this.frag = data.frag,
+      var frag = data.frag,
+          type = frag.type,
+          loader = this.loaders[type],
           decryptdata = frag.decryptdata,
           uri = decryptdata.uri;
       // if uri is different from previous one or if decrypt key not retrieved yet
       if (uri !== this.decrypturl || this.decryptkey === null) {
         var config = this.hls.config;
-        frag.loader = this.loader = new config.loader(config);
+
+        if (loader) {
+          _logger.logger.warn('abort previous fragment loader for type:' + type);
+          loader.abort();
+        }
+        frag.loader = this.loaders[type] = new config.loader(config);
         this.decrypturl = uri;
         this.decryptkey = null;
-        frag.loader.load(uri, 'arraybuffer', this.loadsuccess.bind(this), this.loaderror.bind(this), this.loadtimeout.bind(this), config.fragLoadingTimeOut, config.fragLoadingMaxRetry, config.fragLoadingRetryDelay, this.loadprogress.bind(this), frag);
+
+        var loaderContext = void 0,
+            loaderConfig = void 0,
+            loaderCallbacks = void 0;
+        loaderContext = { url: uri, frag: frag, responseType: 'arraybuffer' };
+        loaderConfig = { timeout: config.fragLoadingTimeOut, maxRetry: config.fragLoadingMaxRetry, retryDelay: config.fragLoadingRetryDelay, maxRetryDelay: config.fragLoadingMaxRetryTimeout };
+        loaderCallbacks = { onSuccess: this.loadsuccess.bind(this), onError: this.loaderror.bind(this), onTimeout: this.loadtimeout.bind(this) };
+        frag.loader.load(loaderContext, loaderConfig, loaderCallbacks);
       } else if (this.decryptkey) {
         // we already loaded this key, return it
         decryptdata.key = this.decryptkey;
@@ -6509,32 +8166,36 @@ var KeyLoader = function (_EventHandler) {
     }
   }, {
     key: 'loadsuccess',
-    value: function loadsuccess(event) {
-      var frag = this.frag;
-      this.decryptkey = frag.decryptdata.key = new Uint8Array(event.currentTarget.response);
+    value: function loadsuccess(response, stats, context) {
+      var frag = context.frag;
+      this.decryptkey = frag.decryptdata.key = new Uint8Array(response.data);
       // detach fragment loader on load success
       frag.loader = undefined;
+      this.loaders[context.type] = undefined;
       this.hls.trigger(_events2.default.KEY_LOADED, { frag: frag });
     }
   }, {
     key: 'loaderror',
-    value: function loaderror(event) {
-      if (this.loader) {
-        this.loader.abort();
+    value: function loaderror(response, context) {
+      var frag = context.frag,
+          loader = frag.loader;
+      if (loader) {
+        loader.abort();
       }
-      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: _errors.ErrorDetails.KEY_LOAD_ERROR, fatal: false, frag: this.frag, response: event });
+      this.loaders[context.type] = undefined;
+      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: _errors.ErrorDetails.KEY_LOAD_ERROR, fatal: false, frag: frag, response: response });
     }
   }, {
     key: 'loadtimeout',
-    value: function loadtimeout() {
-      if (this.loader) {
-        this.loader.abort();
+    value: function loadtimeout(stats, context) {
+      var frag = context.frag,
+          loader = frag.loader;
+      if (loader) {
+        loader.abort();
       }
-      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: _errors.ErrorDetails.KEY_LOAD_TIMEOUT, fatal: false, frag: this.frag });
+      this.loaders[context.type] = undefined;
+      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: _errors.ErrorDetails.KEY_LOAD_TIMEOUT, fatal: false, frag: frag });
     }
-  }, {
-    key: 'loadprogress',
-    value: function loadprogress() {}
   }]);
 
   return KeyLoader;
@@ -6542,7 +8203,7 @@ var KeyLoader = function (_EventHandler) {
 
 exports.default = KeyLoader;
 
-},{"../errors":21,"../event-handler":22,"../events":23}],30:[function(require,module,exports){
+},{"../errors":24,"../event-handler":25,"../events":26,"../utils/logger":43}],34:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6551,25 +8212,25 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _eventHandler = require('../event-handler');
+var _eventHandler = _dereq_('../event-handler');
 
 var _eventHandler2 = _interopRequireDefault(_eventHandler);
 
-var _errors = require('../errors');
+var _errors = _dereq_('../errors');
 
-var _url = require('../utils/url');
+var _url = _dereq_('../utils/url');
 
 var _url2 = _interopRequireDefault(_url);
 
-var _attrList = require('../utils/attr-list');
+var _attrList = _dereq_('../utils/attr-list');
 
 var _attrList2 = _interopRequireDefault(_attrList);
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -6587,62 +8248,78 @@ var PlaylistLoader = function (_EventHandler) {
   function PlaylistLoader(hls) {
     _classCallCheck(this, PlaylistLoader);
 
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(PlaylistLoader).call(this, hls, _events2.default.MANIFEST_LOADING, _events2.default.LEVEL_LOADING));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PlaylistLoader).call(this, hls, _events2.default.MANIFEST_LOADING, _events2.default.LEVEL_LOADING, _events2.default.AUDIO_TRACK_LOADING));
+
+    _this.loaders = {};
+    return _this;
   }
 
   _createClass(PlaylistLoader, [{
     key: 'destroy',
     value: function destroy() {
-      if (this.loader) {
-        this.loader.destroy();
-        this.loader = null;
+      for (var loaderName in this.loaders) {
+        var loader = this.loaders[loaderName];
+        if (loader) {
+          loader.destroy();
+        }
       }
-      this.url = this.id = null;
+      this.loaders = {};
       _eventHandler2.default.prototype.destroy.call(this);
     }
   }, {
     key: 'onManifestLoading',
     value: function onManifestLoading(data) {
-      this.load(data.url, null);
+      this.load(data.url, { type: 'manifest' });
     }
   }, {
     key: 'onLevelLoading',
     value: function onLevelLoading(data) {
-      this.load(data.url, data.level, data.id);
+      this.load(data.url, { type: 'level', level: data.level, id: data.id });
+    }
+  }, {
+    key: 'onAudioTrackLoading',
+    value: function onAudioTrackLoading(data) {
+      this.load(data.url, { type: 'audioTrack', id: data.id });
     }
   }, {
     key: 'load',
-    value: function load(url, id1, id2) {
+    value: function load(url, context) {
       var config = this.hls.config,
           retry,
           timeout,
-          retryDelay;
-
-      if (this.loading && this.loader) {
-        if (this.url === url && this.id === id1 && this.id2 === id2) {
-          // same request than last pending one, don't do anything
-          return;
-        } else {
-          // one playlist load request is pending, but with different params, abort it before loading new playlist
-          this.loader.abort();
-        }
-      }
-
-      this.url = url;
-      this.id = id1;
-      this.id2 = id2;
-      if (this.id === null) {
+          retryDelay,
+          maxRetryDelay;
+      if (context.type === 'manifest') {
         retry = config.manifestLoadingMaxRetry;
         timeout = config.manifestLoadingTimeOut;
         retryDelay = config.manifestLoadingRetryDelay;
+        maxRetryDelay = config.manifestLoadingMaxRetryTimeOut;
       } else {
         retry = config.levelLoadingMaxRetry;
         timeout = config.levelLoadingTimeOut;
         retryDelay = config.levelLoadingRetryDelay;
+        maxRetryDelay = config.levelLoadingMaxRetryTimeOut;
       }
-      this.loader = typeof config.pLoader !== 'undefined' ? new config.pLoader(config) : new config.loader(config);
-      this.loading = true;
-      this.loader.load(url, '', this.loadsuccess.bind(this), this.loaderror.bind(this), this.loadtimeout.bind(this), timeout, retry, retryDelay);
+      var loader = this.loaders[context.type];
+      if (loader) {
+        var loaderContext = loader.context;
+        if (loaderContext && loaderContext.url === url) {
+          _logger.logger.warn('playlist request ongoing');
+          return;
+        } else {
+          _logger.logger.warn('abort previous loader for type:' + context.type);
+          loader.abort();
+        }
+      }
+      loader = this.loaders[context.type] = context.loader = typeof config.pLoader !== 'undefined' ? new config.pLoader(config) : new config.loader(config);
+      context.url = url;
+      context.responseType = '';
+
+      var loaderConfig = void 0,
+          loaderCallbacks = void 0;
+      loaderConfig = { timeout: timeout, maxRetry: retry, retryDelay: retryDelay, maxRetryDelay: maxRetryDelay };
+      loaderCallbacks = { onSuccess: this.loadsuccess.bind(this), onError: this.loaderror.bind(this), onTimeout: this.loadtimeout.bind(this) };
+      loader.load(context, loaderConfig, loaderCallbacks);
     }
   }, {
     key: 'resolve',
@@ -6688,7 +8365,36 @@ var PlaylistLoader = function (_EventHandler) {
       }
       return levels;
     }
+  }, {
+    key: 'parseMasterPlaylistMedia',
+    value: function parseMasterPlaylistMedia(string, baseurl, type) {
+      var result = void 0,
+          medias = [];
 
+      // https://regex101.com is your friend
+      var re = /#EXT-X-MEDIA:(.*)/g;
+      while ((result = re.exec(string)) != null) {
+        var media = {};
+        var attrs = new _attrList2.default(result[1]);
+        if (attrs.TYPE === type) {
+          media.groupId = attrs['GROUP-ID'];
+          media.name = attrs.NAME;
+          media.type = type;
+          media.default = attrs.DEFAULT === 'YES';
+          media.autoselect = attrs.AUTOSELECT === 'YES';
+          media.forced = attrs.FORCED === 'YES';
+          if (attrs.URI) {
+            media.url = this.resolve(attrs.URI, baseurl);
+          }
+          media.lang = attrs.LANGUAGE;
+          if (!media.name) {
+            media.name = media.lang;
+          }
+          medias.push(media);
+        }
+      }
+      return medias;
+    }
     /**
      * Utility method for parseLevelPlaylist to create an initialization vector for a given segment
      * @returns {Uint8Array}
@@ -6746,11 +8452,11 @@ var PlaylistLoader = function (_EventHandler) {
     }
   }, {
     key: 'parseLevelPlaylist',
-    value: function parseLevelPlaylist(string, baseurl, id) {
+    value: function parseLevelPlaylist(string, baseurl, id, type) {
       var currentSN = 0,
           fragdecryptdata,
           totalduration = 0,
-          level = { version: null, type: null, url: baseurl, fragments: [], live: true, startSN: 0 },
+          level = { type: null, version: null, url: baseurl, fragments: [], live: true, startSN: 0 },
           levelkey = { method: null, key: null, iv: null, uri: null },
           cc = 0,
           programDateTime = null,
@@ -6760,18 +8466,16 @@ var PlaylistLoader = function (_EventHandler) {
           duration = null,
           title = null,
           byteRangeEndOffset = null,
-          byteRangeStartOffset = null;
+          byteRangeStartOffset = null,
+          tagList = [];
 
-      regexp = /(?:(?:#(EXTM3U))|(?:#EXT-X-(PLAYLIST-TYPE):(.+))|(?:#EXT-X-(MEDIA-SEQUENCE):(\d+))|(?:#EXT-X-(TARGETDURATION):(\d+))|(?:#EXT-X-(KEY):(.+))|(?:#EXT-X-(START):(.+))|(?:#EXT(INF):(\d+(?:\.\d+)?)(?:,(.*))?)|(?:(?!#)()(\S.+))|(?:#EXT-X-(BYTERANGE):(\d+(?:@\d+(?:\.\d+)?))|(?:#EXT-X-(ENDLIST))|(?:#EXT-X-(DIS)CONTINUITY))|(?:#EXT-X-(PROGRAM-DATE-TIME):(.+))|(?:#EXT-X-(VERSION):(\d+))|(?:(#)(.*):(.*))|(?:(#)(.*)))(?:.*)\r?\n?/g;
+      regexp = /(?:(?:#(EXTM3U))|(?:#EXT-X-(PLAYLIST-TYPE):(.+))|(?:#EXT-X-(MEDIA-SEQUENCE):(\d+))|(?:#EXT-X-(TARGETDURATION):(\d+))|(?:#EXT-X-(KEY):(.+))|(?:#EXT-X-(START):(.+))|(?:#EXT(INF):(\d+(?:\.\d+)?)(?:,(.*))?)|(?:(?!#)()(\S.+))|(?:#EXT-X-(BYTERANGE):(\d+(?:@\d+(?:\.\d+)?)?)|(?:#EXT-X-(ENDLIST))|(?:#EXT-X-(DIS)CONTINUITY))|(?:#EXT-X-(PROGRAM-DATE-TIME):(.+))|(?:#EXT-X-(VERSION):(\d+))|(?:(#)(.*):(.*))|(?:(#)(.*)))(?:.*)\r?\n?/g;
       while ((result = regexp.exec(string)) !== null) {
         result.shift();
         result = result.filter(function (n) {
           return n !== undefined;
         });
         switch (result[0]) {
-          case 'VERSION':
-            level.version = parseInt(result[1]);
-            break;
           case 'PLAYLIST-TYPE':
             level.type = result[1].toUpperCase();
             break;
@@ -6781,6 +8485,9 @@ var PlaylistLoader = function (_EventHandler) {
           case 'TARGETDURATION':
             level.targetduration = parseFloat(result[1]);
             break;
+          case 'VERSION':
+            level.version = parseInt(result[1]);
+            break;
           case 'EXTM3U':
             break;
           case 'ENDLIST':
@@ -6788,6 +8495,7 @@ var PlaylistLoader = function (_EventHandler) {
             break;
           case 'DIS':
             cc++;
+            tagList.push(result);
             break;
           case 'BYTERANGE':
             var params = result[1].split('@');
@@ -6801,6 +8509,7 @@ var PlaylistLoader = function (_EventHandler) {
           case 'INF':
             duration = parseFloat(result[1]);
             title = result[2] ? result[2] : null;
+            tagList.push(result);
             break;
           case '':
             // url
@@ -6809,6 +8518,7 @@ var PlaylistLoader = function (_EventHandler) {
               fragdecryptdata = this.fragmentDecryptdataFromLevelkey(levelkey, sn);
               var url = result[1] ? this.resolve(result[1], baseurl) : null;
               frag = { url: url,
+                type: type,
                 duration: duration,
                 title: title,
                 start: totalduration,
@@ -6816,7 +8526,8 @@ var PlaylistLoader = function (_EventHandler) {
                 level: id,
                 cc: cc,
                 decryptdata: fragdecryptdata,
-                programDateTime: programDateTime };
+                programDateTime: programDateTime,
+                tagList: tagList };
               // only include byte range options if used/needed
               if (byteRangeStartOffset !== null) {
                 frag.byteRangeStartOffset = byteRangeStartOffset;
@@ -6828,6 +8539,7 @@ var PlaylistLoader = function (_EventHandler) {
               title = null;
               byteRangeStartOffset = null;
               programDateTime = null;
+              tagList = [];
             }
             break;
           case 'KEY':
@@ -6859,9 +8571,11 @@ var PlaylistLoader = function (_EventHandler) {
             break;
           case 'PROGRAM-DATE-TIME':
             programDateTime = new Date(Date.parse(result[1]));
+            tagList.push(result);
             break;
           case '#':
             result.shift();
+            tagList.push(result);
             break;
           default:
             _logger.logger.warn('line parsed but not handled: ' + result);
@@ -6874,45 +8588,65 @@ var PlaylistLoader = function (_EventHandler) {
         totalduration -= frag.duration;
       }
       level.totalduration = totalduration;
+      level.averagetargetduration = totalduration / level.fragments.length;
       level.endSN = currentSN - 1;
       return level;
     }
   }, {
     key: 'loadsuccess',
-    value: function loadsuccess(event, stats) {
-      var target = event.currentTarget,
-          string = target.responseText,
-          url = target.responseURL,
-          id = this.id,
-          id2 = this.id2,
-          hls = this.hls,
-          levels;
+    value: function loadsuccess(response, stats, context) {
+      var string = response.data,
+          url = response.url,
+          type = context.type,
+          id = context.id,
+          level = context.level,
+          hls = this.hls;
 
-      this.loading = false;
+      this.loaders[type] = undefined;
       // responseURL not supported on some browsers (it is used to detect URL redirection)
-      if (url === undefined) {
+      // data-uri mode also not supported (but no need to detect redirection)
+      if (url === undefined || url.indexOf('data:') === 0) {
         // fallback to initial URL
-        url = this.url;
+        url = context.url;
       }
       stats.tload = performance.now();
-      stats.mtime = new Date(target.getResponseHeader('Last-Modified'));
+      //stats.mtime = new Date(target.getResponseHeader('Last-Modified'));
       if (string.indexOf('#EXTM3U') === 0) {
         if (string.indexOf('#EXTINF:') > 0) {
-          // 1 level playlist
-          // if first request, fire manifest loaded event, level will be reloaded afterwards
-          // (this is to have a uniform logic for 1 level/multilevel playlists)
-          if (this.id === null) {
-            hls.trigger(_events2.default.MANIFEST_LOADED, { levels: [{ url: url }], url: url, stats: stats });
+          var isLevel = type !== 'audioTrack',
+              levelDetails = this.parseLevelPlaylist(string, url, level || id || 0, isLevel ? 'main' : 'audio');
+          levelDetails.tload = stats.tload;
+          if (type === 'manifest') {
+            // first request, stream manifest (no master playlist), fire manifest loaded event with level details
+            hls.trigger(_events2.default.MANIFEST_LOADED, { levels: [{ url: url, details: levelDetails }], url: url, stats: stats });
+          }
+          stats.tparsed = performance.now();
+          if (isLevel) {
+            hls.trigger(_events2.default.LEVEL_LOADED, { details: levelDetails, level: level || 0, id: id || 0, stats: stats });
           } else {
-            var levelDetails = this.parseLevelPlaylist(string, url, id);
-            stats.tparsed = performance.now();
-            hls.trigger(_events2.default.LEVEL_LOADED, { details: levelDetails, level: id, id: id2, stats: stats });
+            hls.trigger(_events2.default.AUDIO_TRACK_LOADED, { details: levelDetails, id: id, stats: stats });
           }
         } else {
-          levels = this.parseMasterPlaylist(string, url);
+          var levels = this.parseMasterPlaylist(string, url);
           // multi level playlist, parse level info
           if (levels.length) {
-            hls.trigger(_events2.default.MANIFEST_LOADED, { levels: levels, url: url, stats: stats });
+            var audiotracks = this.parseMasterPlaylistMedia(string, url, 'AUDIO');
+            if (audiotracks.length) {
+              // check if we have found an audio track embedded in main playlist (audio track without URI attribute)
+              var embeddedAudioFound = false;
+              audiotracks.forEach(function (audioTrack) {
+                if (!audioTrack.url) {
+                  embeddedAudioFound = true;
+                }
+              });
+              // if no embedded audio track defined, but audio codec signaled in quality level, we need to signal this main audio track
+              // this could happen with playlists with alt audio rendition in which quality levels (main) contains both audio+video. but with mixed audio track not signaled
+              if (embeddedAudioFound === false && levels[0].audioCodec && !levels[0].attrs.AUDIO) {
+                _logger.logger.log('audio codec signaled in quality level, but no embedded audio track signaled, create one');
+                audiotracks.unshift({ type: 'main', name: 'main' });
+              }
+            }
+            hls.trigger(_events2.default.MANIFEST_LOADED, { levels: levels, audioTracks: audiotracks, url: url, stats: stats });
           } else {
             hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: _errors.ErrorDetails.MANIFEST_PARSING_ERROR, fatal: true, url: url, reason: 'no level found in manifest' });
           }
@@ -6923,37 +8657,55 @@ var PlaylistLoader = function (_EventHandler) {
     }
   }, {
     key: 'loaderror',
-    value: function loaderror(event) {
-      var details, fatal;
-      if (this.id === null) {
-        details = _errors.ErrorDetails.MANIFEST_LOAD_ERROR;
-        fatal = true;
-      } else {
-        details = _errors.ErrorDetails.LEVEL_LOAD_ERROR;
-        fatal = false;
+    value: function loaderror(response, context) {
+      var details,
+          fatal,
+          loader = context.loader;
+      switch (context.type) {
+        case 'manifest':
+          details = _errors.ErrorDetails.MANIFEST_LOAD_ERROR;
+          fatal = true;
+          break;
+        case 'level':
+          details = _errors.ErrorDetails.LEVEL_LOAD_ERROR;
+          fatal = false;
+          break;
+        case 'audioTrack':
+          details = _errors.ErrorDetails.AUDIO_TRACK_LOAD_ERROR;
+          fatal = false;
+          break;
       }
-      if (this.loader) {
-        this.loader.abort();
+      if (loader) {
+        loader.abort();
+        this.loaders[context.type] = undefined;
       }
-      this.loading = false;
-      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: details, fatal: fatal, url: this.url, loader: this.loader, response: event.currentTarget, level: this.id, id: this.id2 });
+      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: details, fatal: fatal, url: loader.url, loader: loader, response: response, context: context });
     }
   }, {
     key: 'loadtimeout',
-    value: function loadtimeout() {
-      var details, fatal;
-      if (this.id === null) {
-        details = _errors.ErrorDetails.MANIFEST_LOAD_TIMEOUT;
-        fatal = true;
-      } else {
-        details = _errors.ErrorDetails.LEVEL_LOAD_TIMEOUT;
-        fatal = false;
+    value: function loadtimeout(stats, context) {
+      var details,
+          fatal,
+          loader = context.loader;
+      switch (context.type) {
+        case 'manifest':
+          details = _errors.ErrorDetails.MANIFEST_LOAD_TIMEOUT;
+          fatal = true;
+          break;
+        case 'level':
+          details = _errors.ErrorDetails.LEVEL_LOAD_TIMEOUT;
+          fatal = false;
+          break;
+        case 'audioTrack':
+          details = _errors.ErrorDetails.AUDIO_TRACK_LOAD_TIMEOUT;
+          fatal = false;
+          break;
       }
-      if (this.loader) {
-        this.loader.abort();
+      if (loader) {
+        loader.abort();
+        this.loaders[context.type] = undefined;
       }
-      this.loading = false;
-      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: details, fatal: fatal, url: this.url, loader: this.loader, level: this.id, id: this.id2 });
+      this.hls.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.NETWORK_ERROR, details: details, fatal: fatal, url: loader.url, loader: loader, context: context });
     }
   }]);
 
@@ -6962,7 +8714,7 @@ var PlaylistLoader = function (_EventHandler) {
 
 exports.default = PlaylistLoader;
 
-},{"../errors":21,"../event-handler":22,"../events":23,"../utils/attr-list":34,"../utils/logger":38,"../utils/url":39}],31:[function(require,module,exports){
+},{"../errors":24,"../event-handler":25,"../events":26,"../utils/attr-list":38,"../utils/logger":43,"../utils/url":46}],35:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7471,7 +9223,7 @@ var MP4 = function () {
 
 exports.default = MP4;
 
-},{}],32:[function(require,module,exports){
+},{}],36:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7482,27 +9234,35 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * fMP4 remuxer
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
-var _events = require('../events');
+var _aac = _dereq_('../helper/aac');
+
+var _aac2 = _interopRequireDefault(_aac);
+
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
-var _mp4Generator = require('../remux/mp4-generator');
+var _mp4Generator = _dereq_('../remux/mp4-generator');
 
 var _mp4Generator2 = _interopRequireDefault(_mp4Generator);
 
-var _errors = require('../errors');
+var _errors = _dereq_('../errors');
+
+_dereq_('../utils/polyfill');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var MP4Remuxer = function () {
-  function MP4Remuxer(observer) {
+  function MP4Remuxer(observer, id, config) {
     _classCallCheck(this, MP4Remuxer);
 
     this.observer = observer;
+    this.id = id;
+    this.config = config;
     this.ISGenerated = false;
     this.PES2MP4SCALEFACTOR = 4;
     this.PES_TIMESCALE = 90000;
@@ -7524,19 +9284,37 @@ var MP4Remuxer = function () {
     }
   }, {
     key: 'remux',
-    value: function remux(audioTrack, videoTrack, id3Track, textTrack, timeOffset, contiguous) {
+    value: function remux(level, sn, audioTrack, videoTrack, id3Track, textTrack, timeOffset, contiguous) {
+      this.level = level;
+      this.sn = sn;
       // generate Init Segment if needed
       if (!this.ISGenerated) {
         this.generateIS(audioTrack, videoTrack, timeOffset);
       }
+
       if (this.ISGenerated) {
-        //logger.log('nb AVC samples:' + videoTrack.samples.length);
-        if (videoTrack.samples.length) {
-          this.remuxVideo(videoTrack, timeOffset, contiguous);
-        }
+        // Purposefully remuxing audio before video, so that remuxVideo can use nextAacPts, which is
+        // calculated in remuxAudio.
         //logger.log('nb AAC samples:' + audioTrack.samples.length);
         if (audioTrack.samples.length) {
-          this.remuxAudio(audioTrack, timeOffset, contiguous);
+          var audioData = this.remuxAudio(audioTrack, timeOffset, contiguous);
+          //logger.log('nb AVC samples:' + videoTrack.samples.length);
+          if (videoTrack.samples.length) {
+            var audioTrackLength = void 0;
+            if (audioData) {
+              audioTrackLength = audioData.endPTS - audioData.startPTS;
+            }
+            this.remuxVideo(videoTrack, timeOffset, contiguous, audioTrackLength);
+          }
+        } else {
+          var videoData = void 0;
+          //logger.log('nb AVC samples:' + videoTrack.samples.length);
+          if (videoTrack.samples.length) {
+            videoData = this.remuxVideo(videoTrack, timeOffset, contiguous);
+          }
+          if (videoData && audioTrack.codec) {
+            this.remuxEmptyAudio(audioTrack, timeOffset, contiguous, videoData);
+          }
         }
       }
       //logger.log('nb ID3 samples:' + audioTrack.samples.length);
@@ -7548,7 +9326,7 @@ var MP4Remuxer = function () {
         this.remuxText(textTrack, timeOffset);
       }
       //notify end of parsing
-      this.observer.trigger(_events2.default.FRAG_PARSED);
+      this.observer.trigger(_events2.default.FRAG_PARSED, { id: this.id, level: this.level, sn: this.sn });
     }
   }, {
     key: 'generateIS',
@@ -7558,7 +9336,7 @@ var MP4Remuxer = function () {
           videoSamples = videoTrack.samples,
           pesTimeScale = this.PES_TIMESCALE,
           tracks = {},
-          data = { tracks: tracks, unique: false },
+          data = { id: this.id, level: this.level, sn: this.sn, tracks: tracks, unique: false },
           computePTSDTS = this._initPTS === undefined,
           initPTS,
           initDTS;
@@ -7623,171 +9401,217 @@ var MP4Remuxer = function () {
           this._initDTS = initDTS;
         }
       } else {
-        observer.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, details: _errors.ErrorDetails.FRAG_PARSING_ERROR, fatal: false, reason: 'no audio/video samples found' });
+        observer.trigger(_events2.default.ERROR, { type: _errors.ErrorTypes.MEDIA_ERROR, id: this.id, details: _errors.ErrorDetails.FRAG_PARSING_ERROR, fatal: false, reason: 'no audio/video samples found' });
       }
     }
   }, {
     key: 'remuxVideo',
-    value: function remuxVideo(track, timeOffset, contiguous) {
-      var view,
-          offset = 8,
+    value: function remuxVideo(track, timeOffset, contiguous, audioTrackLength) {
+      var offset = 8,
           pesTimeScale = this.PES_TIMESCALE,
           pes2mp4ScaleFactor = this.PES2MP4SCALEFACTOR,
-          avcSample,
-          mp4Sample,
-          mp4SampleLength,
-          unit,
+          mp4SampleDuration,
           mdat,
           moof,
           firstPTS,
           firstDTS,
+          nextDTS,
+          lastPTS,
           lastDTS,
-          pts,
-          dts,
-          ptsnorm,
-          dtsnorm,
-          flags,
-          samples = [];
+          inputSamples = track.samples,
+          outputSamples = [];
 
-      // handle broken streams with PTS < DTS, tolerance up 200ms (18000 in 90kHz timescale)
-      var PTSDTSshift = track.samples.reduce(function (prev, curr) {
-        return Math.max(Math.min(prev, curr.pts - curr.dts), -18000);
-      }, 0);
-      if (PTSDTSshift < 0) {
-        _logger.logger.warn('PTS < DTS detected in video samples, shifting DTS by ' + Math.round(PTSDTSshift / 90) + ' ms to overcome this issue');
+      // PTS is coded on 33bits, and can loop from -2^32 to 2^32
+      // PTSNormalize will make PTS/DTS value monotonic, we use last known DTS value as reference value
+      var nextAvcDts = void 0;
+      if (contiguous) {
+        // if parsed fragment is contiguous with last one, let's use last DTS value as reference
+        nextAvcDts = this.nextAvcDts;
+      } else {
+        // if not contiguous, let's use target timeOffset
+        nextAvcDts = timeOffset * pesTimeScale;
       }
+
+      // compute first DTS and last DTS, normalize them against reference value
+      var sample = inputSamples[0];
+      firstDTS = Math.max(this._PTSNormalize(sample.dts - this._initDTS, nextAvcDts), 0);
+      firstPTS = Math.max(this._PTSNormalize(sample.pts - this._initDTS, nextAvcDts), 0);
+
+      // check timestamp continuity accross consecutive fragments (this is to remove inter-fragment gap/hole)
+      var delta = Math.round((firstDTS - nextAvcDts) / 90);
+      // if fragment are contiguous, detect hole/overlapping between fragments
+      if (contiguous) {
+        if (delta) {
+          if (delta > 1) {
+            _logger.logger.log('AVC:' + delta + ' ms hole between fragments detected,filling it');
+          } else if (delta < -1) {
+            _logger.logger.log('AVC:' + -delta + ' ms overlapping between fragments detected');
+          }
+          // remove hole/gap : set DTS to next expected DTS
+          firstDTS = nextAvcDts;
+          inputSamples[0].dts = firstDTS + this._initDTS;
+          // offset PTS as well, ensure that PTS is smaller or equal than new DTS
+          firstPTS = Math.max(firstPTS - delta, nextAvcDts);
+          inputSamples[0].pts = firstPTS + this._initDTS;
+          _logger.logger.log('Video/PTS/DTS adjusted: ' + firstPTS + '/' + firstDTS + ',delta:' + delta);
+        }
+      }
+      nextDTS = firstDTS;
+
+      // compute lastPTS/lastDTS
+      sample = inputSamples[inputSamples.length - 1];
+      lastDTS = Math.max(this._PTSNormalize(sample.dts - this._initDTS, nextAvcDts), 0);
+      lastPTS = Math.max(this._PTSNormalize(sample.pts - this._initDTS, nextAvcDts), 0);
+      lastPTS = Math.max(lastPTS, lastDTS);
+
+      var vendor = navigator.vendor,
+          userAgent = navigator.userAgent,
+          isSafari = vendor && vendor.indexOf('Apple') > -1 && userAgent && !userAgent.match('CriOS');
+
+      // on Safari let's signal the same sample duration for all samples
+      // sample duration (as expected by trun MP4 boxes), should be the delta between sample DTS
+      // set this constant duration as being the avg delta between consecutive DTS.
+      if (isSafari) {
+        mp4SampleDuration = Math.round((lastDTS - firstDTS) / (pes2mp4ScaleFactor * (inputSamples.length - 1)));
+      }
+
+      // normalize all PTS/DTS now ...
+      for (var i = 0; i < inputSamples.length; i++) {
+        var _sample = inputSamples[i];
+        if (isSafari) {
+          // sample DTS is computed using a constant decoding offset (mp4SampleDuration) between samples
+          _sample.dts = firstDTS + i * pes2mp4ScaleFactor * mp4SampleDuration;
+        } else {
+          // ensure sample monotonic DTS
+          _sample.dts = Math.max(this._PTSNormalize(_sample.dts - this._initDTS, nextAvcDts), firstDTS);
+          // ensure dts is a multiple of scale factor to avoid rounding issues
+          _sample.dts = Math.round(_sample.dts / pes2mp4ScaleFactor) * pes2mp4ScaleFactor;
+        }
+        // we normalize PTS against nextAvcDts, we also substract initDTS (some streams don't start @ PTS O)
+        // and we ensure that computed value is greater or equal than sample DTS
+        _sample.pts = Math.max(this._PTSNormalize(_sample.pts - this._initDTS, nextAvcDts), _sample.dts);
+        // ensure pts is a multiple of scale factor to avoid rounding issues
+        _sample.pts = Math.round(_sample.pts / pes2mp4ScaleFactor) * pes2mp4ScaleFactor;
+      }
+
       /* concatenate the video data and construct the mdat in place
         (need 8 more bytes to fill length and mpdat type) */
       mdat = new Uint8Array(track.len + 4 * track.nbNalu + 8);
-      view = new DataView(mdat.buffer);
+      var view = new DataView(mdat.buffer);
       view.setUint32(0, mdat.byteLength);
       mdat.set(_mp4Generator2.default.types.mdat, 4);
-      while (track.samples.length) {
-        avcSample = track.samples.shift();
-        mp4SampleLength = 0;
+
+      for (var _i = 0; _i < inputSamples.length; _i++) {
+        var avcSample = inputSamples[_i],
+            mp4SampleLength = 0,
+            compositionTimeOffset = void 0;
         // convert NALU bitstream to MP4 format (prepend NALU with size field)
         while (avcSample.units.units.length) {
-          unit = avcSample.units.units.shift();
+          var unit = avcSample.units.units.shift();
           view.setUint32(offset, unit.data.byteLength);
           offset += 4;
           mdat.set(unit.data, offset);
           offset += unit.data.byteLength;
           mp4SampleLength += 4 + unit.data.byteLength;
         }
-        pts = avcSample.pts - this._initDTS;
-        // shift dts by PTSDTSshift, to ensure that PTS >= DTS
-        dts = avcSample.dts - this._initDTS + PTSDTSshift;
-        // ensure DTS is not bigger than PTS // strap belt !!!
-        dts = Math.min(pts, dts);
-        //logger.log(`Video/PTS/DTS/ptsnorm/DTSnorm:${Math.round(avcSample.pts/90)}/${Math.round(avcSample.dts/90)}/${Math.round(pts/90)}/${Math.round(dts/90)}`);
-        // if not first AVC sample of video track, normalize PTS/DTS with previous sample value
-        // and ensure that sample duration is positive
-        if (lastDTS !== undefined) {
-          ptsnorm = this._PTSNormalize(pts, lastDTS);
-          dtsnorm = this._PTSNormalize(dts, lastDTS);
-          var sampleDuration = (dtsnorm - lastDTS) / pes2mp4ScaleFactor;
-          if (sampleDuration <= 0) {
-            _logger.logger.log('invalid sample duration at PTS/DTS: ' + avcSample.pts + '/' + avcSample.dts + ':' + sampleDuration);
-            sampleDuration = 1;
-          }
-          mp4Sample.duration = sampleDuration;
-        } else {
-          var nextAvcDts = void 0,
-              delta = void 0;
-          if (contiguous) {
-            nextAvcDts = this.nextAvcDts;
+
+        if (!isSafari) {
+          // expected sample duration is the Decoding Timestamp diff of consecutive samples
+          if (_i < inputSamples.length - 1) {
+            mp4SampleDuration = inputSamples[_i + 1].dts - avcSample.dts;
           } else {
-            nextAvcDts = timeOffset * pesTimeScale;
-          }
-          // first AVC sample of video track, normalize PTS/DTS
-          ptsnorm = this._PTSNormalize(pts, nextAvcDts);
-          dtsnorm = this._PTSNormalize(dts, nextAvcDts);
-          delta = Math.round((dtsnorm - nextAvcDts) / 90);
-          // if fragment are contiguous, detect hole/overlapping between fragments
-          if (contiguous) {
-            if (delta) {
-              if (delta > 1) {
-                _logger.logger.log('AVC:' + delta + ' ms hole between fragments detected,filling it');
-              } else if (delta < -1) {
-                _logger.logger.log('AVC:' + -delta + ' ms overlapping between fragments detected');
+            var config = this.config,
+                lastFrameDuration = avcSample.dts - inputSamples[_i > 0 ? _i - 1 : _i].dts;
+            if (config.stretchShortVideoTrack) {
+              // In some cases, a segment's audio track duration may exceed the video track duration.
+              // Since we've already remuxed audio, and we know how long the audio track is, we look to
+              // see if the delta to the next segment is longer than the minimum of maxBufferHole and
+              // maxSeekHole. If so, playback would potentially get stuck, so we artificially inflate
+              // the duration of the last frame to minimize any potential gap between segments.
+              var maxBufferHole = config.maxBufferHole,
+                  maxSeekHole = config.maxSeekHole,
+                  gapTolerance = Math.floor(Math.min(maxBufferHole, maxSeekHole) * pesTimeScale),
+                  deltaToFrameEnd = (audioTrackLength ? firstPTS + audioTrackLength * pesTimeScale : this.nextAacPts) - avcSample.pts;
+              if (deltaToFrameEnd > gapTolerance) {
+                // We subtract lastFrameDuration from deltaToFrameEnd to try to prevent any video
+                // frame overlap. maxBufferHole/maxSeekHole should be >> lastFrameDuration anyway.
+                mp4SampleDuration = deltaToFrameEnd - lastFrameDuration;
+                if (mp4SampleDuration < 0) {
+                  mp4SampleDuration = lastFrameDuration;
+                }
+                _logger.logger.log('It is approximately ' + deltaToFrameEnd / 90 + ' ms to the next segment; using duration ' + mp4SampleDuration / 90 + ' ms for the last video frame.');
+              } else {
+                mp4SampleDuration = lastFrameDuration;
               }
-              // set DTS to next DTS
-              dtsnorm = nextAvcDts;
-              // offset PTS as well, ensure that PTS is smaller or equal than new DTS
-              ptsnorm = Math.max(ptsnorm - delta, dtsnorm);
-              _logger.logger.log('Video/PTS/DTS adjusted: ' + ptsnorm + '/' + dtsnorm + ',delta:' + delta);
+            } else {
+              mp4SampleDuration = lastFrameDuration;
             }
           }
-          // remember first PTS of our avcSamples, ensure value is positive
-          firstPTS = Math.max(0, ptsnorm);
-          firstDTS = Math.max(0, dtsnorm);
+          mp4SampleDuration /= pes2mp4ScaleFactor;
+          compositionTimeOffset = Math.round((avcSample.pts - avcSample.dts) / pes2mp4ScaleFactor);
+        } else {
+          compositionTimeOffset = Math.max(0, mp4SampleDuration * Math.round((avcSample.pts - avcSample.dts) / (pes2mp4ScaleFactor * mp4SampleDuration)));
         }
-        //console.log(`PTS/DTS/initDTS/normPTS/normDTS/relative PTS : ${avcSample.pts}/${avcSample.dts}/${this._initDTS}/${ptsnorm}/${dtsnorm}/${(avcSample.pts/4294967296).toFixed(3)});
-        mp4Sample = {
+
+        //console.log('PTS/DTS/initDTS/normPTS/normDTS/relative PTS : ${avcSample.pts}/${avcSample.dts}/${this._initDTS}/${ptsnorm}/${dtsnorm}/${(avcSample.pts/4294967296).toFixed(3)}');
+        outputSamples.push({
           size: mp4SampleLength,
-          duration: 0,
-          cts: (ptsnorm - dtsnorm) / pes2mp4ScaleFactor,
+          // constant duration
+          duration: mp4SampleDuration,
+          cts: compositionTimeOffset,
           flags: {
             isLeading: 0,
             isDependedOn: 0,
             hasRedundancy: 0,
-            degradPrio: 0
+            degradPrio: 0,
+            dependsOn: avcSample.key ? 2 : 1,
+            isNonSync: avcSample.key ? 0 : 1
           }
-        };
-        flags = mp4Sample.flags;
-        if (avcSample.key === true) {
-          // the current sample is a key frame
-          flags.dependsOn = 2;
-          flags.isNonSync = 0;
-        } else {
-          flags.dependsOn = 1;
-          flags.isNonSync = 1;
-        }
-        samples.push(mp4Sample);
-        lastDTS = dtsnorm;
+        });
       }
-      var lastSampleDuration = 0;
-      if (samples.length >= 2) {
-        lastSampleDuration = samples[samples.length - 2].duration;
-        mp4Sample.duration = lastSampleDuration;
-      }
-      // next AVC sample DTS should be equal to last sample DTS + last sample duration
-      this.nextAvcDts = dtsnorm + lastSampleDuration * pes2mp4ScaleFactor;
+      // next AVC sample DTS should be equal to last sample DTS + last sample duration (in PES timescale)
+      this.nextAvcDts = lastDTS + mp4SampleDuration * pes2mp4ScaleFactor;
       var dropped = track.dropped;
       track.len = 0;
       track.nbNalu = 0;
       track.dropped = 0;
-      if (samples.length && navigator.userAgent.toLowerCase().indexOf('chrome') > -1) {
-        flags = samples[0].flags;
+      if (outputSamples.length && navigator.userAgent.toLowerCase().indexOf('chrome') > -1) {
+        var flags = outputSamples[0].flags;
         // chrome workaround, mark first sample as being a Random Access Point to avoid sourcebuffer append issue
         // https://code.google.com/p/chromium/issues/detail?id=229412
         flags.dependsOn = 2;
         flags.isNonSync = 0;
       }
-      track.samples = samples;
+      track.samples = outputSamples;
       moof = _mp4Generator2.default.moof(track.sequenceNumber++, firstDTS / pes2mp4ScaleFactor, track);
       track.samples = [];
-      this.observer.trigger(_events2.default.FRAG_PARSING_DATA, {
+
+      var data = {
+        id: this.id,
+        level: this.level,
+        sn: this.sn,
         data1: moof,
         data2: mdat,
         startPTS: firstPTS / pesTimeScale,
-        endPTS: (ptsnorm + pes2mp4ScaleFactor * lastSampleDuration) / pesTimeScale,
+        endPTS: (lastPTS + pes2mp4ScaleFactor * mp4SampleDuration) / pesTimeScale,
         startDTS: firstDTS / pesTimeScale,
         endDTS: this.nextAvcDts / pesTimeScale,
         type: 'video',
-        nb: samples.length,
+        nb: outputSamples.length,
         dropped: dropped
-      });
+      };
+      this.observer.trigger(_events2.default.FRAG_PARSING_DATA, data);
+      return data;
     }
   }, {
     key: 'remuxAudio',
     value: function remuxAudio(track, timeOffset, contiguous) {
-      var view,
-          offset = 8,
-          pesTimeScale = this.PES_TIMESCALE,
+      var pesTimeScale = this.PES_TIMESCALE,
           mp4timeScale = track.timescale,
           pes2mp4ScaleFactor = pesTimeScale / mp4timeScale,
-          expectedSampleDuration = track.timescale * 1024 / track.audiosamplerate,
+          expectedSampleDuration = track.timescale * 1024 / track.audiosamplerate;
+      var view,
+          offset = 8,
           aacSample,
           mp4Sample,
           unit,
@@ -7801,12 +9625,73 @@ var MP4Remuxer = function () {
           ptsnorm,
           dtsnorm,
           samples = [],
-          samples0 = [];
+          samples0 = [],
+          fillFrame,
+          newStamp;
 
       track.samples.sort(function (a, b) {
         return a.pts - b.pts;
       });
       samples0 = track.samples;
+
+      var nextAacPts = contiguous ? this.nextAacPts : timeOffset * pesTimeScale;
+
+      // If the audio track is missing samples, the frames seem to get "left-shifted" within the
+      // resulting mp4 segment, causing sync issues and leaving gaps at the end of the audio segment.
+      // In an effort to prevent this from happening, we inject frames here where there are gaps.
+      // When possible, we inject a silent frame; when that's not possible, we duplicate the last
+      // frame.
+      var pesFrameDuration = expectedSampleDuration * pes2mp4ScaleFactor;
+      var nextPtsNorm = nextAacPts;
+      for (var i = 0; i < samples0.length;) {
+        // First, let's see how far off this frame is from where we expect it to be
+        var sample = samples0[i],
+            ptsNorm = this._PTSNormalize(sample.pts - this._initDTS, nextAacPts),
+            delta = ptsNorm - nextPtsNorm;
+
+        // If we're overlapping by more than half a duration, drop this sample
+        if (delta < -0.5 * pesFrameDuration) {
+          _logger.logger.log('Dropping frame due to ' + Math.round(Math.abs(delta / 90)) + ' ms overlap.');
+          samples0.splice(i, 1);
+          track.len -= sample.unit.length;
+          // Don't touch nextPtsNorm or i
+        }
+        // Otherwise, if we're more than half a frame away from where we should be, insert missing frames
+        else if (delta > 0.5 * pesFrameDuration) {
+            var missing = Math.round(delta / pesFrameDuration);
+            _logger.logger.log('Injecting ' + missing + ' frame' + (missing > 1 ? 's' : '') + ' of missing audio due to ' + Math.round(delta / 90) + ' ms gap.');
+            for (var j = 0; j < missing; j++) {
+              newStamp = sample.pts - (missing - j) * pesFrameDuration;
+              newStamp = Math.max(newStamp, this._initDTS);
+              fillFrame = _aac2.default.getSilentFrame(track.channelCount);
+              if (!fillFrame) {
+                _logger.logger.log('Unable to get silent frame for given audio codec; duplicating last frame instead.');
+                fillFrame = sample.unit.slice(0);
+              }
+              samples0.splice(i, 0, { unit: fillFrame, pts: newStamp, dts: newStamp });
+              track.len += fillFrame.length;
+              i += 1;
+            }
+
+            // Adjust sample to next expected pts
+            sample.pts = samples0[i - 1].pts + pesFrameDuration;
+            nextPtsNorm = this._PTSNormalize(sample.pts + pesFrameDuration - this._initDTS, nextAacPts);
+            i += 1;
+          }
+          // Otherwise, we're within half a frame duration, so just adjust pts
+          else {
+              if (Math.abs(delta) > 0.1 * pesFrameDuration) {
+                _logger.logger.log('Invalid frame delta ' + Math.round(ptsNorm - nextPtsNorm + pesFrameDuration) + ' at PTS ' + Math.round(ptsNorm / 90) + ' (should be ' + Math.round(pesFrameDuration) + ').');
+              }
+              nextPtsNorm += pesFrameDuration;
+              if (i === 0) {
+                sample.pts = this._initDTS + nextAacPts;
+              } else {
+                sample.pts = samples0[i - 1].pts + pesFrameDuration;
+              }
+              i += 1;
+            }
+      }
 
       while (samples0.length) {
         aacSample = samples0.shift();
@@ -7818,41 +9703,34 @@ var MP4Remuxer = function () {
         if (lastDTS !== undefined) {
           ptsnorm = this._PTSNormalize(pts, lastDTS);
           dtsnorm = this._PTSNormalize(dts, lastDTS);
-          // let's compute sample duration.
-          // sample Duration should be close to expectedSampleDuration
-          mp4Sample.duration = (dtsnorm - lastDTS) / pes2mp4ScaleFactor;
-          if (Math.abs(mp4Sample.duration - expectedSampleDuration) > expectedSampleDuration / 10) {
-            // more than 10% diff between sample duration and expectedSampleDuration .... lets log that
-            _logger.logger.log('invalid AAC sample duration at PTS ' + Math.round(pts / 90) + ',should be 1024,found :' + Math.round(mp4Sample.duration * track.audiosamplerate / track.timescale));
-          }
-          // always adjust sample duration to avoid av sync issue
-          mp4Sample.duration = expectedSampleDuration;
-          ptsnorm = dtsnorm = expectedSampleDuration * pes2mp4ScaleFactor + lastDTS;
+          mp4Sample.duration = Math.round((dtsnorm - lastDTS) / pes2mp4ScaleFactor);
         } else {
-          var nextAacPts = void 0,
-              delta = void 0;
-          if (contiguous) {
-            nextAacPts = this.nextAacPts;
-          } else {
-            nextAacPts = timeOffset * pesTimeScale;
-          }
           ptsnorm = this._PTSNormalize(pts, nextAacPts);
           dtsnorm = this._PTSNormalize(dts, nextAacPts);
-          delta = Math.round(1000 * (ptsnorm - nextAacPts) / pesTimeScale);
+          var _delta = Math.round(1000 * (ptsnorm - nextAacPts) / pesTimeScale),
+              numMissingFrames = 0;
           // if fragment are contiguous, detect hole/overlapping between fragments
           if (contiguous) {
             // log delta
-            if (delta) {
-              if (delta > 0) {
-                _logger.logger.log(delta + ' ms hole between AAC samples detected,filling it');
-                // if we have frame overlap, overlapping for more than half a frame duration
-              } else if (delta < -12) {
+            if (_delta) {
+              if (_delta > 0) {
+                numMissingFrames = Math.round((ptsnorm - nextAacPts) / pesFrameDuration);
+                _logger.logger.log(_delta + ' ms hole between AAC samples detected,filling it');
+                if (numMissingFrames > 0) {
+                  fillFrame = _aac2.default.getSilentFrame(track.channelCount);
+                  if (!fillFrame) {
+                    fillFrame = unit.slice(0);
+                  }
+                  track.len += numMissingFrames * fillFrame.length;
+                }
+                // if we have frame overlap, overlapping for more than half a frame duraion
+              } else if (_delta < -12) {
                   // drop overlapping audio frames... browser will deal with it
-                  _logger.logger.log(-delta + ' ms overlapping between AAC samples detected, drop frame');
+                  _logger.logger.log(-_delta + ' ms overlapping between AAC samples detected, drop frame');
                   track.len -= unit.byteLength;
                   continue;
                 }
-              // set PTS/DTS to next PTS/DTS
+              // set PTS/DTS to expected PTS/DTS
               ptsnorm = dtsnorm = nextAacPts;
             }
           }
@@ -7869,6 +9747,29 @@ var MP4Remuxer = function () {
           } else {
             // no audio samples
             return;
+          }
+          for (i = 0; i < numMissingFrames; i++) {
+            newStamp = ptsnorm - (numMissingFrames - i) * pesFrameDuration;
+            fillFrame = _aac2.default.getSilentFrame(track.channelCount);
+            if (!fillFrame) {
+              _logger.logger.log('Unable to get silent frame for given audio codec; duplicating this frame instead.');
+              fillFrame = unit.slice(0);
+            }
+            mdat.set(fillFrame, offset);
+            offset += fillFrame.byteLength;
+            mp4Sample = {
+              size: fillFrame.byteLength,
+              cts: 0,
+              duration: 1024,
+              flags: {
+                isLeading: 0,
+                isDependedOn: 0,
+                hasRedundancy: 0,
+                degradPrio: 0,
+                dependsOn: 1
+              }
+            };
+            samples.push(mp4Sample);
           }
         }
         mdat.set(unit, offset);
@@ -7904,7 +9805,10 @@ var MP4Remuxer = function () {
         track.samples = samples;
         moof = _mp4Generator2.default.moof(track.sequenceNumber++, firstDTS / pes2mp4ScaleFactor, track);
         track.samples = [];
-        this.observer.trigger(_events2.default.FRAG_PARSING_DATA, {
+        var audioData = {
+          id: this.id,
+          level: this.level,
+          sn: this.sn,
           data1: moof,
           data2: mdat,
           startPTS: firstPTS / pesTimeScale,
@@ -7913,8 +9817,52 @@ var MP4Remuxer = function () {
           endDTS: (dtsnorm + pes2mp4ScaleFactor * lastSampleDuration) / pesTimeScale,
           type: 'audio',
           nb: nbSamples
-        });
+        };
+        this.observer.trigger(_events2.default.FRAG_PARSING_DATA, audioData);
+        return audioData;
       }
+      return null;
+    }
+  }, {
+    key: 'remuxEmptyAudio',
+    value: function remuxEmptyAudio(track, timeOffset, contiguous, videoData) {
+      var pesTimeScale = this.PES_TIMESCALE,
+          mp4timeScale = track.timescale ? track.timescale : track.audiosamplerate,
+          pes2mp4ScaleFactor = pesTimeScale / mp4timeScale,
+
+
+      // sync with video's timestamp
+      startDTS = videoData.startDTS * pesTimeScale + this._initDTS,
+          endDTS = videoData.endDTS * pesTimeScale + this._initDTS,
+
+
+      // one sample's duration value
+      sampleDuration = 1024,
+          frameDuration = pes2mp4ScaleFactor * sampleDuration,
+
+
+      // samples count of this segment's duration
+      nbSamples = Math.ceil((endDTS - startDTS) / frameDuration),
+
+
+      // silent frame
+      silentFrame = _aac2.default.getSilentFrame(track.channelCount);
+
+      // Can't remux if we can't generate a silent frame...
+      if (!silentFrame) {
+        _logger.logger.trace('Unable to remuxEmptyAudio since we were unable to get a silent frame for given audio codec!');
+        return;
+      }
+
+      var samples = [];
+      for (var i = 0; i < nbSamples; i++) {
+        var stamp = startDTS + i * frameDuration;
+        samples.push({ unit: silentFrame.slice(0), pts: stamp, dts: stamp });
+        track.len += silentFrame.length;
+      }
+      track.samples = samples;
+
+      this.remuxAudio(track, timeOffset, contiguous);
     }
   }, {
     key: 'remuxID3',
@@ -7931,6 +9879,9 @@ var MP4Remuxer = function () {
           sample.dts = (sample.dts - this._initDTS) / this.PES_TIMESCALE;
         }
         this.observer.trigger(_events2.default.FRAG_PARSING_METADATA, {
+          id: this.id,
+          level: this.level,
+          sn: this.sn,
           samples: track.samples
         });
       }
@@ -7956,6 +9907,9 @@ var MP4Remuxer = function () {
           sample.pts = (sample.pts - this._initPTS) / this.PES_TIMESCALE;
         }
         this.observer.trigger(_events2.default.FRAG_PARSING_USERDATA, {
+          id: this.id,
+          level: this.level,
+          sn: this.sn,
           samples: track.samples
         });
       }
@@ -7997,7 +9951,7 @@ var MP4Remuxer = function () {
 
 exports.default = MP4Remuxer;
 
-},{"../errors":21,"../events":23,"../remux/mp4-generator":31,"../utils/logger":38}],33:[function(require,module,exports){
+},{"../errors":24,"../events":26,"../helper/aac":27,"../remux/mp4-generator":35,"../utils/logger":43,"../utils/polyfill":44}],37:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8009,7 +9963,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
 
-var _events = require('../events');
+var _events = _dereq_('../events');
 
 var _events2 = _interopRequireDefault(_events);
 
@@ -8018,10 +9972,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var PassThroughRemuxer = function () {
-  function PassThroughRemuxer(observer) {
+  function PassThroughRemuxer(observer, id) {
     _classCallCheck(this, PassThroughRemuxer);
 
     this.observer = observer;
+    this.id = id;
     this.ISGenerated = false;
   }
 
@@ -8043,7 +9998,7 @@ var PassThroughRemuxer = function () {
       // generate Init Segment if needed
       if (!this.ISGenerated) {
         var tracks = {},
-            data = { tracks: tracks, unique: true },
+            data = { id: this.id, tracks: tracks, unique: true },
             track = videoTrack,
             codec = track.codec;
 
@@ -8073,6 +10028,7 @@ var PassThroughRemuxer = function () {
         observer.trigger(_events2.default.FRAG_PARSING_INIT_SEGMENT, data);
       }
       observer.trigger(_events2.default.FRAG_PARSING_DATA, {
+        id: this.id,
         data1: rawData,
         startPTS: timeOffset,
         startDTS: timeOffset,
@@ -8093,7 +10049,7 @@ var PassThroughRemuxer = function () {
 
 exports.default = PassThroughRemuxer;
 
-},{"../events":23}],34:[function(require,module,exports){
+},{"../events":26}],38:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8200,7 +10156,7 @@ var AttrList = function () {
 
 exports.default = AttrList;
 
-},{}],35:[function(require,module,exports){
+},{}],39:[function(_dereq_,module,exports){
 "use strict";
 
 var BinarySearch = {
@@ -8245,427 +10201,1364 @@ var BinarySearch = {
 
 module.exports = BinarySearch;
 
-},{}],36:[function(require,module,exports){
+},{}],40:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/*
- * CEA-708 interpreter
-*/
+/**
+ *
+ * This code was ported from the dash.js project at:
+ *   https://github.com/Dash-Industry-Forum/dash.js/blob/development/externals/cea608-parser.js
+ *   https://github.com/Dash-Industry-Forum/dash.js/commit/8269b26a761e0853bb21d78780ed945144ecdd4d#diff-71bc295a2d6b6b7093a1d3290d53a4b2
+ *
+ * The original copyright appears below:
+ *
+ * The copyright in this software is being made available under the BSD License,
+ * included below. This software may be subject to other third party and contributor
+ * rights, including patent rights, and no such rights are granted under this license.
+ *
+ * Copyright (c) 2015-2016, DASH Industry Forum.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *  1. Redistributions of source code must retain the above copyright notice, this
+ *  list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright notice,
+ *  this list of conditions and the following disclaimer in the documentation and/or
+ *  other materials provided with the distribution.
+ *  2. Neither the name of Dash Industry Forum nor the names of its
+ *  contributors may be used to endorse or promote products derived from this software
+ *  without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS AND ANY
+ *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ *  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ *  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ *  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ *  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ */
+/**
+ *  Exceptions from regular ASCII. CodePoints are mapped to UTF-16 codes
+ */
 
-var CEA708Interpreter = function () {
-  function CEA708Interpreter() {
-    _classCallCheck(this, CEA708Interpreter);
-  }
+var specialCea608CharsCodes = {
+    0x2a: 0xe1, // lowercase a, acute accent
+    0x5c: 0xe9, // lowercase e, acute accent
+    0x5e: 0xed, // lowercase i, acute accent
+    0x5f: 0xf3, // lowercase o, acute accent
+    0x60: 0xfa, // lowercase u, acute accent
+    0x7b: 0xe7, // lowercase c with cedilla
+    0x7c: 0xf7, // division symbol
+    0x7d: 0xd1, // uppercase N tilde
+    0x7e: 0xf1, // lowercase n tilde
+    0x7f: 0x2588, // Full block
+    // THIS BLOCK INCLUDES THE 16 EXTENDED (TWO-BYTE) LINE 21 CHARACTERS
+    // THAT COME FROM HI BYTE=0x11 AND LOW BETWEEN 0x30 AND 0x3F
+    // THIS MEANS THAT \x50 MUST BE ADDED TO THE VALUES
+    0x80: 0xae, // Registered symbol (R)
+    0x81: 0xb0, // degree sign
+    0x82: 0xbd, // 1/2 symbol
+    0x83: 0xbf, // Inverted (open) question mark
+    0x84: 0x2122, // Trademark symbol (TM)
+    0x85: 0xa2, // Cents symbol
+    0x86: 0xa3, // Pounds sterling
+    0x87: 0x266a, // Music 8'th note
+    0x88: 0xe0, // lowercase a, grave accent
+    0x89: 0x20, // transparent space (regular)
+    0x8a: 0xe8, // lowercase e, grave accent
+    0x8b: 0xe2, // lowercase a, circumflex accent
+    0x8c: 0xea, // lowercase e, circumflex accent
+    0x8d: 0xee, // lowercase i, circumflex accent
+    0x8e: 0xf4, // lowercase o, circumflex accent
+    0x8f: 0xfb, // lowercase u, circumflex accent
+    // THIS BLOCK INCLUDES THE 32 EXTENDED (TWO-BYTE) LINE 21 CHARACTERS
+    // THAT COME FROM HI BYTE=0x12 AND LOW BETWEEN 0x20 AND 0x3F
+    0x90: 0xc1, // capital letter A with acute
+    0x91: 0xc9, // capital letter E with acute
+    0x92: 0xd3, // capital letter O with acute
+    0x93: 0xda, // capital letter U with acute
+    0x94: 0xdc, // capital letter U with diaresis
+    0x95: 0xfc, // lowercase letter U with diaeresis
+    0x96: 0x2018, // opening single quote
+    0x97: 0xa1, // inverted exclamation mark
+    0x98: 0x2a, // asterisk
+    0x99: 0x2019, // closing single quote
+    0x9a: 0x2501, // box drawings heavy horizontal
+    0x9b: 0xa9, // copyright sign
+    0x9c: 0x2120, // Service mark
+    0x9d: 0x2022, // (round) bullet
+    0x9e: 0x201c, // Left double quotation mark
+    0x9f: 0x201d, // Right double quotation mark
+    0xa0: 0xc0, // uppercase A, grave accent
+    0xa1: 0xc2, // uppercase A, circumflex
+    0xa2: 0xc7, // uppercase C with cedilla
+    0xa3: 0xc8, // uppercase E, grave accent
+    0xa4: 0xca, // uppercase E, circumflex
+    0xa5: 0xcb, // capital letter E with diaresis
+    0xa6: 0xeb, // lowercase letter e with diaresis
+    0xa7: 0xce, // uppercase I, circumflex
+    0xa8: 0xcf, // uppercase I, with diaresis
+    0xa9: 0xef, // lowercase i, with diaresis
+    0xaa: 0xd4, // uppercase O, circumflex
+    0xab: 0xd9, // uppercase U, grave accent
+    0xac: 0xf9, // lowercase u, grave accent
+    0xad: 0xdb, // uppercase U, circumflex
+    0xae: 0xab, // left-pointing double angle quotation mark
+    0xaf: 0xbb, // right-pointing double angle quotation mark
+    // THIS BLOCK INCLUDES THE 32 EXTENDED (TWO-BYTE) LINE 21 CHARACTERS
+    // THAT COME FROM HI BYTE=0x13 AND LOW BETWEEN 0x20 AND 0x3F
+    0xb0: 0xc3, // Uppercase A, tilde
+    0xb1: 0xe3, // Lowercase a, tilde
+    0xb2: 0xcd, // Uppercase I, acute accent
+    0xb3: 0xcc, // Uppercase I, grave accent
+    0xb4: 0xec, // Lowercase i, grave accent
+    0xb5: 0xd2, // Uppercase O, grave accent
+    0xb6: 0xf2, // Lowercase o, grave accent
+    0xb7: 0xd5, // Uppercase O, tilde
+    0xb8: 0xf5, // Lowercase o, tilde
+    0xb9: 0x7b, // Open curly brace
+    0xba: 0x7d, // Closing curly brace
+    0xbb: 0x5c, // Backslash
+    0xbc: 0x5e, // Caret
+    0xbd: 0x5f, // Underscore
+    0xbe: 0x7c, // Pipe (vertical line)
+    0xbf: 0x223c, // Tilde operator
+    0xc0: 0xc4, // Uppercase A, umlaut
+    0xc1: 0xe4, // Lowercase A, umlaut
+    0xc2: 0xd6, // Uppercase O, umlaut
+    0xc3: 0xf6, // Lowercase o, umlaut
+    0xc4: 0xdf, // Esszett (sharp S)
+    0xc5: 0xa5, // Yen symbol
+    0xc6: 0xa4, // Generic currency sign
+    0xc7: 0x2503, // Box drawings heavy vertical
+    0xc8: 0xc5, // Uppercase A, ring
+    0xc9: 0xe5, // Lowercase A, ring
+    0xca: 0xd8, // Uppercase O, stroke
+    0xcb: 0xf8, // Lowercase o, strok
+    0xcc: 0x250f, // Box drawings heavy down and right
+    0xcd: 0x2513, // Box drawings heavy down and left
+    0xce: 0x2517, // Box drawings heavy up and right
+    0xcf: 0x251b // Box drawings heavy up and left
+};
 
-  _createClass(CEA708Interpreter, [{
-    key: 'attach',
-    value: function attach(media) {
-      this.media = media;
-      this.display = [];
-      this.memory = [];
+/**
+ * Utils
+ */
+var getCharForByte = function getCharForByte(byte) {
+    var charCode = byte;
+    if (specialCea608CharsCodes.hasOwnProperty(byte)) {
+        charCode = specialCea608CharsCodes[byte];
     }
-  }, {
-    key: 'detach',
-    value: function detach() {
-      this.clear();
-    }
-  }, {
-    key: 'destroy',
-    value: function destroy() {}
-  }, {
-    key: '_createCue',
-    value: function _createCue() {
-      var VTTCue = window.VTTCue || window.TextTrackCue;
+    return String.fromCharCode(charCode);
+};
 
-      var cue = this.cue = new VTTCue(-1, -1, '');
-      cue.text = '';
-      cue.pauseOnExit = false;
+var NR_ROWS = 15,
+    NR_COLS = 32;
+// Tables to look up row from PAC data
+var rowsLowCh1 = { 0x11: 1, 0x12: 3, 0x15: 5, 0x16: 7, 0x17: 9, 0x10: 11, 0x13: 12, 0x14: 14 };
+var rowsHighCh1 = { 0x11: 2, 0x12: 4, 0x15: 6, 0x16: 8, 0x17: 10, 0x13: 13, 0x14: 15 };
+var rowsLowCh2 = { 0x19: 1, 0x1A: 3, 0x1D: 5, 0x1E: 7, 0x1F: 9, 0x18: 11, 0x1B: 12, 0x1C: 14 };
+var rowsHighCh2 = { 0x19: 2, 0x1A: 4, 0x1D: 6, 0x1E: 8, 0x1F: 10, 0x1B: 13, 0x1C: 15 };
 
-      // make sure it doesn't show up before it's ready
-      cue.startTime = Number.MAX_VALUE;
+var backgroundColors = ['white', 'green', 'blue', 'cyan', 'red', 'yellow', 'magenta', 'black', 'transparent'];
 
-      // show it 'forever' once we do show it
-      // (we'll set the end time once we know it later)
-      cue.endTime = Number.MAX_VALUE;
-
-      this.memory.push(cue);
-    }
-  }, {
-    key: 'clear',
-    value: function clear() {
-      var textTrack = this._textTrack;
-      if (textTrack && textTrack.cues) {
-        while (textTrack.cues.length > 0) {
-          textTrack.removeCue(textTrack.cues[0]);
+/**
+ * Simple logger class to be able to write with time-stamps and filter on level.
+ */
+var logger = {
+    verboseFilter: { 'DATA': 3, 'DEBUG': 3, 'INFO': 2, 'WARNING': 2, 'TEXT': 1, 'ERROR': 0 },
+    time: null,
+    verboseLevel: 0, // Only write errors
+    setTime: function setTime(newTime) {
+        this.time = newTime;
+    },
+    log: function log(severity, msg) {
+        var minLevel = this.verboseFilter[severity];
+        if (this.verboseLevel >= minLevel) {
+            console.log(this.time + ' [' + severity + '] ' + msg);
         }
-      }
     }
-  }, {
-    key: 'push',
-    value: function push(timestamp, bytes) {
-      if (!this.cue) {
-        this._createCue();
-      }
+};
 
-      var count = bytes[0] & 31;
-      var position = 2;
-      var tmpByte, ccbyte1, ccbyte2, ccValid, ccType;
+var numArrayToHexArray = function numArrayToHexArray(numArray) {
+    var hexArray = [];
+    for (var j = 0; j < numArray.length; j++) {
+        hexArray.push(numArray[j].toString(16));
+    }
+    return hexArray;
+};
 
-      for (var j = 0; j < count; j++) {
-        tmpByte = bytes[position++];
-        ccbyte1 = 0x7F & bytes[position++];
-        ccbyte2 = 0x7F & bytes[position++];
-        ccValid = (4 & tmpByte) === 0 ? false : true;
-        ccType = 3 & tmpByte;
+var PenState = function () {
+    function PenState(foreground, underline, italics, background, flash) {
+        _classCallCheck(this, PenState);
 
-        if (ccbyte1 === 0 && ccbyte2 === 0) {
-          continue;
+        this.foreground = foreground || 'white';
+        this.underline = underline || false;
+        this.italics = italics || false;
+        this.background = background || 'black';
+        this.flash = flash || false;
+    }
+
+    _createClass(PenState, [{
+        key: 'reset',
+        value: function reset() {
+            this.foreground = 'white';
+            this.underline = false;
+            this.italics = false;
+            this.background = 'black';
+            this.flash = false;
         }
-
-        if (ccValid) {
-          if (ccType === 0) // || ccType === 1
-            {
-              // Standard Characters
-              if (0x20 & ccbyte1 || 0x40 & ccbyte1) {
-                this.cue.text += this._fromCharCode(ccbyte1) + this._fromCharCode(ccbyte2);
-              }
-              // Special Characters
-              else if ((ccbyte1 === 0x11 || ccbyte1 === 0x19) && ccbyte2 >= 0x30 && ccbyte2 <= 0x3F) {
-                  // extended chars, e.g. musical note, accents
-                  switch (ccbyte2) {
-                    case 48:
-                      this.cue.text += '®';
-                      break;
-                    case 49:
-                      this.cue.text += '°';
-                      break;
-                    case 50:
-                      this.cue.text += '½';
-                      break;
-                    case 51:
-                      this.cue.text += '¿';
-                      break;
-                    case 52:
-                      this.cue.text += '™';
-                      break;
-                    case 53:
-                      this.cue.text += '¢';
-                      break;
-                    case 54:
-                      this.cue.text += '';
-                      break;
-                    case 55:
-                      this.cue.text += '£';
-                      break;
-                    case 56:
-                      this.cue.text += '♪';
-                      break;
-                    case 57:
-                      this.cue.text += ' ';
-                      break;
-                    case 58:
-                      this.cue.text += 'è';
-                      break;
-                    case 59:
-                      this.cue.text += 'â';
-                      break;
-                    case 60:
-                      this.cue.text += 'ê';
-                      break;
-                    case 61:
-                      this.cue.text += 'î';
-                      break;
-                    case 62:
-                      this.cue.text += 'ô';
-                      break;
-                    case 63:
-                      this.cue.text += 'û';
-                      break;
-                  }
+    }, {
+        key: 'setStyles',
+        value: function setStyles(styles) {
+            var attribs = ['foreground', 'underline', 'italics', 'background', 'flash'];
+            for (var i = 0; i < attribs.length; i++) {
+                var style = attribs[i];
+                if (styles.hasOwnProperty(style)) {
+                    this[style] = styles[style];
                 }
-              if ((ccbyte1 === 0x11 || ccbyte1 === 0x19) && ccbyte2 >= 0x20 && ccbyte2 <= 0x2F) {
-                // Mid-row codes: color/underline
-                switch (ccbyte2) {
-                  case 0x20:
-                    // White
-                    break;
-                  case 0x21:
-                    // White Underline
-                    break;
-                  case 0x22:
-                    // Green
-                    break;
-                  case 0x23:
-                    // Green Underline
-                    break;
-                  case 0x24:
-                    // Blue
-                    break;
-                  case 0x25:
-                    // Blue Underline
-                    break;
-                  case 0x26:
-                    // Cyan
-                    break;
-                  case 0x27:
-                    // Cyan Underline
-                    break;
-                  case 0x28:
-                    // Red
-                    break;
-                  case 0x29:
-                    // Red Underline
-                    break;
-                  case 0x2A:
-                    // Yellow
-                    break;
-                  case 0x2B:
-                    // Yellow Underline
-                    break;
-                  case 0x2C:
-                    // Magenta
-                    break;
-                  case 0x2D:
-                    // Magenta Underline
-                    break;
-                  case 0x2E:
-                    // Italics
-                    break;
-                  case 0x2F:
-                    // Italics Underline
-                    break;
-                }
-              }
-              if ((ccbyte1 === 0x14 || ccbyte1 === 0x1C) && ccbyte2 >= 0x20 && ccbyte2 <= 0x2F) {
-                // Mid-row codes: color/underline
-                switch (ccbyte2) {
-                  case 0x20:
-                    // TODO: shouldn't affect roll-ups...
-                    this._clearActiveCues(timestamp);
-                    // RCL: Resume Caption Loading
-                    // begin pop on
-                    break;
-                  case 0x21:
-                    // BS: Backspace
-                    this.cue.text = this.cue.text.substr(0, this.cue.text.length - 1);
-                    break;
-                  case 0x22:
-                    // AOF: reserved (formerly alarm off)
-                    break;
-                  case 0x23:
-                    // AON: reserved (formerly alarm on)
-                    break;
-                  case 0x24:
-                    // DER: Delete to end of row
-                    break;
-                  case 0x25:
-                    // RU2: roll-up 2 rows
-                    //this._rollup(2);
-                    break;
-                  case 0x26:
-                    // RU3: roll-up 3 rows
-                    //this._rollup(3);
-                    break;
-                  case 0x27:
-                    // RU4: roll-up 4 rows
-                    //this._rollup(4);
-                    break;
-                  case 0x28:
-                    // FON: Flash on
-                    break;
-                  case 0x29:
-                    // RDC: Resume direct captioning
-                    this._clearActiveCues(timestamp);
-                    break;
-                  case 0x2A:
-                    // TR: Text Restart
-                    break;
-                  case 0x2B:
-                    // RTD: Resume Text Display
-                    break;
-                  case 0x2C:
-                    // EDM: Erase Displayed Memory
-                    this._clearActiveCues(timestamp);
-                    break;
-                  case 0x2D:
-                    // CR: Carriage Return
-                    // only affects roll-up
-                    //this._rollup(1);
-                    break;
-                  case 0x2E:
-                    // ENM: Erase non-displayed memory
-                    this._text = '';
-                    break;
-                  case 0x2F:
-                    this._flipMemory(timestamp);
-                    // EOC: End of caption
-                    // hide any displayed captions and show any hidden one
-                    break;
-                }
-              }
-              if ((ccbyte1 === 0x17 || ccbyte1 === 0x1F) && ccbyte2 >= 0x21 && ccbyte2 <= 0x23) {
-                // Mid-row codes: color/underline
-                switch (ccbyte2) {
-                  case 0x21:
-                    // TO1: tab offset 1 column
-                    break;
-                  case 0x22:
-                    // TO1: tab offset 2 column
-                    break;
-                  case 0x23:
-                    // TO1: tab offset 3 column
-                    break;
-                }
-              } else {
-                // Probably a pre-amble address code
-              }
             }
         }
-      }
-    }
-  }, {
-    key: '_fromCharCode',
-    value: function _fromCharCode(tmpByte) {
-      switch (tmpByte) {
-        case 42:
-          return 'á';
-
-        case 2:
-          return 'á';
-
-        case 2:
-          return 'é';
-
-        case 4:
-          return 'í';
-
-        case 5:
-          return 'ó';
-
-        case 6:
-          return 'ú';
-
-        case 3:
-          return 'ç';
-
-        case 4:
-          return '÷';
-
-        case 5:
-          return 'Ñ';
-
-        case 6:
-          return 'ñ';
-
-        case 7:
-          return '█';
-
-        default:
-          return String.fromCharCode(tmpByte);
-      }
-    }
-  }, {
-    key: '_flipMemory',
-    value: function _flipMemory(timestamp) {
-      this._clearActiveCues(timestamp);
-      this._flushCaptions(timestamp);
-    }
-  }, {
-    key: '_flushCaptions',
-    value: function _flushCaptions(timestamp) {
-      if (!this._has708) {
-        this._textTrack = this.media.addTextTrack('captions', 'English', 'en');
-        this._has708 = true;
-      }
-
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = this.memory[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var memoryItem = _step.value;
-
-          memoryItem.startTime = timestamp;
-          this._textTrack.addCue(memoryItem);
-          this.display.push(memoryItem);
+    }, {
+        key: 'isDefault',
+        value: function isDefault() {
+            return this.foreground === 'white' && !this.underline && !this.italics && this.background === 'black' && !this.flash;
         }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
+    }, {
+        key: 'equals',
+        value: function equals(other) {
+            return this.foreground === other.foreground && this.underline === other.underline && this.italics === other.italics && this.background === other.background && this.flash === other.flash;
         }
-      }
-
-      this.memory = [];
-      this.cue = null;
-    }
-  }, {
-    key: '_clearActiveCues',
-    value: function _clearActiveCues(timestamp) {
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
-
-      try {
-        for (var _iterator2 = this.display[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var displayItem = _step2.value;
-
-          displayItem.endTime = timestamp;
+    }, {
+        key: 'copy',
+        value: function copy(newPenState) {
+            this.foreground = newPenState.foreground;
+            this.underline = newPenState.underline;
+            this.italics = newPenState.italics;
+            this.background = newPenState.background;
+            this.flash = newPenState.flash;
         }
-      } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
+    }, {
+        key: 'toString',
+        value: function toString() {
+            return 'color=' + this.foreground + ', underline=' + this.underline + ', italics=' + this.italics + ', background=' + this.background + ', flash=' + this.flash;
         }
-      }
+    }]);
 
-      this.display = [];
-    }
-
-    /*  _rollUp(n)
-      {
-        // TODO: implement roll-up captions
-      }
-    */
-
-  }, {
-    key: '_clearBufferedCues',
-    value: function _clearBufferedCues() {
-      //remove them all...
-    }
-  }]);
-
-  return CEA708Interpreter;
+    return PenState;
 }();
 
-exports.default = CEA708Interpreter;
+/**
+ * Unicode character with styling and background.
+ * @constructor
+ */
 
-},{}],37:[function(require,module,exports){
+
+var StyledUnicodeChar = function () {
+    function StyledUnicodeChar(uchar, foreground, underline, italics, background, flash) {
+        _classCallCheck(this, StyledUnicodeChar);
+
+        this.uchar = uchar || ' '; // unicode character
+        this.penState = new PenState(foreground, underline, italics, background, flash);
+    }
+
+    _createClass(StyledUnicodeChar, [{
+        key: 'reset',
+        value: function reset() {
+            this.uchar = ' ';
+            this.penState.reset();
+        }
+    }, {
+        key: 'setChar',
+        value: function setChar(uchar, newPenState) {
+            this.uchar = uchar;
+            this.penState.copy(newPenState);
+        }
+    }, {
+        key: 'setPenState',
+        value: function setPenState(newPenState) {
+            this.penState.copy(newPenState);
+        }
+    }, {
+        key: 'equals',
+        value: function equals(other) {
+            return this.uchar === other.uchar && this.penState.equals(other.penState);
+        }
+    }, {
+        key: 'copy',
+        value: function copy(newChar) {
+            this.uchar = newChar.uchar;
+            this.penState.copy(newChar.penState);
+        }
+    }, {
+        key: 'isEmpty',
+        value: function isEmpty() {
+            return this.uchar === ' ' && this.penState.isDefault();
+        }
+    }]);
+
+    return StyledUnicodeChar;
+}();
+
+/**
+ * CEA-608 row consisting of NR_COLS instances of StyledUnicodeChar.
+ * @constructor
+ */
+
+
+var Row = function () {
+    function Row() {
+        _classCallCheck(this, Row);
+
+        this.chars = [];
+        for (var i = 0; i < NR_COLS; i++) {
+            this.chars.push(new StyledUnicodeChar());
+        }
+        this.pos = 0;
+        this.currPenState = new PenState();
+    }
+
+    _createClass(Row, [{
+        key: 'equals',
+        value: function equals(other) {
+            var equal = true;
+            for (var i = 0; i < NR_COLS; i++) {
+                if (!this.chars[i].equals(other.chars[i])) {
+                    equal = false;
+                    break;
+                }
+            }
+            return equal;
+        }
+    }, {
+        key: 'copy',
+        value: function copy(other) {
+            for (var i = 0; i < NR_COLS; i++) {
+                this.chars[i].copy(other.chars[i]);
+            }
+        }
+    }, {
+        key: 'isEmpty',
+        value: function isEmpty() {
+            var empty = true;
+            for (var i = 0; i < NR_COLS; i++) {
+                if (!this.chars[i].isEmpty()) {
+                    empty = false;
+                    break;
+                }
+            }
+            return empty;
+        }
+
+        /**
+         *  Set the cursor to a valid column.
+         */
+
+    }, {
+        key: 'setCursor',
+        value: function setCursor(absPos) {
+            if (this.pos !== absPos) {
+                this.pos = absPos;
+            }
+            if (this.pos < 0) {
+                logger.log('ERROR', 'Negative cursor position ' + this.pos);
+                this.pos = 0;
+            } else if (this.pos > NR_COLS) {
+                logger.log('ERROR', 'Too large cursor position ' + this.pos);
+                this.pos = NR_COLS;
+            }
+        }
+
+        /**
+         * Move the cursor relative to current position.
+         */
+
+    }, {
+        key: 'moveCursor',
+        value: function moveCursor(relPos) {
+            var newPos = this.pos + relPos;
+            if (relPos > 1) {
+                for (var i = this.pos + 1; i < newPos + 1; i++) {
+                    this.chars[i].setPenState(this.currPenState);
+                }
+            }
+            this.setCursor(newPos);
+        }
+
+        /**
+         * Backspace, move one step back and clear character.
+         */
+
+    }, {
+        key: 'backSpace',
+        value: function backSpace() {
+            this.moveCursor(-1);
+            this.chars[this.pos].setChar(' ', this.currPenState);
+        }
+    }, {
+        key: 'insertChar',
+        value: function insertChar(byte) {
+            if (byte >= 0x90) {
+                //Extended char
+                this.backSpace();
+            }
+            var char = getCharForByte(byte);
+            if (this.pos >= NR_COLS) {
+                logger.log('ERROR', 'Cannot insert ' + byte.toString(16) + ' (' + char + ') at position ' + this.pos + '. Skipping it!');
+                return;
+            }
+            this.chars[this.pos].setChar(char, this.currPenState);
+            this.moveCursor(1);
+        }
+    }, {
+        key: 'clearFromPos',
+        value: function clearFromPos(startPos) {
+            var i;
+            for (i = startPos; i < NR_COLS; i++) {
+                this.chars[i].reset();
+            }
+        }
+    }, {
+        key: 'clear',
+        value: function clear() {
+            this.clearFromPos(0);
+            this.pos = 0;
+            this.currPenState.reset();
+        }
+    }, {
+        key: 'clearToEndOfRow',
+        value: function clearToEndOfRow() {
+            this.clearFromPos(this.pos);
+        }
+    }, {
+        key: 'getTextString',
+        value: function getTextString() {
+            var chars = [];
+            var empty = true;
+            for (var i = 0; i < NR_COLS; i++) {
+                var char = this.chars[i].uchar;
+                if (char !== ' ') {
+                    empty = false;
+                }
+                chars.push(char);
+            }
+            if (empty) {
+                return '';
+            } else {
+                return chars.join('');
+            }
+        }
+    }, {
+        key: 'setPenStyles',
+        value: function setPenStyles(styles) {
+            this.currPenState.setStyles(styles);
+            var currChar = this.chars[this.pos];
+            currChar.setPenState(this.currPenState);
+        }
+    }]);
+
+    return Row;
+}();
+
+/**
+ * Keep a CEA-608 screen of 32x15 styled characters
+ * @constructor
+*/
+
+
+var CaptionScreen = function () {
+    function CaptionScreen() {
+        _classCallCheck(this, CaptionScreen);
+
+        this.rows = [];
+        for (var i = 0; i < NR_ROWS; i++) {
+            this.rows.push(new Row()); // Note that we use zero-based numbering (0-14)
+        }
+        this.currRow = NR_ROWS - 1;
+        this.nrRollUpRows = null;
+        this.reset();
+    }
+
+    _createClass(CaptionScreen, [{
+        key: 'reset',
+        value: function reset() {
+            for (var i = 0; i < NR_ROWS; i++) {
+                this.rows[i].clear();
+            }
+            this.currRow = NR_ROWS - 1;
+        }
+    }, {
+        key: 'equals',
+        value: function equals(other) {
+            var equal = true;
+            for (var i = 0; i < NR_ROWS; i++) {
+                if (!this.rows[i].equals(other.rows[i])) {
+                    equal = false;
+                    break;
+                }
+            }
+            return equal;
+        }
+    }, {
+        key: 'copy',
+        value: function copy(other) {
+            for (var i = 0; i < NR_ROWS; i++) {
+                this.rows[i].copy(other.rows[i]);
+            }
+        }
+    }, {
+        key: 'isEmpty',
+        value: function isEmpty() {
+            var empty = true;
+            for (var i = 0; i < NR_ROWS; i++) {
+                if (!this.rows[i].isEmpty()) {
+                    empty = false;
+                    break;
+                }
+            }
+            return empty;
+        }
+    }, {
+        key: 'backSpace',
+        value: function backSpace() {
+            var row = this.rows[this.currRow];
+            row.backSpace();
+        }
+    }, {
+        key: 'clearToEndOfRow',
+        value: function clearToEndOfRow() {
+            var row = this.rows[this.currRow];
+            row.clearToEndOfRow();
+        }
+
+        /**
+         * Insert a character (without styling) in the current row.
+         */
+
+    }, {
+        key: 'insertChar',
+        value: function insertChar(char) {
+            var row = this.rows[this.currRow];
+            row.insertChar(char);
+        }
+    }, {
+        key: 'setPen',
+        value: function setPen(styles) {
+            var row = this.rows[this.currRow];
+            row.setPenStyles(styles);
+        }
+    }, {
+        key: 'moveCursor',
+        value: function moveCursor(relPos) {
+            var row = this.rows[this.currRow];
+            row.moveCursor(relPos);
+        }
+    }, {
+        key: 'setCursor',
+        value: function setCursor(absPos) {
+            logger.log('INFO', 'setCursor: ' + absPos);
+            var row = this.rows[this.currRow];
+            row.setCursor(absPos);
+        }
+    }, {
+        key: 'setPAC',
+        value: function setPAC(pacData) {
+            logger.log('INFO', 'pacData = ' + JSON.stringify(pacData));
+            var newRow = pacData.row - 1;
+            if (this.nrRollUpRows && newRow < this.nrRollUpRows - 1) {
+                newRow = this.nrRollUpRows - 1;
+            }
+            this.currRow = newRow;
+            var row = this.rows[this.currRow];
+            if (pacData.indent !== null) {
+                var indent = pacData.indent;
+                var prevPos = Math.max(indent - 1, 0);
+                row.setCursor(pacData.indent);
+                pacData.color = row.chars[prevPos].penState.foreground;
+            }
+            var styles = { foreground: pacData.color, underline: pacData.underline, italics: pacData.italics, background: 'black', flash: false };
+            this.setPen(styles);
+        }
+
+        /**
+         * Set background/extra foreground, but first do back_space, and then insert space (backwards compatibility).
+         */
+
+    }, {
+        key: 'setBkgData',
+        value: function setBkgData(bkgData) {
+
+            logger.log('INFO', 'bkgData = ' + JSON.stringify(bkgData));
+            this.backSpace();
+            this.setPen(bkgData);
+            this.insertChar(0x20); //Space
+        }
+    }, {
+        key: 'setRollUpRows',
+        value: function setRollUpRows(nrRows) {
+            this.nrRollUpRows = nrRows;
+        }
+    }, {
+        key: 'rollUp',
+        value: function rollUp() {
+            if (this.nrRollUpRows === null) {
+                logger.log('DEBUG', 'roll_up but nrRollUpRows not set yet');
+                return; //Not properly setup
+            }
+            logger.log('TEXT', this.getDisplayText());
+            var topRowIndex = this.currRow + 1 - this.nrRollUpRows;
+            var topRow = this.rows.splice(topRowIndex, 1)[0];
+            topRow.clear();
+            this.rows.splice(this.currRow, 0, topRow);
+            logger.log('INFO', 'Rolling up');
+            //logger.log('TEXT', this.get_display_text())
+        }
+
+        /**
+         * Get all non-empty rows with as unicode text.
+         */
+
+    }, {
+        key: 'getDisplayText',
+        value: function getDisplayText(asOneRow) {
+            asOneRow = asOneRow || false;
+            var displayText = [];
+            var text = '';
+            var rowNr = -1;
+            for (var i = 0; i < NR_ROWS; i++) {
+                var rowText = this.rows[i].getTextString();
+                if (rowText) {
+                    rowNr = i + 1;
+                    if (asOneRow) {
+                        displayText.push('Row ' + rowNr + ': \'' + rowText + '\'');
+                    } else {
+                        displayText.push(rowText.trim());
+                    }
+                }
+            }
+            if (displayText.length > 0) {
+                if (asOneRow) {
+                    text = '[' + displayText.join(' | ') + ']';
+                } else {
+                    text = displayText.join('\n');
+                }
+            }
+            return text;
+        }
+    }, {
+        key: 'getTextAndFormat',
+        value: function getTextAndFormat() {
+            return this.rows;
+        }
+    }]);
+
+    return CaptionScreen;
+}();
+
+//var modes = ['MODE_ROLL-UP', 'MODE_POP-ON', 'MODE_PAINT-ON', 'MODE_TEXT'];
+
+var Cea608Channel = function () {
+    function Cea608Channel(channelNumber, outputFilter) {
+        _classCallCheck(this, Cea608Channel);
+
+        this.chNr = channelNumber;
+        this.outputFilter = outputFilter;
+        this.mode = null;
+        this.verbose = 0;
+        this.displayedMemory = new CaptionScreen();
+        this.nonDisplayedMemory = new CaptionScreen();
+        this.lastOutputScreen = new CaptionScreen();
+        this.currRollUpRow = this.displayedMemory.rows[NR_ROWS - 1];
+        this.writeScreen = this.displayedMemory;
+        this.mode = null;
+        this.cueStartTime = null; // Keeps track of where a cue started.
+    }
+
+    _createClass(Cea608Channel, [{
+        key: 'reset',
+        value: function reset() {
+            this.mode = null;
+            this.displayedMemory.reset();
+            this.nonDisplayedMemory.reset();
+            this.lastOutputScreen.reset();
+            this.currRollUpRow = this.displayedMemory.rows[NR_ROWS - 1];
+            this.writeScreen = this.displayedMemory;
+            this.mode = null;
+            this.cueStartTime = null;
+            this.lastCueEndTime = null;
+        }
+    }, {
+        key: 'getHandler',
+        value: function getHandler() {
+            return this.outputFilter;
+        }
+    }, {
+        key: 'setHandler',
+        value: function setHandler(newHandler) {
+            this.outputFilter = newHandler;
+        }
+    }, {
+        key: 'setPAC',
+        value: function setPAC(pacData) {
+            this.writeScreen.setPAC(pacData);
+        }
+    }, {
+        key: 'setBkgData',
+        value: function setBkgData(bkgData) {
+            this.writeScreen.setBkgData(bkgData);
+        }
+    }, {
+        key: 'setMode',
+        value: function setMode(newMode) {
+            if (newMode === this.mode) {
+                return;
+            }
+            this.mode = newMode;
+            logger.log('INFO', 'MODE=' + newMode);
+            if (this.mode === 'MODE_POP-ON') {
+                this.writeScreen = this.nonDisplayedMemory;
+            } else {
+                this.writeScreen = this.displayedMemory;
+                this.writeScreen.reset();
+            }
+            if (this.mode !== 'MODE_ROLL-UP') {
+                this.displayedMemory.nrRollUpRows = null;
+                this.nonDisplayedMemory.nrRollUpRows = null;
+            }
+            this.mode = newMode;
+        }
+    }, {
+        key: 'insertChars',
+        value: function insertChars(chars) {
+            for (var i = 0; i < chars.length; i++) {
+                this.writeScreen.insertChar(chars[i]);
+            }
+            var screen = this.writeScreen === this.displayedMemory ? 'DISP' : 'NON_DISP';
+            logger.log('INFO', screen + ': ' + this.writeScreen.getDisplayText(true));
+            if (this.mode === 'MODE_PAINT-ON' || this.mode === 'MODE_ROLL-UP') {
+                logger.log('TEXT', 'DISPLAYED: ' + this.displayedMemory.getDisplayText(true));
+                this.outputDataUpdate();
+            }
+        }
+    }, {
+        key: 'ccRCL',
+        value: function ccRCL() {
+            // Resume Caption Loading (switch mode to Pop On)
+            logger.log('INFO', 'RCL - Resume Caption Loading');
+            this.setMode('MODE_POP-ON');
+        }
+    }, {
+        key: 'ccBS',
+        value: function ccBS() {
+            // BackSpace
+            logger.log('INFO', 'BS - BackSpace');
+            if (this.mode === 'MODE_TEXT') {
+                return;
+            }
+            this.writeScreen.backSpace();
+            if (this.writeScreen === this.displayedMemory) {
+                this.outputDataUpdate();
+            }
+        }
+    }, {
+        key: 'ccAOF',
+        value: function ccAOF() {
+            // Reserved (formerly Alarm Off)
+            return;
+        }
+    }, {
+        key: 'ccAON',
+        value: function ccAON() {
+            // Reserved (formerly Alarm On)
+            return;
+        }
+    }, {
+        key: 'ccDER',
+        value: function ccDER() {
+            // Delete to End of Row
+            logger.log('INFO', 'DER- Delete to End of Row');
+            this.writeScreen.clearToEndOfRow();
+            this.outputDataUpdate();
+        }
+    }, {
+        key: 'ccRU',
+        value: function ccRU(nrRows) {
+            //Roll-Up Captions-2,3,or 4 Rows
+            logger.log('INFO', 'RU(' + nrRows + ') - Roll Up');
+            this.writeScreen = this.displayedMemory;
+            this.setMode('MODE_ROLL-UP');
+            this.writeScreen.setRollUpRows(nrRows);
+        }
+    }, {
+        key: 'ccFON',
+        value: function ccFON() {
+            //Flash On
+            logger.log('INFO', 'FON - Flash On');
+            this.writeScreen.setPen({ flash: true });
+        }
+    }, {
+        key: 'ccRDC',
+        value: function ccRDC() {
+            // Resume Direct Captioning (switch mode to PaintOn)
+            logger.log('INFO', 'RDC - Resume Direct Captioning');
+            this.setMode('MODE_PAINT-ON');
+        }
+    }, {
+        key: 'ccTR',
+        value: function ccTR() {
+            // Text Restart in text mode (not supported, however)
+            logger.log('INFO', 'TR');
+            this.setMode('MODE_TEXT');
+        }
+    }, {
+        key: 'ccRTD',
+        value: function ccRTD() {
+            // Resume Text Display in Text mode (not supported, however)
+            logger.log('INFO', 'RTD');
+            this.setMode('MODE_TEXT');
+        }
+    }, {
+        key: 'ccEDM',
+        value: function ccEDM() {
+            // Erase Displayed Memory
+            logger.log('INFO', 'EDM - Erase Displayed Memory');
+            this.displayedMemory.reset();
+            this.outputDataUpdate();
+        }
+    }, {
+        key: 'ccCR',
+        value: function ccCR() {
+            // Carriage Return
+            logger.log('CR - Carriage Return');
+            this.writeScreen.rollUp();
+            this.outputDataUpdate();
+        }
+    }, {
+        key: 'ccENM',
+        value: function ccENM() {
+            //Erase Non-Displayed Memory
+            logger.log('INFO', 'ENM - Erase Non-displayed Memory');
+            this.nonDisplayedMemory.reset();
+        }
+    }, {
+        key: 'ccEOC',
+        value: function ccEOC() {
+            //End of Caption (Flip Memories)
+            logger.log('INFO', 'EOC - End Of Caption');
+            if (this.mode === 'MODE_POP-ON') {
+                var tmp = this.displayedMemory;
+                this.displayedMemory = this.nonDisplayedMemory;
+                this.nonDisplayedMemory = tmp;
+                this.writeScreen = this.nonDisplayedMemory;
+                logger.log('TEXT', 'DISP: ' + this.displayedMemory.getDisplayText());
+            }
+            this.outputDataUpdate();
+        }
+    }, {
+        key: 'ccTO',
+        value: function ccTO(nrCols) {
+            // Tab Offset 1,2, or 3 columns
+            logger.log('INFO', 'TO(' + nrCols + ') - Tab Offset');
+            this.writeScreen.moveCursor(nrCols);
+        }
+    }, {
+        key: 'ccMIDROW',
+        value: function ccMIDROW(secondByte) {
+            // Parse MIDROW command
+            var styles = { flash: false };
+            styles.underline = secondByte % 2 === 1;
+            styles.italics = secondByte >= 0x2e;
+            if (!styles.italics) {
+                var colorIndex = Math.floor(secondByte / 2) - 0x10;
+                var colors = ['white', 'green', 'blue', 'cyan', 'red', 'yellow', 'magenta'];
+                styles.foreground = colors[colorIndex];
+            } else {
+                styles.foreground = 'white';
+            }
+            logger.log('INFO', 'MIDROW: ' + JSON.stringify(styles));
+            this.writeScreen.setPen(styles);
+        }
+    }, {
+        key: 'outputDataUpdate',
+        value: function outputDataUpdate() {
+            var t = logger.time;
+            if (t === null) {
+                return;
+            }
+            if (this.outputFilter) {
+                if (this.outputFilter.updateData) {
+                    this.outputFilter.updateData(t, this.displayedMemory);
+                }
+                if (this.cueStartTime === null && !this.displayedMemory.isEmpty()) {
+                    // Start of a new cue
+                    this.cueStartTime = t;
+                } else {
+                    if (!this.displayedMemory.equals(this.lastOutputScreen)) {
+                        if (this.outputFilter.newCue) {
+                            this.outputFilter.newCue(this.cueStartTime, t, this.lastOutputScreen);
+                        }
+                        this.cueStartTime = this.displayedMemory.isEmpty() ? null : t;
+                    }
+                }
+                this.lastOutputScreen.copy(this.displayedMemory);
+            }
+        }
+    }, {
+        key: 'cueSplitAtTime',
+        value: function cueSplitAtTime(t) {
+            if (this.outputFilter) {
+                if (!this.displayedMemory.isEmpty()) {
+                    if (this.outputFilter.newCue) {
+                        this.outputFilter.newCue(this.cueStartTime, t, this.displayedMemory);
+                    }
+                    this.cueStartTime = t;
+                }
+            }
+        }
+    }]);
+
+    return Cea608Channel;
+}();
+
+var Cea608Parser = function () {
+    function Cea608Parser(field, out1, out2) {
+        _classCallCheck(this, Cea608Parser);
+
+        this.field = field || 1;
+        this.outputs = [out1, out2];
+        this.channels = [new Cea608Channel(1, out1), new Cea608Channel(2, out2)];
+        this.currChNr = -1; // Will be 1 or 2
+        this.lastCmdA = null; // First byte of last command
+        this.lastCmdB = null; // Second byte of last command
+        this.bufferedData = [];
+        this.startTime = null;
+        this.lastTime = null;
+        this.dataCounters = { 'padding': 0, 'char': 0, 'cmd': 0, 'other': 0 };
+    }
+
+    _createClass(Cea608Parser, [{
+        key: 'getHandler',
+        value: function getHandler(index) {
+            return this.channels[index].getHandler();
+        }
+    }, {
+        key: 'setHandler',
+        value: function setHandler(index, newHandler) {
+            this.channels[index].setHandler(newHandler);
+        }
+
+        /**
+         * Add data for time t in forms of list of bytes (unsigned ints). The bytes are treated as pairs.
+         */
+
+    }, {
+        key: 'addData',
+        value: function addData(t, byteList) {
+            var cmdFound,
+                a,
+                b,
+                charsFound = false;
+
+            this.lastTime = t;
+            logger.setTime(t);
+
+            for (var i = 0; i < byteList.length; i += 2) {
+                a = byteList[i] & 0x7f;
+                b = byteList[i + 1] & 0x7f;
+                if (a === 0 && b === 0) {
+                    this.dataCounters.padding += 2;
+                    continue;
+                } else {
+                    logger.log('DATA', '[' + numArrayToHexArray([byteList[i], byteList[i + 1]]) + '] -> (' + numArrayToHexArray([a, b]) + ')');
+                }
+                cmdFound = this.parseCmd(a, b);
+                if (!cmdFound) {
+                    cmdFound = this.parseMidrow(a, b);
+                }
+                if (!cmdFound) {
+                    cmdFound = this.parsePAC(a, b);
+                }
+                if (!cmdFound) {
+                    cmdFound = this.parseBackgroundAttributes(a, b);
+                }
+                if (!cmdFound) {
+                    charsFound = this.parseChars(a, b);
+                    if (charsFound) {
+                        if (this.currChNr && this.currChNr >= 0) {
+                            var channel = this.channels[this.currChNr - 1];
+                            channel.insertChars(charsFound);
+                        } else {
+                            logger.log('WARNING', 'No channel found yet. TEXT-MODE?');
+                        }
+                    }
+                }
+                if (cmdFound) {
+                    this.dataCounters.cmd += 2;
+                } else if (charsFound) {
+                    this.dataCounters.char += 2;
+                } else {
+                    this.dataCounters.other += 2;
+                    logger.log('WARNING', 'Couldn\'t parse cleaned data ' + numArrayToHexArray([a, b]) + ' orig: ' + numArrayToHexArray([byteList[i], byteList[i + 1]]));
+                }
+            }
+        }
+
+        /**
+         * Parse Command.
+         * @returns {Boolean} Tells if a command was found
+         */
+
+    }, {
+        key: 'parseCmd',
+        value: function parseCmd(a, b) {
+            var chNr = null;
+
+            var cond1 = (a === 0x14 || a === 0x1C) && 0x20 <= b && b <= 0x2F;
+            var cond2 = (a === 0x17 || a === 0x1F) && 0x21 <= b && b <= 0x23;
+            if (!(cond1 || cond2)) {
+                return false;
+            }
+
+            if (a === this.lastCmdA && b === this.lastCmdB) {
+                this.lastCmdA = null;
+                this.lastCmdB = null; // Repeated commands are dropped (once)
+                logger.log('DEBUG', 'Repeated command (' + numArrayToHexArray([a, b]) + ') is dropped');
+                return true;
+            }
+
+            if (a === 0x14 || a === 0x17) {
+                chNr = 1;
+            } else {
+                chNr = 2; // (a === 0x1C || a=== 0x1f)
+            }
+
+            var channel = this.channels[chNr - 1];
+
+            if (a === 0x14 || a === 0x1C) {
+                if (b === 0x20) {
+                    channel.ccRCL();
+                } else if (b === 0x21) {
+                    channel.ccBS();
+                } else if (b === 0x22) {
+                    channel.ccAOF();
+                } else if (b === 0x23) {
+                    channel.ccAON();
+                } else if (b === 0x24) {
+                    channel.ccDER();
+                } else if (b === 0x25) {
+                    channel.ccRU(2);
+                } else if (b === 0x26) {
+                    channel.ccRU(3);
+                } else if (b === 0x27) {
+                    channel.ccRU(4);
+                } else if (b === 0x28) {
+                    channel.ccFON();
+                } else if (b === 0x29) {
+                    channel.ccRDC();
+                } else if (b === 0x2A) {
+                    channel.ccTR();
+                } else if (b === 0x2B) {
+                    channel.ccRTD();
+                } else if (b === 0x2C) {
+                    channel.ccEDM();
+                } else if (b === 0x2D) {
+                    channel.ccCR();
+                } else if (b === 0x2E) {
+                    channel.ccENM();
+                } else if (b === 0x2F) {
+                    channel.ccEOC();
+                }
+            } else {
+                //a == 0x17 || a == 0x1F
+                channel.ccTO(b - 0x20);
+            }
+            this.lastCmdA = a;
+            this.lastCmdB = b;
+            this.currChNr = chNr;
+            return true;
+        }
+
+        /**
+         * Parse midrow styling command
+         * @returns {Boolean}
+         */
+
+    }, {
+        key: 'parseMidrow',
+        value: function parseMidrow(a, b) {
+            var chNr = null;
+
+            if ((a === 0x11 || a === 0x19) && 0x20 <= b && b <= 0x2f) {
+                if (a === 0x11) {
+                    chNr = 1;
+                } else {
+                    chNr = 2;
+                }
+                if (chNr !== this.currChNr) {
+                    logger.log('ERROR', 'Mismatch channel in midrow parsing');
+                    return false;
+                }
+                var channel = this.channels[chNr - 1];
+                channel.ccMIDROW(b);
+                logger.log('DEBUG', 'MIDROW (' + numArrayToHexArray([a, b]) + ')');
+                return true;
+            }
+            return false;
+        }
+        /**
+         * Parse Preable Access Codes (Table 53).
+         * @returns {Boolean} Tells if PAC found
+         */
+
+    }, {
+        key: 'parsePAC',
+        value: function parsePAC(a, b) {
+
+            var chNr = null;
+            var row = null;
+
+            var case1 = (0x11 <= a && a <= 0x17 || 0x19 <= a && a <= 0x1F) && 0x40 <= b && b <= 0x7F;
+            var case2 = (a === 0x10 || a === 0x18) && 0x40 <= b && b <= 0x5F;
+            if (!(case1 || case2)) {
+                return false;
+            }
+
+            if (a === this.lastCmdA && b === this.lastCmdB) {
+                this.lastCmdA = null;
+                this.lastCmdB = null;
+                return true; // Repeated commands are dropped (once)
+            }
+
+            chNr = a <= 0x17 ? 1 : 2;
+
+            if (0x40 <= b && b <= 0x5F) {
+                row = chNr === 1 ? rowsLowCh1[a] : rowsLowCh2[a];
+            } else {
+                // 0x60 <= b <= 0x7F
+                row = chNr === 1 ? rowsHighCh1[a] : rowsHighCh2[a];
+            }
+            var pacData = this.interpretPAC(row, b);
+            var channel = this.channels[chNr - 1];
+            channel.setPAC(pacData);
+            this.lastCmdA = a;
+            this.lastCmdB = b;
+            this.currChNr = chNr;
+            return true;
+        }
+
+        /**
+         * Interpret the second byte of the pac, and return the information.
+         * @returns {Object} pacData with style parameters.
+         */
+
+    }, {
+        key: 'interpretPAC',
+        value: function interpretPAC(row, byte) {
+            var pacIndex = byte;
+            var pacData = { color: null, italics: false, indent: null, underline: false, row: row };
+
+            if (byte > 0x5F) {
+                pacIndex = byte - 0x60;
+            } else {
+                pacIndex = byte - 0x40;
+            }
+            pacData.underline = (pacIndex & 1) === 1;
+            if (pacIndex <= 0xd) {
+                pacData.color = ['white', 'green', 'blue', 'cyan', 'red', 'yellow', 'magenta', 'white'][Math.floor(pacIndex / 2)];
+            } else if (pacIndex <= 0xf) {
+                pacData.italics = true;
+                pacData.color = 'white';
+            } else {
+                pacData.indent = Math.floor((pacIndex - 0x10) / 2) * 4;
+            }
+            return pacData; // Note that row has zero offset. The spec uses 1.
+        }
+
+        /**
+         * Parse characters.
+         * @returns An array with 1 to 2 codes corresponding to chars, if found. null otherwise.
+         */
+
+    }, {
+        key: 'parseChars',
+        value: function parseChars(a, b) {
+
+            var channelNr = null,
+                charCodes = null,
+                charCode1 = null;
+
+            if (a >= 0x19) {
+                channelNr = 2;
+                charCode1 = a - 8;
+            } else {
+                channelNr = 1;
+                charCode1 = a;
+            }
+            if (0x11 <= charCode1 && charCode1 <= 0x13) {
+                // Special character
+                var oneCode = b;
+                if (charCode1 === 0x11) {
+                    oneCode = b + 0x50;
+                } else if (charCode1 === 0x12) {
+                    oneCode = b + 0x70;
+                } else {
+                    oneCode = b + 0x90;
+                }
+                logger.log('INFO', 'Special char \'' + getCharForByte(oneCode) + '\' in channel ' + channelNr);
+                charCodes = [oneCode];
+            } else if (0x20 <= a && a <= 0x7f) {
+                charCodes = b === 0 ? [a] : [a, b];
+            }
+            if (charCodes) {
+                var hexCodes = numArrayToHexArray(charCodes);
+                logger.log('DEBUG', 'Char codes =  ' + hexCodes.join(','));
+                this.lastCmdA = null;
+                this.lastCmdB = null;
+            }
+            return charCodes;
+        }
+
+        /**
+        * Parse extended background attributes as well as new foreground color black.
+        * @returns{Boolean} Tells if background attributes are found
+        */
+
+    }, {
+        key: 'parseBackgroundAttributes',
+        value: function parseBackgroundAttributes(a, b) {
+            var bkgData, index, chNr, channel;
+
+            var case1 = (a === 0x10 || a === 0x18) && 0x20 <= b && b <= 0x2f;
+            var case2 = (a === 0x17 || a === 0x1f) && 0x2d <= b && b <= 0x2f;
+            if (!(case1 || case2)) {
+                return false;
+            }
+            bkgData = {};
+            if (a === 0x10 || a === 0x18) {
+                index = Math.floor((b - 0x20) / 2);
+                bkgData.background = backgroundColors[index];
+                if (b % 2 === 1) {
+                    bkgData.background = bkgData.background + '_semi';
+                }
+            } else if (b === 0x2d) {
+                bkgData.background = 'transparent';
+            } else {
+                bkgData.foreground = 'black';
+                if (b === 0x2f) {
+                    bkgData.underline = true;
+                }
+            }
+            chNr = a < 0x18 ? 1 : 2;
+            channel = this.channels[chNr - 1];
+            channel.setBkgData(bkgData);
+            this.lastCmdA = null;
+            this.lastCmdB = null;
+            return true;
+        }
+
+        /**
+         * Reset state of parser and its channels.
+         */
+
+    }, {
+        key: 'reset',
+        value: function reset() {
+            for (var i = 0; i < this.channels.length; i++) {
+                if (this.channels[i]) {
+                    this.channels[i].reset();
+                }
+            }
+            this.lastCmdA = null;
+            this.lastCmdB = null;
+        }
+
+        /**
+         * Trigger the generation of a cue, and the start of a new one if displayScreens are not empty.
+         */
+
+    }, {
+        key: 'cueSplitAtTime',
+        value: function cueSplitAtTime(t) {
+            for (var i = 0; i < this.channels.length; i++) {
+                if (this.channels[i]) {
+                    this.channels[i].cueSplitAtTime(t);
+                }
+            }
+        }
+    }]);
+
+    return Cea608Parser;
+}();
+
+exports.default = Cea608Parser;
+
+},{}],41:[function(_dereq_,module,exports){
+'use strict';
+
+var Cues = {
+
+  newCue: function newCue(track, startTime, endTime, captionScreen) {
+    var row;
+    var cue;
+    var indenting;
+    var indent;
+    var text;
+    var VTTCue = window.VTTCue || window.TextTrackCue;
+
+    for (var r = 0; r < captionScreen.rows.length; r++) {
+      row = captionScreen.rows[r];
+      indenting = true;
+      indent = 0;
+      text = '';
+
+      if (!row.isEmpty()) {
+        for (var c = 0; c < row.chars.length; c++) {
+          if (row.chars[c].uchar.match(/\s/) && indenting) {
+            indent++;
+          } else {
+            text += row.chars[c].uchar;
+            indenting = false;
+          }
+        }
+        cue = new VTTCue(startTime, endTime, text.trim());
+
+        if (indent >= 16) {
+          indent--;
+        } else {
+          indent++;
+        }
+
+        // VTTCue.line get's flakey when using controls, so let's now include line 13&14
+        // also, drop line 1 since it's to close to the top
+        if (navigator.userAgent.match(/Firefox\//)) {
+          cue.line = r + 1;
+        } else {
+          cue.line = r > 7 ? r - 2 : r + 1;
+        }
+        cue.align = 'left';
+        cue.position = 100 * (indent / 32) + (navigator.userAgent.match(/Firefox\//) ? 50 : 0);
+        track.addCue(cue);
+      }
+    }
+  }
+
+};
+
+module.exports = Cues;
+
+},{}],42:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8724,7 +11617,7 @@ var EWMA = function () {
 
 exports.default = EWMA;
 
-},{}],38:[function(require,module,exports){
+},{}],43:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8807,7 +11700,62 @@ var enableLogs = exports.enableLogs = function enableLogs(debugConfig) {
 
 var logger = exports.logger = exportedLogger;
 
-},{}],39:[function(require,module,exports){
+},{}],44:[function(_dereq_,module,exports){
+'use strict';
+
+if (typeof ArrayBuffer !== 'undefined' && !ArrayBuffer.prototype.slice) {
+  ArrayBuffer.prototype.slice = function (start, end) {
+    var that = new Uint8Array(this);
+    if (end === undefined) {
+      end = that.length;
+    }
+    var result = new ArrayBuffer(end - start);
+    var resultArray = new Uint8Array(result);
+    for (var i = 0; i < resultArray.length; i++) {
+      resultArray[i] = that[i + start];
+    }
+    return result;
+  };
+}
+
+},{}],45:[function(_dereq_,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ *  TimeRanges to string helper
+ */
+
+var TimeRanges = function () {
+  function TimeRanges() {
+    _classCallCheck(this, TimeRanges);
+  }
+
+  _createClass(TimeRanges, null, [{
+    key: 'toString',
+    value: function toString(r) {
+      var log = '',
+          len = r.length;
+      for (var i = 0; i < len; i++) {
+        log += '[' + r.start(i) + ',' + r.end(i) + ']';
+      }
+      return log;
+    }
+  }]);
+
+  return TimeRanges;
+}();
+
+exports.default = TimeRanges;
+
+},{}],46:[function(_dereq_,module,exports){
 'use strict';
 
 var URLHelper = {
@@ -8895,7 +11843,7 @@ var URLHelper = {
 
 module.exports = URLHelper;
 
-},{}],40:[function(require,module,exports){
+},{}],47:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8906,7 +11854,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * XHR based logger
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
-var _logger = require('../utils/logger');
+var _logger = _dereq_('../utils/logger');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -8928,41 +11876,32 @@ var XhrLoader = function () {
   }, {
     key: 'abort',
     value: function abort() {
-      var loader = this.loader,
-          timeoutHandle = this.timeoutHandle;
+      var loader = this.loader;
       if (loader && loader.readyState !== 4) {
         this.stats.aborted = true;
         loader.abort();
       }
-      if (timeoutHandle) {
-        window.clearTimeout(timeoutHandle);
-      }
+
+      window.clearTimeout(this.requestTimeout);
+      this.requestTimeout = null;
+      window.clearTimeout(this.retryTimeout);
+      this.retryTimeout = null;
     }
   }, {
     key: 'load',
-    value: function load(url, responseType, onSuccess, onError, onTimeout, timeout, maxRetry, retryDelay) {
-      var onProgress = arguments.length <= 8 || arguments[8] === undefined ? null : arguments[8];
-      var frag = arguments.length <= 9 || arguments[9] === undefined ? null : arguments[9];
-
-      this.url = url;
-      if (frag && !isNaN(frag.byteRangeStartOffset) && !isNaN(frag.byteRangeEndOffset)) {
-        this.byteRange = frag.byteRangeStartOffset + '-' + (frag.byteRangeEndOffset - 1);
-      }
-      this.responseType = responseType;
-      this.onSuccess = onSuccess;
-      this.onProgress = onProgress;
-      this.onTimeout = onTimeout;
-      this.onError = onError;
+    value: function load(context, config, callbacks) {
+      this.context = context;
+      this.config = config;
+      this.callbacks = callbacks;
       this.stats = { trequest: performance.now(), retry: 0 };
-      this.timeout = timeout;
-      this.maxRetry = maxRetry;
-      this.retryDelay = retryDelay;
+      this.retryDelay = config.retryDelay;
       this.loadInternal();
     }
   }, {
     key: 'loadInternal',
     value: function loadInternal() {
-      var xhr;
+      var xhr,
+          context = this.context;
 
       if (typeof XDomainRequest !== 'undefined') {
         xhr = this.loader = new XDomainRequest();
@@ -8973,18 +11912,20 @@ var XhrLoader = function () {
       xhr.onloadend = this.loadend.bind(this);
       xhr.onprogress = this.loadprogress.bind(this);
 
-      xhr.open('GET', this.url, true);
-      if (this.byteRange) {
-        xhr.setRequestHeader('Range', 'bytes=' + this.byteRange);
+      xhr.open('GET', context.url, true);
+
+      if (context.rangeEnd) {
+        xhr.setRequestHeader('Range', 'bytes=' + context.rangeStart + '-' + (context.rangeEnd - 1));
       }
-      xhr.responseType = this.responseType;
+      xhr.responseType = context.responseType;
       var stats = this.stats;
       stats.tfirst = 0;
       stats.loaded = 0;
       if (this.xhrSetup) {
-        this.xhrSetup(xhr, this.url);
+        this.xhrSetup(xhr, context.url);
       }
-      this.timeoutHandle = window.setTimeout(this.loadtimeout.bind(this), this.timeout);
+      // setup timeout before we perform request
+      this.requestTimeout = window.setTimeout(this.loadtimeout.bind(this), this.config.timeout);
       xhr.send();
     }
   }, {
@@ -8992,36 +11933,56 @@ var XhrLoader = function () {
     value: function loadend(event) {
       var xhr = event.currentTarget,
           status = xhr.status,
-          stats = this.stats;
+          stats = this.stats,
+          context = this.context,
+          config = this.config;
+
       // don't proceed if xhr has been aborted
-      if (!stats.aborted) {
-        // http status between 200 to 299 are all successful
-        if (status >= 200 && status < 300) {
-          window.clearTimeout(this.timeoutHandle);
-          stats.tload = Math.max(stats.tfirst, performance.now());
-          this.onSuccess(event, stats);
+      if (stats.aborted) {
+        return;
+      }
+
+      // in any case clear the current xhrs timeout
+      window.clearTimeout(this.requestTimeout);
+
+      // http status between 200 to 299 are all successful
+      if (status >= 200 && status < 300) {
+        stats.tload = Math.max(stats.tfirst, performance.now());
+        var data = void 0,
+            len = void 0;
+        if (context.responseType === 'arraybuffer') {
+          data = xhr.response;
+          len = data.byteLength;
         } else {
-          // if max nb of retries reached or if http status between 400 and 499 (such error cannot be recovered, retrying is useless), return error
-          if (stats.retry >= this.maxRetry || status >= 400 && status < 499) {
-            window.clearTimeout(this.timeoutHandle);
-            _logger.logger.error(status + ' while loading ' + this.url);
-            this.onError(event);
-          } else {
-            _logger.logger.warn(status + ' while loading ' + this.url + ', retrying in ' + this.retryDelay + '...');
-            this.destroy();
-            window.setTimeout(this.loadInternal.bind(this), this.retryDelay);
-            // exponential backoff
-            this.retryDelay = Math.min(2 * this.retryDelay, 64000);
-            stats.retry++;
-          }
+          data = xhr.responseText;
+          len = data.length;
+        }
+        stats.loaded = stats.total = len;
+        var response = { url: xhr.responseURL, data: data };
+        this.callbacks.onSuccess(response, stats, context);
+      } else {
+        // if max nb of retries reached or if http status between 400 and 499 (such error cannot be recovered, retrying is useless), return error
+        if (stats.retry >= config.maxRetry || status >= 400 && status < 499) {
+          _logger.logger.error(status + ' while loading ' + context.url);
+          this.callbacks.onError({ code: status, text: xhr.statusText }, context);
+        } else {
+          // retry
+          _logger.logger.warn(status + ' while loading ' + context.url + ', retrying in ' + this.retryDelay + '...');
+          // aborts and resets internal state
+          this.destroy();
+          // schedule retry
+          this.retryTimeout = window.setTimeout(this.loadInternal.bind(this), this.retryDelay);
+          // set exponential backoff
+          this.retryDelay = Math.min(2 * this.retryDelay, config.maxRetryDelay);
+          stats.retry++;
         }
       }
     }
   }, {
     key: 'loadtimeout',
-    value: function loadtimeout(event) {
-      _logger.logger.warn('timeout while loading ' + this.url);
-      this.onTimeout(event, this.stats);
+    value: function loadtimeout() {
+      _logger.logger.warn('timeout while loading ' + this.context.url);
+      this.callbacks.onTimeout(this.stats, this.context);
     }
   }, {
     key: 'loadprogress',
@@ -9031,8 +11992,13 @@ var XhrLoader = function () {
         stats.tfirst = Math.max(performance.now(), stats.trequest);
       }
       stats.loaded = event.loaded;
-      if (this.onProgress) {
-        this.onProgress(event, stats);
+      if (event.lengthComputable) {
+        stats.total = event.total;
+      }
+      var onProgress = this.callbacks.onProgress;
+      if (onProgress) {
+        // last args is to provide on progress data
+        onProgress(stats, this.context, null);
       }
     }
   }]);
@@ -9042,6 +12008,6 @@ var XhrLoader = function () {
 
 exports.default = XhrLoader;
 
-},{"../utils/logger":38}]},{},[27])(27)
+},{"../utils/logger":43}]},{},[31])(31)
 });
 //# sourceMappingURL=hls.js.map

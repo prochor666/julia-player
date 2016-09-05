@@ -1,6 +1,10 @@
 Julia player
 =============
 
+![julia-player](https://raw.githubusercontent.com/prochor666/julia-player/master/src/img/brand/julia-logo-128x128.png)
+
+Responsive, mobile first, HTML5 player with HTTP Live Streaming (HLS) and Dynamic Adaptive Streaming over HTTP (MPEG-DASH) support.
+
 How to establish devel environment.
 
 - Install Node.js. See [Node.js](https://nodejs.org/en/) for more.

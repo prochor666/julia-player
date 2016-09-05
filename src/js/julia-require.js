@@ -40,7 +40,7 @@ Julia.prototype._Require = function(origin)
             }else{
                 self.raiseEvent(eventName);
             }
-        }, 100);
+        }, 20);
     };
 
 

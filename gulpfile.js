@@ -14,12 +14,10 @@ var minify = require('gulp-minify');
 
 // Sources
 var appSrc = [
-    //'src/js/lib/dash.all.debug.js',
-    //'src/js/lib/hls.js',
-    'src/js/lib/rangeslider.js',
     'src/js/julia-base.js',
     'src/js/julia-api.js',
     'src/js/julia-ui.js',
+    'src/js/julia-slider.js',
     'src/js/julia-events.js',
     'src/js/julia-controls.js',
     'src/js/julia-support.js',

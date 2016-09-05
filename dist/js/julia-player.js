@@ -1,496 +1,9 @@
-/*! rangeslider.js - v2.2.1 | (c) 2016 @andreruffert | MIT license | https://github.com/andreruffert/rangeslider.js */
-(function(factory) {
-    'use strict';
-
-    if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define(['jquery'], factory);
-    } else if (typeof exports === 'object') {
-        // CommonJS
-        module.exports = factory(require('jquery'));
-    } else {
-        // Browser globals
-        factory(jQuery);
-    }
-}(function($) {
-    'use strict';
-
-    // Polyfill Number.isNaN(value)
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN
-    Number.isNaN = Number.isNaN || function(value) {
-        return typeof value === 'number' && value !== value;
-    };
-
-    /**
-     * Range feature detection
-     * @return {Boolean}
-     */
-    function supportsRange() {
-        var input = document.createElement('input');
-        input.setAttribute('type', 'range');
-        return input.type !== 'text';
-    }
-
-    var pluginName = 'rangeslider',
-        pluginIdentifier = 0,
-        hasInputRangeSupport = supportsRange(),
-        defaults = {
-            polyfill: true,
-            orientation: 'horizontal',
-            rangeClass: 'rangeslider',
-            disabledClass: 'rangeslider--disabled',
-            horizontalClass: 'rangeslider--horizontal',
-            verticalClass: 'rangeslider--vertical',
-            fillClass: 'rangeslider__fill',
-            handleClass: 'rangeslider__handle',
-            startEvent: ['mousedown', 'touchstart', 'pointerdown'],
-            moveEvent: ['mousemove', 'touchmove', 'pointermove'],
-            endEvent: ['mouseup', 'touchend', 'pointerup']
-        },
-        constants = {
-            orientation: {
-                horizontal: {
-                    dimension: 'width',
-                    direction: 'left',
-                    directionStyle: 'left',
-                    coordinate: 'x'
-                },
-                vertical: {
-                    dimension: 'height',
-                    direction: 'top',
-                    directionStyle: 'bottom',
-                    coordinate: 'y'
-                }
-            }
-        };
-
-    /**
-     * Delays a function for the given number of milliseconds, and then calls
-     * it with the arguments supplied.
-     *
-     * @param  {Function} fn   [description]
-     * @param  {Number}   wait [description]
-     * @return {Function}
-     */
-    function delay(fn, wait) {
-        var args = Array.prototype.slice.call(arguments, 2);
-        return setTimeout(function(){ return fn.apply(null, args); }, wait);
-    }
-
-    /**
-     * Returns a debounced function that will make sure the given
-     * function is not triggered too much.
-     *
-     * @param  {Function} fn Function to debounce.
-     * @param  {Number}   debounceDuration OPTIONAL. The amount of time in milliseconds for which we will debounce the function. (defaults to 100ms)
-     * @return {Function}
-     */
-    function debounce(fn, debounceDuration) {
-        debounceDuration = debounceDuration || 100;
-        return function() {
-            if (!fn.debouncing) {
-                var args = Array.prototype.slice.apply(arguments);
-                fn.lastReturnVal = fn.apply(window, args);
-                fn.debouncing = true;
-            }
-            clearTimeout(fn.debounceTimeout);
-            fn.debounceTimeout = setTimeout(function(){
-                fn.debouncing = false;
-            }, debounceDuration);
-            return fn.lastReturnVal;
-        };
-    }
-
-    /**
-     * Check if a `element` is visible in the DOM
-     *
-     * @param  {Element}  element
-     * @return {Boolean}
-     */
-    function isHidden(element) {
-        return (
-            element && (
-                element.offsetWidth === 0 ||
-                element.offsetHeight === 0 ||
-                // Also Consider native `<details>` elements.
-                element.open === false
-            )
-        );
-    }
-
-    /**
-     * Get hidden parentNodes of an `element`
-     *
-     * @param  {Element} element
-     * @return {[type]}
-     */
-    function getHiddenParentNodes(element) {
-        var parents = [],
-            node    = element.parentNode;
-
-        while (isHidden(node)) {
-            parents.push(node);
-            node = node.parentNode;
-        }
-        return parents;
-    }
-
-    /**
-     * Returns dimensions for an element even if it is not visible in the DOM.
-     *
-     * @param  {Element} element
-     * @param  {String}  key     (e.g. offsetWidth …)
-     * @return {Number}
-     */
-    function getDimension(element, key) {
-        var hiddenParentNodes       = getHiddenParentNodes(element),
-            hiddenParentNodesLength = hiddenParentNodes.length,
-            inlineStyle             = [],
-            dimension               = element[key];
-
-        // Used for native `<details>` elements
-        function toggleOpenProperty(element) {
-            if (typeof element.open !== 'undefined') {
-                element.open = (element.open) ? false : true;
-            }
-        }
-
-        if (hiddenParentNodesLength) {
-            for (var i = 0; i < hiddenParentNodesLength; i++) {
-
-                // Cache style attribute to restore it later.
-                inlineStyle[i] = hiddenParentNodes[i].style.cssText;
-
-                // visually hide
-                if (hiddenParentNodes[i].style.setProperty) {
-                    hiddenParentNodes[i].style.setProperty('display', 'block', 'important');
-                } else {
-                    hiddenParentNodes[i].style.cssText += ';display: block !important';
-                }
-                hiddenParentNodes[i].style.height = '0';
-                hiddenParentNodes[i].style.overflow = 'hidden';
-                hiddenParentNodes[i].style.visibility = 'hidden';
-                toggleOpenProperty(hiddenParentNodes[i]);
-            }
-
-            // Update dimension
-            dimension = element[key];
-
-            for (var j = 0; j < hiddenParentNodesLength; j++) {
-
-                // Restore the style attribute
-                hiddenParentNodes[j].style.cssText = inlineStyle[j];
-                toggleOpenProperty(hiddenParentNodes[j]);
-            }
-        }
-        return dimension;
-    }
-
-    /**
-     * Returns the parsed float or the default if it failed.
-     *
-     * @param  {String}  str
-     * @param  {Number}  defaultValue
-     * @return {Number}
-     */
-    function tryParseFloat(str, defaultValue) {
-        var value = parseFloat(str);
-        return Number.isNaN(value) ? defaultValue : value;
-    }
-
-    /**
-     * Capitalize the first letter of string
-     *
-     * @param  {String} str
-     * @return {String}
-     */
-    function ucfirst(str) {
-        return str.charAt(0).toUpperCase() + str.substr(1);
-    }
-
-    /**
-     * Plugin
-     * @param {String} element
-     * @param {Object} options
-     */
-    function Plugin(element, options) {
-        this.$window            = $(window);
-        this.$document          = $(document);
-        this.$element           = $(element);
-        this.options            = $.extend( {}, defaults, options );
-        this.polyfill           = this.options.polyfill;
-        this.orientation        = this.$element[0].getAttribute('data-orientation') || this.options.orientation;
-        this.onInit             = this.options.onInit;
-        this.onSlide            = this.options.onSlide;
-        this.onSlideEnd         = this.options.onSlideEnd;
-        this.DIMENSION          = constants.orientation[this.orientation].dimension;
-        this.DIRECTION          = constants.orientation[this.orientation].direction;
-        this.DIRECTION_STYLE    = constants.orientation[this.orientation].directionStyle;
-        this.COORDINATE         = constants.orientation[this.orientation].coordinate;
-
-        // Plugin should only be used as a polyfill
-        if (this.polyfill) {
-            // Input range support?
-            if (hasInputRangeSupport) { return false; }
-        }
-
-        this.identifier = 'js-' + pluginName + '-' +(pluginIdentifier++);
-        this.startEvent = this.options.startEvent.join('.' + this.identifier + ' ') + '.' + this.identifier;
-        this.moveEvent  = this.options.moveEvent.join('.' + this.identifier + ' ') + '.' + this.identifier;
-        this.endEvent   = this.options.endEvent.join('.' + this.identifier + ' ') + '.' + this.identifier;
-        this.toFixed    = (this.step + '').replace('.', '').length - 1;
-        this.$fill      = $('<div class="' + this.options.fillClass + '" />');
-        this.$handle    = $('<div class="' + this.options.handleClass + '" />');
-        this.$range     = $('<div class="' + this.options.rangeClass + ' ' + this.options[this.orientation + 'Class'] + '" id="' + this.identifier + '" />').insertAfter(this.$element).prepend(this.$fill, this.$handle);
-
-        // visually hide the input
-        this.$element.css({
-            'position': 'absolute',
-            'width': '1px',
-            'height': '1px',
-            'overflow': 'hidden',
-            'opacity': '0'
-        });
-
-        // Store context
-        this.handleDown = $.proxy(this.handleDown, this);
-        this.handleMove = $.proxy(this.handleMove, this);
-        this.handleEnd  = $.proxy(this.handleEnd, this);
-
-        this.init();
-
-        // Attach Events
-        var _this = this;
-        this.$window.on('resize.' + this.identifier, debounce(function() {
-            // Simulate resizeEnd event.
-            delay(function() { _this.update(false, false); }, 300);
-        }, 20));
-
-        this.$document.on(this.startEvent, '#' + this.identifier + ':not(.' + this.options.disabledClass + ')', this.handleDown);
-
-        // Listen to programmatic value changes
-        this.$element.on('change.' + this.identifier, function(e, data) {
-            if (data && data.origin === _this.identifier) {
-                return;
-            }
-
-            var value = e.target.value,
-                pos = _this.getPositionFromValue(value);
-            _this.setPosition(pos);
-        });
-    }
-
-    Plugin.prototype.init = function() {
-        this.update(true, false);
-
-        if (this.onInit && typeof this.onInit === 'function') {
-            this.onInit();
-        }
-    };
-
-    Plugin.prototype.update = function(updateAttributes, triggerSlide) {
-        updateAttributes = updateAttributes || false;
-
-        if (updateAttributes) {
-            this.min    = tryParseFloat(this.$element[0].getAttribute('min'), 0);
-            this.max    = tryParseFloat(this.$element[0].getAttribute('max'), 100);
-            this.value  = tryParseFloat(this.$element[0].value, Math.round(this.min + (this.max-this.min)/2));
-            this.step   = tryParseFloat(this.$element[0].getAttribute('step'), 1);
-        }
-
-        this.handleDimension    = getDimension(this.$handle[0], 'offset' + ucfirst(this.DIMENSION));
-        this.rangeDimension     = getDimension(this.$range[0], 'offset' + ucfirst(this.DIMENSION));
-        this.maxHandlePos       = this.rangeDimension - this.handleDimension;
-        this.grabPos            = this.handleDimension / 2;
-        this.position           = this.getPositionFromValue(this.value);
-
-        // Consider disabled state
-        if (this.$element[0].disabled) {
-            this.$range.addClass(this.options.disabledClass);
-        } else {
-            this.$range.removeClass(this.options.disabledClass);
-        }
-
-        this.setPosition(this.position, triggerSlide);
-    };
-
-    Plugin.prototype.handleDown = function(e) {
-        this.$document.on(this.moveEvent, this.handleMove);
-        this.$document.on(this.endEvent, this.handleEnd);
-
-        // If we click on the handle don't set the new position
-        if ((' ' + e.target.className + ' ').replace(/[\n\t]/g, ' ').indexOf(this.options.handleClass) > -1) {
-            return;
-        }
-
-        var pos         = this.getRelativePosition(e),
-            rangePos    = this.$range[0].getBoundingClientRect()[this.DIRECTION],
-            handlePos   = this.getPositionFromNode(this.$handle[0]) - rangePos,
-            setPos      = (this.orientation === 'vertical') ? (this.maxHandlePos - (pos - this.grabPos)) : (pos - this.grabPos);
-
-        this.setPosition(setPos);
-
-        if (pos >= handlePos && pos < handlePos + this.handleDimension) {
-            this.grabPos = pos - handlePos;
-        }
-    };
-
-    Plugin.prototype.handleMove = function(e) {
-        e.preventDefault();
-        var pos = this.getRelativePosition(e);
-        var setPos = (this.orientation === 'vertical') ? (this.maxHandlePos - (pos - this.grabPos)) : (pos - this.grabPos);
-        this.setPosition(setPos);
-    };
-
-    Plugin.prototype.handleEnd = function(e) {
-        e.preventDefault();
-        this.$document.off(this.moveEvent, this.handleMove);
-        this.$document.off(this.endEvent, this.handleEnd);
-
-        // Ok we're done fire the change event
-        this.$element.trigger('change', { origin: this.identifier });
-
-        if (this.onSlideEnd && typeof this.onSlideEnd === 'function') {
-            this.onSlideEnd(this.position, this.value);
-        }
-    };
-
-    Plugin.prototype.cap = function(pos, min, max) {
-        if (pos < min) { return min; }
-        if (pos > max) { return max; }
-        return pos;
-    };
-
-    Plugin.prototype.setPosition = function(pos, triggerSlide) {
-        var value, newPos;
-
-        if (triggerSlide === undefined) {
-            triggerSlide = true;
-        }
-
-        // Snapping steps
-        value = this.getValueFromPosition(this.cap(pos, 0, this.maxHandlePos));
-        newPos = this.getPositionFromValue(value);
-
-        // Update ui
-        this.$fill[0].style[this.DIMENSION] = (newPos + this.grabPos) + 'px';
-        this.$handle[0].style[this.DIRECTION_STYLE] = newPos + 'px';
-        this.setValue(value);
-
-        // Update globals
-        this.position = newPos;
-        this.value = value;
-
-        if (triggerSlide && this.onSlide && typeof this.onSlide === 'function') {
-            this.onSlide(newPos, value);
-        }
-    };
-
-    // Returns element position relative to the parent
-    Plugin.prototype.getPositionFromNode = function(node) {
-        var i = 0;
-        while (node !== null) {
-            i += node.offsetLeft;
-            node = node.offsetParent;
-        }
-        return i;
-    };
-
-    Plugin.prototype.getRelativePosition = function(e) {
-        // Get the offset DIRECTION relative to the viewport
-        var ucCoordinate = ucfirst(this.COORDINATE),
-            rangePos = this.$range[0].getBoundingClientRect()[this.DIRECTION],
-            pageCoordinate = 0;
-
-        if (typeof e['page' + ucCoordinate] !== 'undefined') {
-            pageCoordinate = e['page' + ucCoordinate];
-        }
-        // IE8 support :)
-        else if (typeof e.originalEvent['client' + ucCoordinate] !== 'undefined') {
-            pageCoordinate = e.originalEvent['client' + ucCoordinate];
-        }
-        else if (e.originalEvent.touches && e.originalEvent.touches[0] && typeof e.originalEvent.touches[0]['page' + ucCoordinate] !== 'undefined') {
-            pageCoordinate = e.originalEvent.touches[0]['page' + ucCoordinate];
-        }
-        else if(e.currentPoint && typeof e.currentPoint[this.COORDINATE] !== 'undefined') {
-            pageCoordinate = e.currentPoint[this.COORDINATE];
-        }
-
-        return pageCoordinate - rangePos;
-    };
-
-    Plugin.prototype.getPositionFromValue = function(value) {
-        var percentage, pos;
-        percentage = (value - this.min)/(this.max - this.min);
-        pos = (!Number.isNaN(percentage)) ? percentage * this.maxHandlePos : 0;
-        return pos;
-    };
-
-    Plugin.prototype.getValueFromPosition = function(pos) {
-        var percentage, value;
-        percentage = ((pos) / (this.maxHandlePos || 1));
-        value = this.step * Math.round(percentage * (this.max - this.min) / this.step) + this.min;
-        return Number((value).toFixed(this.toFixed));
-    };
-
-    Plugin.prototype.setValue = function(value) {
-        if (value === this.value && this.$element[0].value !== '') {
-            return;
-        }
-
-        // Set the new value and fire the `input` event
-        this.$element
-            .val(value)
-            .trigger('input', { origin: this.identifier });
-    };
-
-    Plugin.prototype.destroy = function() {
-        this.$document.off('.' + this.identifier);
-        this.$window.off('.' + this.identifier);
-
-        this.$element
-            .off('.' + this.identifier)
-            .removeAttr('style')
-            .removeData('plugin_' + pluginName);
-
-        // Remove the generated markup
-        if (this.$range && this.$range.length) {
-            this.$range[0].parentNode.removeChild(this.$range[0]);
-        }
-    };
-
-    // A really lightweight plugin wrapper around the constructor,
-    // preventing against multiple instantiations
-    $.fn[pluginName] = function(options) {
-        var args = Array.prototype.slice.call(arguments, 1);
-
-        return this.each(function() {
-            var $this = $(this),
-                data  = $this.data('plugin_' + pluginName);
-
-            // Create a new instance.
-            if (!data) {
-                $this.data('plugin_' + pluginName, (data = new Plugin(this, options)));
-            }
-
-            // Make it possible to access methods from public.
-            // e.g `$element.rangeslider('method');`
-            if (typeof options === 'string') {
-                data[options].apply(data, args);
-            }
-        });
-    };
-
-    return 'rangeslider.js is available in jQuery context e.g $(selector).rangeslider(options);';
-
-}));
-
 /* *****************************************
 * Julia HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.0.2
-* @build: 2016-08-30
+* @version: 1.0.3
+* @build: 2016-09-06
 * @license: MIT
 *
 * @requires:
@@ -507,12 +20,8 @@ var Julia = function(options)
     var origin = this;
 
 
-
-
     // Import origin.options
     options = typeof options === 'undefined' ? {}: options;
-
-
 
 
     // Root path workaround
@@ -526,8 +35,6 @@ var Julia = function(options)
 
     // Unique instance ID
     var __JULIA_INSTANCE__ID__ = Math.floor((Math.random()*10000000)+1);
-
-
 
 
     // Default origin.options
@@ -559,7 +66,7 @@ var Julia = function(options)
         dashConfig: {
         },
         suggest: [],
-        suggestLimit: 2,
+        suggestLimit: 4,
         suggestTimeout: 10000,
         themePath: __JULIA_ROOT_PATH__+'/css/themes',
         pluginPath: __JULIA_ROOT_PATH__+'/js/lib',
@@ -577,8 +84,6 @@ var Julia = function(options)
         onPosition: false,
         onSuggest: false,
     };
-
-
 
 
     // Environment
@@ -601,6 +106,10 @@ var Julia = function(options)
                 fullscreen: '',
             },
             ranges: {
+                volume: '',
+                progress: ''
+            },
+            sliders: {
                 volume: '',
                 progress: ''
             },
@@ -633,8 +142,6 @@ var Julia = function(options)
         suggestClicked: false,
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
     };
-
-
 
 
     // Base functions
@@ -739,6 +246,49 @@ var Julia = function(options)
     });
 
 
+    $('body').on('julia.ui-ready', '#julia-player-'+origin.env.ID, function(e)
+    {
+        origin.env.model.sliders.progress = new origin._Slider( origin, {
+            element: $('#julia-toolbar-'+origin.env.ID+'>div.julia-progress>input.julia-range'),
+            eventRise: 'progress-change'
+        });
+        origin.env.model.sliders.progress.init();
+
+        origin.env.model.sliders.volume = new origin._Slider( origin, {
+            element: $('#julia-toolbar-'+origin.env.ID+'>div.julia-volume>input.julia-range'),
+            eventRise: 'volume-change'
+        });
+        origin.env.model.sliders.volume.init();
+
+        // Size Fix
+        origin.Support.resize();
+
+        // Handle events
+        origin.Events.ui();
+        origin.Events.native();
+
+        // Persistent data
+        volume = origin.Persist.get('julia-player-volume');
+        muted = origin.Persist.get('julia-player-muted');
+
+        if(typeof volume !== 'undefined' && volume.length>0)
+        {
+            origin.options.volume = parseInt(volume);
+
+            if(origin.options.volume > 100 || origin.options.volume < 0)
+            {
+                origin.options.volume = 25;
+            }
+        }
+
+        if(typeof muted !=='undefined' && muted.length>0)
+        {
+            origin.options.muted = muted == 'false' ?  false: true;
+        }
+
+    });
+
+
     // Run player init
     origin.Boot.run();
 
@@ -757,8 +307,6 @@ var Julia = function(options)
         Timecode: origin.Timecode,
         Require: origin.Require,
         Inject: origin.Inject,
-        //Loader: origin.Loader,
-        //Boot: origin.Boot,
         stats: origin.Base.stats
     };
 
@@ -982,23 +530,29 @@ Julia.prototype._Ui = function(origin)
 
         origin.env.instance.insertAfter(origin.env.element);
 
-        // Rangeslider polyfill
-        $('#julia-toolbar-'+origin.env.ID+'>div.julia-progress>input, #julia-toolbar-'+origin.env.ID+'>div.julia-volume>input').rangeslider({
-            polyfill: false,
-            rangeClass: 'julia-rangeslider',
-            disabledClass: 'julia-rangeslider--disabled',
-            horizontalClass: 'julia-rangeslider--horizontal',
-            verticalClass: 'julia-rangeslider--vertical',
-            fillClass: 'julia-rangeslider__fill',
-            handleClass: 'julia-rangeslider__handle',
-            onInit: function(){},
-            onSlide : function(position, value){},
-            onSlideEnd : function(position, value){}
-        });
+        self.raiseEvent('julia.ui-ready');
 
         origin.Base.debug({
             'playerInstance': origin.env.instance,
         });
+    };
+
+
+
+
+    self.raiseEvent = function(eventName)
+    {
+        setTimeout( function()
+        {
+            if($('#julia-player-'+origin.env.ID).length == 1)
+            {
+                $('#julia-player-'+origin.env.ID).trigger({
+                    type: eventName,
+                });
+            }else{
+                self.raiseEvent(eventName);
+            }
+        }, 10);
     };
 
 
@@ -1018,14 +572,6 @@ Julia.prototype._Ui = function(origin)
     {
         element.removeClass(remove)
         .addClass(add);
-    };
-
-
-
-
-    self.progress = function(element, value)
-    {
-        element.find('input[type="range"]').val(value).rangeslider('update', true);
     };
 
 
@@ -1063,6 +609,225 @@ Julia.prototype._Ui = function(origin)
     };
 
 }
+
+/* *****************************************
+* Julia HTML5 media player
+* Slider controller
+* Progress and volume widget library
+****************************************** */
+Julia.prototype._Slider = function(origin, options)
+{
+    var self = this,
+
+        leftButtonDown = false,
+
+        ua = navigator.userAgent,
+
+        isChrome = /chrome/i.exec(ua),
+
+        isAndroid = /android/i.exec(ua),
+
+        hasTouch = 'ontouchstart' in window && !(isChrome && !isAndroid),
+
+        _normalize = function(percent)
+        {
+            if( percent > 100 ){ return 100; }
+            if( percent < 0 ){ return 0; }
+            return ( Math.round(percent*100) ) / 100;
+        },
+
+        _posToPercent = function(pos)
+        {
+            return _normalize( pos / (self.track.innerWidth()/100) );
+        },
+
+        _position = function(e)
+        {
+            var pos = hasTouch === true ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
+            percent = _posToPercent( pos );
+            return percent;
+        },
+
+        model = $('<div class="julia-slider">'
+            +'<div class="julia-slider-track" data-julia-slider-component="track"></div>'
+            +'<div class="julia-slider-handle" data-julia-slider-component="handle"></div>'
+            +'<div class="julia-slider-fill" data-julia-slider-component="fill"></div>'
+        +'</div>');
+
+        self.model = model.clone();
+
+        self.track = self.model.find('[data-julia-slider-component="track"]');
+
+        self.handle = self.model.find('[data-julia-slider-component="handle"]');
+
+        self.fill = self.model.find('[data-julia-slider-component="fill"]');
+
+        self.options = {
+            element: {},
+            value: 0,
+            originVisible: false,
+            eventRise: '',
+        };
+
+    // Extend custom options
+    $.extend(true, self.options, options);
+
+    self.elem = typeof self.options.element === 'object' ? self.options.element: $(self.options.element.toString()),
+
+    self.value = self.options.value;
+
+
+
+
+    // Public methods & props
+    self.init = function()
+    {
+        if( ['input'].lastIndexOf( self.elem.prop('tagName').toLowerCase() ) > -1 )
+        {
+            self.value = _normalize( self.elem.val() );
+        }
+
+        if( self.options.originVisible === false )
+        {
+        	self.elem.hide().after( self.model );
+        }else{
+            self.elem.after( self.model );
+        }
+
+        self.slide( self.value, true );
+    };
+
+
+
+
+    self.update = function( percent )
+    {
+        if( leftButtonDown === false )
+        {
+            self.slide( percent, true );
+        }
+    };
+
+
+
+
+    self.slide = function( percent, eventPrevent )
+    {
+        if( typeof eventPrevent === 'undefined' )
+        {
+            eventPrevent = false;
+        }
+
+        self.value = _normalize( percent ) ;
+        var pos = ( self.track.innerWidth() / 100 ) * self.value;
+        self.handle.css({'left': pos+'px'});
+        self.fill.css({'width': pos+2+'px'});
+
+        self.respond( percent, eventPrevent );
+    };
+
+
+
+
+    self.respond = function( percent, eventPrevent )
+    {
+        if( typeof eventPrevent === 'undefined' )
+        {
+            eventPrevent = false;
+        }
+
+        if( ['input'].lastIndexOf( self.elem.prop('tagName').toLowerCase() ) > -1 )
+        {
+        	self.elem.val( self.value );
+
+            if( eventPrevent === false )
+            {
+                $('#julia-player-'+origin.env.ID).trigger({
+                    type: 'julia.'+self.options.eventRise,
+                    percent: percent
+                });
+            }
+        }
+
+        // Fix final handle position on track
+        self.track.innerWidth( self.model.innerWidth() - self.handle.innerWidth() );
+    }
+
+
+
+
+    self.getValue = function()
+    {
+    	return self.value;
+    };
+
+
+
+
+    self.sliding = function()
+    {
+    	return leftButtonDown;
+    };
+
+
+    // Mouse & touch events
+    self.fill.on('click ', function(e)
+    {
+        self.slide( _position(e), false );
+    });
+
+
+
+
+    self.track.on('click', function(e)
+    {
+        self.slide( _position(e), false );
+    });
+
+
+
+
+    self.model.on('click', function(e)
+    {
+        self.slide( _position(e), false );
+    });
+
+
+
+
+    self.model.on('mousedown touchstart', function(e)
+    {
+        // Left mouse button activate
+        if(e.type == 'touchstart')
+        {
+            self.slide( _position(e), false );
+        }
+
+        leftButtonDown = true;
+    });
+
+
+
+
+    $(document).on('mouseup touchend', function(e)
+    {
+        // Left mouse button deactivate
+        leftButtonDown = false;
+    });
+
+
+
+
+    $(document).on('mousemove touchmove', function(e)
+    {
+        if(leftButtonDown === true)
+        {
+            self.slide( _position(e) );
+        }
+    });
+
+    return self;
+};
 
 /* *****************************************
 * Julia HTML5 media player
@@ -1112,6 +877,9 @@ Julia.prototype._Events = function(origin)
             origin.Controls.press('fullscreen-off');
         });
 
+
+
+
         // Big play
         origin.env.model.shield.on('click contextmenu', '.julia-big-play', function(e)
         {
@@ -1121,12 +889,16 @@ Julia.prototype._Events = function(origin)
             {
                 if(origin.env.started === false)
                 {
+                    origin.Ui.state( origin.env.model.preloader, '', 'on' );
                     origin.Loader.init();
                 }
 
                 origin.Controls.press('play');
             }
         });
+
+
+
 
         // Area click
         origin.env.model.shield.on('click contextmenu', function(e)
@@ -1139,10 +911,13 @@ Julia.prototype._Events = function(origin)
             }
         });
 
+
+
+
         // Fullscreen toolbar behavior bindings
         var mouseMoveCleaner;
 
-        origin.env.instance.on('mousemove', '#julia-shield-'+origin.env.ID+', #julia-suggest-'+origin.env.ID, function(e)
+        origin.env.instance.on('mousemove touchmove', '#julia-shield-'+origin.env.ID+', #julia-suggest-'+origin.env.ID, function(e)
         {
             e.preventDefault();
             origin.env.model.toolbar.addClass('julia-toolbar-visible');
@@ -1153,13 +928,13 @@ Julia.prototype._Events = function(origin)
                 origin.env.model.toolbar.removeClass('julia-toolbar-visible');
             }, 1750);
         })
-        .on('mouseover mousemove mouseout', '#julia-toolbar-'+origin.env.ID+'.julia-toolbar-visible', function(e)
+        .on('mouseover mousemove touchmove mouseout', '#julia-toolbar-'+origin.env.ID+'.julia-toolbar-visible', function(e)
         {
             e.preventDefault();
             origin.env.model.toolbar.addClass('julia-toolbar-visible');
             clearTimeout(mouseMoveCleaner);
 
-            if(e.type == 'mouseout')
+            if( ['mouseout', 'touchend'].lastIndexOf( e.type.toLowerCase() ) > -1 )
             {
                 mouseMoveCleaner = setTimeout(function(e)
                 {
@@ -1168,39 +943,41 @@ Julia.prototype._Events = function(origin)
             }
         });
 
+
+
+
         // Bind progressbar change
-        origin.env.model.toolbar.on('change input', '.julia-progress>input', function(e)
+        $('body').on('julia.progress-change', '#julia-player-'+origin.env.ID, function(e, percent)
         {
-            if(e.type == 'input')
-            {
-                origin.env.seeking = true;
-            }else{
+            seekTo = origin.Timecode.toSeconds( e.percent );
+            seekTo = seekTo >= origin.env.duration ? origin.env.duration: seekTo.toFixed(2);
 
-                seekTo = origin.Timecode.toSeconds( $(this).val() );
-                seekTo = seekTo >= origin.env.duration ? origin.env.duration: seekTo.toFixed(2);
-
-                origin.Controls.press('goto', {
-                    currentTime: seekTo
-                });
-
-                origin.env.seeking = false;
-            }
-        });
-
-        // Bind volumebar change
-        origin.env.model.toolbar.on('change', '.julia-volume>input', function()
-        {
-            origin.Controls.press('volume', {
-                volume: $(this).val(),
-                'event': 'slideChange'
+            origin.Controls.press('goto', {
+                currentTime: seekTo
             });
         });
+
+
+
+
+        $('body').on('julia.volume-change', '#julia-player-'+origin.env.ID, function(e, percent)
+        {
+            origin.Controls.press('volume', {
+                volume: e.percent,
+            });
+        });
+
+
+
 
         // Fullscreen event included
         $(window).on('resize', function()
         {
             origin.Support.resize();
         });
+
+
+
 
         // Fullscreen change event handler
         $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
@@ -1260,13 +1037,16 @@ Julia.prototype._Events = function(origin)
             origin.env.api.oncanplaythrough = function(e)
             {
                 origin.env.duration = origin.env.api.duration;
-                
+
                 if(origin.env.started === false && origin.env.api.readyState >= 3)
                 {
                     origin.Api.allowStart(e);
                 }
             }
         }
+
+
+
 
         // Video playback detect
         origin.env.api.onplay = function(e)
@@ -1275,19 +1055,21 @@ Julia.prototype._Events = function(origin)
             origin.Ui.icon( origin.env.model.buttons.play, 'julia-play', 'julia-pause' );
             origin.env.model.buttons.bigPlay.hide();
             //origin.Ui.state( origin.env.model.preloader, 'on', '' );
-            //origin.Ui.posterUnset();
+            origin.Ui.posterUnset();
             origin.env.model.toolbar.show();
         };
+
+
+
 
         origin.env.api.onplaying = function(e)
         {
             origin.Ui.state( origin.env.model.buttons.play, 'play', 'pause' );
             origin.Ui.icon( origin.env.model.buttons.play, 'julia-play', 'julia-pause' );
             origin.env.model.buttons.bigPlay.hide();
-            origin.Ui.state( origin.env.model.preloader, 'on', '' );
             origin.env.model.suggest.html('');
             origin.Ui.state( origin.env.model.suggest, 'on', '' );
-            origin.Ui.posterUnset();
+            //origin.Ui.posterUnset();
             origin.env.model.toolbar.show();
 
             origin.Controls.press('setDuration', {
@@ -1295,6 +1077,8 @@ Julia.prototype._Events = function(origin)
             });
             origin.env.started = true;
         };
+
+
 
 
         // Video pause
@@ -1306,23 +1090,37 @@ Julia.prototype._Events = function(origin)
         };
 
 
+
+
         // Errors
         origin.env.api.onerror = function(e)
         {
 
         };
 
+
+
+
         origin.env.api.onemptied = function(e)
         {
         };
+
+
+
 
         origin.env.api.onstalled = function(e)
         {
         };
 
+
+
+
         origin.env.api.onsuspend = function(e)
         {
         };
+
+
+
 
         // Video position
         origin.env.api.ontimeupdate = function(e)
@@ -1331,15 +1129,14 @@ Julia.prototype._Events = function(origin)
             {
                 currentTimeReadable = origin.Timecode.toHuman( origin.env.api.currentTime.toFixed(2) );
 
-                origin.Ui.progress(
-                    origin.env.model.ranges.progress,
-                    origin.Timecode.toPercents( origin.env.api.currentTime.toFixed(2) )
-                );
+                origin.env.model.sliders.progress.update( origin.Timecode.toPercents( origin.env.api.currentTime.toFixed(2) ) );
 
                 origin.Ui.panel(
                     origin.env.model.panels.currentTime,
                     currentTimeReadable
                 );
+
+                origin.Ui.state( origin.env.model.preloader, 'on', '' );
             }
 
             origin.Callback.onTime(currentTimeReadable, origin.env.api.currentTime);
@@ -1352,35 +1149,44 @@ Julia.prototype._Events = function(origin)
             }
         };
 
+
+
+
         // Video position
         origin.env.api.seeked = function(e)
         {
             origin.env.seeking = false;
         };
 
+
+
+
         // Video position
         origin.env.api.seeking = function(e)
         {
+            origin.Ui.state( origin.env.model.preloader, '', 'on' );
             origin.env.seeking = true;
         };
+
+
+
 
         // Volume
         origin.env.api.onvolumechange = function(e)
         {
             if(origin.env.api.muted === false)
             {
-                origin.Ui.progress(
-                    origin.env.model.ranges.volume,
-                    origin.env.api.volume*100
-                );
+                //origin.Ui.volume( origin.env.api.volume*100 );
+                origin.env.model.sliders.volume.update( origin.env.api.volume*100 );
 
             }else{
-                origin.Ui.progress(
-                    origin.env.model.ranges.volume,
-                    0
-                );
+                //origin.Ui.volume( 0 );
+                origin.env.model.sliders.volume.update( 0 );
             }
         };
+
+
+
 
         // Set video duration
         origin.env.api.ondurationchange = function(e)
@@ -1399,6 +1205,9 @@ Julia.prototype._Events = function(origin)
                 });
             }
         };
+
+
+
 
         // Bind playback end event
         origin.env.api.onended = function(e)
@@ -1478,6 +1287,9 @@ Julia.prototype._Controls = function(origin)
 {
     var self = this;
 
+
+
+
     self.press = function(action, data)
     {
         data = data||{};
@@ -1521,17 +1333,17 @@ Julia.prototype._Controls = function(origin)
                 origin.Ui.state( origin.env.model.buttons.play, 'pause', 'play' );
                 origin.Ui.icon( origin.env.model.buttons.play, 'julia-pause', 'julia-play' );
                 origin.env.model.buttons.bigPlay.show();
-                origin.Ui.progress( origin.env.model.ranges.progress, 0 );
+                origin.env.model.sliders.progress.update( 0 );
 
             break; case 'goto':
+
+                origin.Ui.state( origin.env.model.preloader, '', 'on' );
+                origin.env.api.currentTime = data.currentTime;
 
                 if(origin.options.onPosition !== false)
                 {
                     origin.Callback.fn(origin.options.onPosition, data);
                 }
-
-                origin.Ui.state( origin.env.model.preloader, '', 'on' );
-                origin.env.api.currentTime = data.currentTime;
 
             break; case 'setDuration':
 
@@ -1539,7 +1351,7 @@ Julia.prototype._Controls = function(origin)
 
                 if(origin.env.started === false)
                 {
-                    origin.Ui.progress( origin.env.model.ranges.progress, 0 );
+                    origin.env.model.sliders.progress.update( 0 );
                 }
 
                 origin.Base.debug({
@@ -1555,7 +1367,7 @@ Julia.prototype._Controls = function(origin)
                     'volume is': origin.env.api.volume
                 });
 
-                origin.Ui.progress( origin.env.model.ranges.volume, data.volume );
+                origin.env.model.sliders.volume.update( data.volume );
 
                 if(data.volume>0)
                 {
@@ -1614,15 +1426,21 @@ Julia.prototype._Support = function(origin)
         return w>0 && h>0 ? h/w: 0;
     };
 
+
+
+
     self.isMobile = function()
     {
-        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) )
+        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile/i.test(navigator.userAgent) )
         {
             return true;
         }
 
         return false;
     };
+
+
+
 
     self.forceReady = function()
     {
@@ -1634,6 +1452,9 @@ Julia.prototype._Support = function(origin)
         return false;
     };
 
+
+
+
     self.canPlayMedia = function()
     {
         var vid = document.createElement('video');
@@ -1642,6 +1463,9 @@ Julia.prototype._Support = function(origin)
         $('#video-cap-test'+origin.env.ID).remove();
         return (origin.env.canPlayMediaString == 'probably' || origin.env.canPlayMediaString == 'maybe');
     };
+
+
+
 
     self.resize = function()
     {
@@ -1663,6 +1487,9 @@ Julia.prototype._Support = function(origin)
         origin.env.api.setAttribute('width', '100%');
         origin.env.api.setAttribute('height', '100%');
     };
+
+
+
 
     self.getSize = function()
     {
@@ -1764,7 +1591,6 @@ Julia.prototype._Suggest = function(origin)
 
                             origin.Ui.state(origin.env.model.suggest, 'on', '');
 
-                            //origin.Loader.init();
                             origin.env.model.buttons.bigPlay.click();
                         });
 
@@ -1910,11 +1736,17 @@ Julia.prototype._Timecode = function(origin)
         return p;
     },
 
+
+
+
     self.toSeconds = function(percent)
     {
         t = (origin.env.duration/100)*percent;
         return t;
     },
+
+
+
 
     self.toNum = function(human)
     {
@@ -1926,6 +1758,9 @@ Julia.prototype._Timecode = function(origin)
         t = s + m*60 + h*60*60;
         return t;
     },
+
+
+
 
     self.toHuman = function(time)
     {
@@ -2108,7 +1943,7 @@ Julia.prototype._Require = function(origin)
             }else{
                 self.raiseEvent(eventName);
             }
-        }, 100);
+        }, 20);
     };
 
 
@@ -2177,26 +2012,6 @@ Julia.prototype._Boot = function(origin)
             origin.options.suggest[i].played = false;
         }
 
-        // Persistent data
-        volume = origin.Persist.get('julia-player-volume');
-        muted = origin.Persist.get('julia-player-muted');
-
-        if(typeof volume !== 'undefined' && volume.length>0)
-        {
-            origin.options.volume = parseInt(volume);
-
-            if(origin.options.volume > 100 || origin.options.volume < 0)
-            {
-                origin.options.volume = 25;
-            }
-        }
-
-        if(typeof muted !=='undefined' && muted.length>0)
-        {
-            origin.options.muted = muted == 'false' ?  false: true;
-        }
-
-
         if(origin.env.hls !== false)
         {
             origin.env.hls.destroy();
@@ -2213,18 +2028,13 @@ Julia.prototype._Boot = function(origin)
         // Create UI
         origin.Ui.create();
 
+
         // Source select, poster select
         origin.Api.source();
 
+
         // Create API
         origin.Api.create();
-
-        // Size Fix
-        origin.Support.resize();
-
-        // Handle events
-        origin.Events.ui();
-        origin.Events.native();
     };
 };
 

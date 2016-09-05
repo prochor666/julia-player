@@ -13,11 +13,17 @@ Julia.prototype._Timecode = function(origin)
         return p;
     },
 
+
+
+
     self.toSeconds = function(percent)
     {
         t = (origin.env.duration/100)*percent;
         return t;
     },
+
+
+
 
     self.toNum = function(human)
     {
@@ -29,6 +35,9 @@ Julia.prototype._Timecode = function(origin)
         t = s + m*60 + h*60*60;
         return t;
     },
+
+
+
 
     self.toHuman = function(time)
     {

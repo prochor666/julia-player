@@ -12,15 +12,21 @@ Julia.prototype._Support = function(origin)
         return w>0 && h>0 ? h/w: 0;
     };
 
+
+
+
     self.isMobile = function()
     {
-        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) )
+        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile/i.test(navigator.userAgent) )
         {
             return true;
         }
 
         return false;
     };
+
+
+
 
     self.forceReady = function()
     {
@@ -32,6 +38,9 @@ Julia.prototype._Support = function(origin)
         return false;
     };
 
+
+
+
     self.canPlayMedia = function()
     {
         var vid = document.createElement('video');
@@ -40,6 +49,9 @@ Julia.prototype._Support = function(origin)
         $('#video-cap-test'+origin.env.ID).remove();
         return (origin.env.canPlayMediaString == 'probably' || origin.env.canPlayMediaString == 'maybe');
     };
+
+
+
 
     self.resize = function()
     {
@@ -61,6 +73,9 @@ Julia.prototype._Support = function(origin)
         origin.env.api.setAttribute('width', '100%');
         origin.env.api.setAttribute('height', '100%');
     };
+
+
+
 
     self.getSize = function()
     {
