@@ -3,17 +3,13 @@
 *
 * @author prochor666@gmail.com
 * @version: 1.0.3
-* @build: 2016-09-06
+* @build: 2016-09-09
 * @license: MIT
 *
 * @requires:
 * jquery [required]
-* hls.js [required]
-* dash.js [required]
-* rangeslider.js [required]
-*
-* Julia player constructor
-* options, environment, theme
+* hls.js [optional]
+* dash.js [optional]
 ****************************************** */
 var Julia = function(options)
 {
@@ -51,6 +47,7 @@ var Julia = function(options)
         force: false,
         live: false,
         responsive: true,
+        pauseOnBlur: false,
         dimensions: [
             [1920, 1080],
             [1280,720],

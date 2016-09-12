@@ -383,6 +383,17 @@ Julia.prototype._Events = function(origin)
         {
             origin.Suggest.run();
         };
+
+
+
+
+        $(window).on('blur', function()
+        {
+            if( origin.options.pauseOnBlur === true && origin.env.api.paused === false && origin.env.started === true )
+            {
+                origin.Controls.press('pause');
+            }
+        });
     };
 
 
