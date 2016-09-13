@@ -2,8 +2,8 @@
 * Julia HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.0.3
-* @build: 2016-09-09
+* @version: 1.0.4
+* @build: 2016-09-13
 * @license: MIT
 *
 * @requires:
