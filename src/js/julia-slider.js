@@ -36,6 +36,12 @@ Julia.prototype._Slider = function(origin, options)
             return percent;
         },
 
+        _pixels = function(e)
+        {
+            var pos = hasTouch === true ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
+            return pos;
+        },
+
         model = $('<div class="julia-slider">'
             +'<div class="julia-slider-track" data-julia-slider-component="track"></div>'
             +'<div class="julia-slider-handle" data-julia-slider-component="handle"></div>'
@@ -55,6 +61,9 @@ Julia.prototype._Slider = function(origin, options)
             value: 0,
             originVisible: false,
             eventRise: '',
+            overcall: function(){
+                return;
+            }
         };
 
     // Extend custom options
@@ -175,9 +184,43 @@ Julia.prototype._Slider = function(origin, options)
 
 
 
-    self.model.on('click', function(e)
+    self.model.on('click mouseover mousemove mouseout', function(e)
     {
-        self.slide( _position(e), false );
+        if(e.type == 'click')
+        {
+            self.slide( _position(e), false );
+        }
+
+        if( ( e.type == 'mouseover' || e.type == 'mousemove' ) && self.options.eventRise == 'progress-change' )
+        {
+            pos = _position(e);
+            pix = _pixels(e);
+            origin.Ui.state( origin.env.model.labels.goto, '', 'on' );
+            origin.Ui.panel( origin.env.model.labels.goto, origin.Timecode.toHuman( origin.Timecode.toSeconds( pos ) ) );
+
+            left = pix+'px';
+            border = (origin.env.model.labels.goto.innerWidth()/2);
+
+            if( pix < border )
+            {
+                left = (border) + 'px';
+            }
+
+            if( pix > self.model.innerWidth() - border - 10 )
+            {
+                left = ( self.model.innerWidth() - border ) + 'px';
+            }
+
+            origin.env.model.labels.goto.css({
+                'left': left,
+                'margin-left': -(origin.env.model.labels.goto.innerWidth()/2)+'px'
+            });
+        }
+
+        if( e.type == 'mouseout' && self.options.eventRise == 'progress-change' )
+        {
+            origin.Ui.state( origin.env.model.labels.goto, 'on', '' );
+        }
     });
 
 

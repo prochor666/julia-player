@@ -3,17 +3,13 @@
 *
 * @author prochor666@gmail.com
 * @version: 1.0.3
-* @build: 2016-09-06
+* @build: 2016-09-09
 * @license: MIT
 *
 * @requires:
 * jquery [required]
-* hls.js [required]
-* dash.js [required]
-* rangeslider.js [required]
-*
-* Julia player constructor
-* options, environment, theme
+* hls.js [optional]
+* dash.js [optional]
 ****************************************** */
 var Julia = function(options)
 {
@@ -51,6 +47,7 @@ var Julia = function(options)
         force: false,
         live: false,
         responsive: true,
+        pauseOnBlur: false,
         dimensions: [
             [1920, 1080],
             [1280,720],
@@ -117,6 +114,11 @@ var Julia = function(options)
                 live: '',
                 currentTime: '',
                 duration: ''
+            },
+            labels: {
+                goto: ''
+            },
+            menus: {
             }
         },
         isLive: false,
@@ -495,6 +497,11 @@ Julia.prototype._Ui = function(origin)
         +'    <span>00:00:00</span>'
         +'</div>');
 
+        // Labels
+        origin.env.model.labels.goto = $('<div class="julia-label julia-label-goto">'
+        +'    <span>00:00:00</span>'
+        +'</div>');
+
 
         // Compose player object
         origin.env.model.shield
@@ -512,7 +519,8 @@ Julia.prototype._Ui = function(origin)
             origin.env.model.buttons.play,
             origin.env.model.buttons.sound,
             origin.env.model.ranges.volume,
-            origin.env.model.buttons.fullscreen
+            origin.env.model.buttons.fullscreen,
+            origin.env.model.labels.goto,
         ]);
 
         origin.env.instance
@@ -648,6 +656,12 @@ Julia.prototype._Slider = function(origin, options)
             return percent;
         },
 
+        _pixels = function(e)
+        {
+            var pos = hasTouch === true ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
+            return pos;
+        },
+
         model = $('<div class="julia-slider">'
             +'<div class="julia-slider-track" data-julia-slider-component="track"></div>'
             +'<div class="julia-slider-handle" data-julia-slider-component="handle"></div>'
@@ -667,6 +681,9 @@ Julia.prototype._Slider = function(origin, options)
             value: 0,
             originVisible: false,
             eventRise: '',
+            overcall: function(){
+                return;
+            }
         };
 
     // Extend custom options
@@ -787,9 +804,43 @@ Julia.prototype._Slider = function(origin, options)
 
 
 
-    self.model.on('click', function(e)
+    self.model.on('click mouseover mousemove mouseout', function(e)
     {
-        self.slide( _position(e), false );
+        if(e.type == 'click')
+        {
+            self.slide( _position(e), false );
+        }
+
+        if( ( e.type == 'mouseover' || e.type == 'mousemove' ) && self.options.eventRise == 'progress-change' )
+        {
+            pos = _position(e);
+            pix = _pixels(e);
+            origin.Ui.state( origin.env.model.labels.goto, '', 'on' );
+            origin.Ui.panel( origin.env.model.labels.goto, origin.Timecode.toHuman( origin.Timecode.toSeconds( pos ) ) );
+
+            left = pix+'px';
+            border = (origin.env.model.labels.goto.innerWidth()/2);
+
+            if( pix < border )
+            {
+                left = (border) + 'px';
+            }
+
+            if( pix > self.model.innerWidth() - border - 10 )
+            {
+                left = ( self.model.innerWidth() - border ) + 'px';
+            }
+
+            origin.env.model.labels.goto.css({
+                'left': left,
+                'margin-left': -(origin.env.model.labels.goto.innerWidth()/2)+'px'
+            });
+        }
+
+        if( e.type == 'mouseout' && self.options.eventRise == 'progress-change' )
+        {
+            origin.Ui.state( origin.env.model.labels.goto, 'on', '' );
+        }
     });
 
 
@@ -1214,6 +1265,17 @@ Julia.prototype._Events = function(origin)
         {
             origin.Suggest.run();
         };
+
+
+
+
+        $(window).on('blur', function()
+        {
+            if( origin.options.pauseOnBlur === true && origin.env.api.paused === false && origin.env.started === true )
+            {
+                origin.Controls.press('pause');
+            }
+        });
     };
 
 
@@ -1420,6 +1482,9 @@ Julia.prototype._Controls = function(origin)
 Julia.prototype._Support = function(origin)
 {
     var self = this;
+
+
+
 
     self.aspect = function(w,h)
     {

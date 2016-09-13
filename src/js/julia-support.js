@@ -7,6 +7,9 @@ Julia.prototype._Support = function(origin)
 {
     var self = this;
 
+
+
+
     self.aspect = function(w,h)
     {
         return w>0 && h>0 ? h/w: 0;

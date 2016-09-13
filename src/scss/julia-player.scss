@@ -30,7 +30,6 @@ div.julia-player {
     background: rgba(0,0,0,1);
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.9);
 
-
     /* *****************************
     * Julia player style
     * Keep UI unselectable
@@ -45,8 +44,7 @@ div.julia-player {
         padding: 0;
         margin: 0;
         /* *****************************
-        * FIX!
-        * 4/5px gap bellow resizable
+        * FIX! 4/5px gap bellow resizable
         * inline media elements
         ***************************** */
         vertical-align: top;
@@ -89,8 +87,8 @@ div.julia-player {
 
 
     /* *****************************
-    * === SHIELD ===
-    ***************************** */
+    * === PLAYER SHIELD OVERLAY ===
+    ****************************** */
     >div.julia-shield {
         position: absolute;
         top: 0;
@@ -109,7 +107,7 @@ div.julia-player {
 
         /* *****************************
         * === PRELOADER ===
-        ***************************** */
+        ****************************** */
         >div.julia-preloader {
             display: none;
             width: 100%;
@@ -159,7 +157,7 @@ div.julia-player {
 
     /* *****************************
     * === SUGGEST ===
-    ***************************** */
+    ****************************** */
     >div.julia-suggest {
         position: absolute;
         top: 0;
@@ -180,7 +178,7 @@ div.julia-player {
         /* *****************************
         * Julia player style
         * === SUGGEST ITEMS ===
-        ***************************** */
+        ****************************** */
         >div.julia-suggest-item {
             width: 50%;
             height: 50%;
@@ -226,7 +224,7 @@ div.julia-player {
 
     /* *****************************
     * === BASE TOOLBAR ===
-    ***************************** */
+    ****************************** */
     >div.julia-toolbar {
         background: rgba(0,0,0,.7);
         height: 48px;
@@ -237,13 +235,43 @@ div.julia-player {
         z-index: 70;
         opacity: .0;
         border: none;
+        font-family: sans-serif;
+
+
+
+        /* *****************************
+        * === LABELS ===
+        ****************************** */
+        div.julia-label {
+            display: block;
+            position: absolute;
+            border: 0;
+            outline: 0;
+            height: 22px;
+            line-height: 22px;
+            font-size: 12px;
+            color: #DDD;
+            background: rgba(0,0,0,.7);
+
+            &.julia-label-goto {
+                width: 60px;
+                left: 30px;
+                bottom: 55px;
+                text-align: center;
+                display: none;
+
+                &.on {
+                    display: block;
+                }
+            }
+        }
 
 
 
 
         /* *****************************
         * === PANELS ===
-        ***************************** */
+        ****************************** */
         div.julia-panel {
             display: block;
             border: 0;
@@ -253,7 +281,6 @@ div.julia-player {
             color: #DDD;
             position: absolute;
             bottom: 6px;
-            font-family: sans-serif;
 
             &.julia-currentTime {
                 width: 60px;
@@ -301,7 +328,7 @@ div.julia-player {
 
         /* *****************************
         * === TOOLBAR VISIBLE MODE ===
-        ***************************** */
+        ****************************** */
         &.julia-toolbar-visible {
             opacity: 1;
             z-index: 80;
@@ -331,7 +358,7 @@ div.julia-player {
 
         /* *****************************
         * === BARS ===
-        ***************************** */
+        ****************************** */
         div.julia-progress {
             height: 30px;
             left: 0px;
@@ -353,7 +380,7 @@ div.julia-player {
 
     /* *****************************
     * === BUTTONS ===
-    ***************************** */
+    ****************************** */
     button.julia-btn {
         color: #F9F9F9;
         background: transparent;
@@ -431,7 +458,7 @@ div.julia-player {
 
 /* *****************************
 * === TRANSITIONS ===
-****************************** */
+******************************* */
 div.julia-player,
 div.julia-player>div.julia-toolbar,
 div.julia-player>div.julia-shield>button.julia-btn.julia-big-play,
@@ -447,7 +474,7 @@ div.julia-player>div.julia-suggest>div.julia-suggest-item
 
 /* *****************************
 * === BACKDROP ===
-****************************** */
+******************************* */
 ::backdrop {
     background-color: #000;
 }

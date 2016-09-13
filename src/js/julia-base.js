@@ -114,6 +114,11 @@ var Julia = function(options)
                 live: '',
                 currentTime: '',
                 duration: ''
+            },
+            labels: {
+                goto: ''
+            },
+            menus: {
             }
         },
         isLive: false,

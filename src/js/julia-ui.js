@@ -66,6 +66,11 @@ Julia.prototype._Ui = function(origin)
         +'    <span>00:00:00</span>'
         +'</div>');
 
+        // Labels
+        origin.env.model.labels.goto = $('<div class="julia-label julia-label-goto">'
+        +'    <span>00:00:00</span>'
+        +'</div>');
+
 
         // Compose player object
         origin.env.model.shield
@@ -83,7 +88,8 @@ Julia.prototype._Ui = function(origin)
             origin.env.model.buttons.play,
             origin.env.model.buttons.sound,
             origin.env.model.ranges.volume,
-            origin.env.model.buttons.fullscreen
+            origin.env.model.buttons.fullscreen,
+            origin.env.model.labels.goto,
         ]);
 
         origin.env.instance
