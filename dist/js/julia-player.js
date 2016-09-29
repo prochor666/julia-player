@@ -556,7 +556,6 @@ Julia.prototype._Ui = function(origin)
         origin.env.model.toolbar.hide();
         origin.env.model.buttons.bigPlay.hide();
         origin.Ui.state(origin.env.model.preloader, '', 'on');
-
         origin.env.instance.insertAfter(origin.env.element);
 
         origin.env.fullscreenFrame = document.querySelector('#julia-player-'+origin.env.ID);
@@ -1176,10 +1175,10 @@ Julia.prototype._Events = function(origin)
         // Video position
         origin.env.api.ontimeupdate = function(e)
         {
+            currentTimeReadable = origin.Timecode.toHuman( origin.env.api.currentTime.toFixed(2) );
+            
             if(origin.env.seeking === false)
             {
-                currentTimeReadable = origin.Timecode.toHuman( origin.env.api.currentTime.toFixed(2) );
-
                 origin.env.model.sliders.progress.update( origin.Timecode.toPercents( origin.env.api.currentTime ) );
 
                 origin.Ui.panel(

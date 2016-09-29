@@ -118,7 +118,6 @@ Julia.prototype._Ui = function(origin)
         origin.env.model.toolbar.hide();
         origin.env.model.buttons.bigPlay.hide();
         origin.Ui.state(origin.env.model.preloader, '', 'on');
-
         origin.env.instance.insertAfter(origin.env.element);
 
         origin.env.fullscreenFrame = document.querySelector('#julia-player-'+origin.env.ID);
