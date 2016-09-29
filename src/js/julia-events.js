@@ -54,6 +54,7 @@ Julia.prototype._Events = function(origin)
         {
             e.preventDefault();
             e.stopPropagation();
+
             if(e.type == 'click')
             {
                 if(origin.env.started === false)
@@ -70,13 +71,29 @@ Julia.prototype._Events = function(origin)
 
 
         // Area click
-        origin.env.model.shield.on('click contextmenu', function(e)
+        origin.env.model.shield.on('dblclick click contextmenu', function(e)
         {
             e.preventDefault();
             e.stopPropagation();
-            if(origin.options.pauseOnClick === true && origin.Support.isMobile() === false && e.type == 'click')
+
+            if( origin.options.pauseOnClick === true && origin.Support.isMobile() === false && e.type == 'click' )
             {
-                origin.Controls.press('pause');
+                if( origin.env.api.paused === false )
+                {
+                    origin.Controls.press('pause');
+                }else{
+                    origin.Controls.press('play');
+                }
+            }
+
+            if( e.type == 'dblclick' )
+            {
+                if( origin.env.instance.hasClass('julia-fullscreen-on') )
+                {
+                    origin.Controls.press('fullscreen-off');
+                }else{
+                    origin.Controls.press('fullscreen-on');
+                }
             }
         });
 
@@ -144,53 +161,6 @@ Julia.prototype._Events = function(origin)
         {
             origin.Support.resize();
         });
-
-
-
-
-        // Fullscreen change event handler
-        $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
-        {
-            if(!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement)
-            {
-
-                origin.Ui.state( origin.env.instance, 'julia-fullscreen-on', 'julia-fullscreen-off' );
-                origin.Ui.state( origin.env.model.buttons.fullscreen, 'off', 'on' );
-                origin.Ui.icon( origin.env.model.buttons.fullscreen, 'julia-fullscreen-exit', 'julia-fullscreen' );
-
-                // Turn off landscape on mobile
-                if(origin.Support.isMobile())
-                {
-                    screen.orientation.unlock();
-                    screen.msLockOrientation.unlock();
-                    screen.mozLockOrientation.unlock();
-                }
-
-                origin.Base.debug({
-                    'fullscreen off' : '#julia-player-'+origin.env.ID
-                });
-
-                origin.Support.resize();
-
-            }else{
-
-                origin.Ui.state( origin.env.instance, 'julia-fullscreen-off', 'julia-fullscreen-on' );
-                origin.Ui.state( origin.env.model.buttons.fullscreen, 'on', 'off' );
-                origin.Ui.icon( origin.env.model.buttons.fullscreen, 'julia-fullscreen', 'julia-fullscreen-exit' );
-
-                // Force landscape in fullscreen mode on mobile
-                if(origin.Support.isMobile())
-                {
-                    screen.orientation.lock('landscape-primary');
-                    screen.msLockOrientation.lock('landscape-primary');
-                    screen.mozLockOrientation.lock('landscape-primary');
-                }
-
-                origin.Base.debug({
-                    'fullscreen on' : '#julia-player-'+origin.env.ID
-                });
-            }
-        });
     };
 
 
@@ -255,7 +225,14 @@ Julia.prototype._Events = function(origin)
         {
             origin.Ui.state( origin.env.model.buttons.play, 'pause', 'play' );
             origin.Ui.icon( origin.env.model.buttons.play, 'julia-pause', 'julia-play' );
-            origin.env.model.buttons.bigPlay.show();
+
+            setTimeout( function()
+            {
+                if( origin.env.api.paused === true )
+                {
+                    origin.env.model.buttons.bigPlay.show();
+                }
+            }, 350);
         };
 
 
@@ -298,7 +275,7 @@ Julia.prototype._Events = function(origin)
             {
                 currentTimeReadable = origin.Timecode.toHuman( origin.env.api.currentTime.toFixed(2) );
 
-                origin.env.model.sliders.progress.update( origin.Timecode.toPercents( origin.env.api.currentTime.toFixed(2) ) );
+                origin.env.model.sliders.progress.update( origin.Timecode.toPercents( origin.env.api.currentTime ) );
 
                 origin.Ui.panel(
                     origin.env.model.panels.currentTime,
@@ -322,7 +299,7 @@ Julia.prototype._Events = function(origin)
 
 
         // Video position
-        origin.env.api.seeked = function(e)
+        origin.env.api.onseeked = function(e)
         {
             origin.env.seeking = false;
         };
@@ -331,7 +308,7 @@ Julia.prototype._Events = function(origin)
 
 
         // Video position
-        origin.env.api.seeking = function(e)
+        origin.env.api.onseeking = function(e)
         {
             origin.Ui.state( origin.env.model.preloader, '', 'on' );
             origin.env.seeking = true;

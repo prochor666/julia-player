@@ -233,11 +233,11 @@ div.julia-player {
         text-align: left; }
   div.julia-player > div.julia-toolbar {
     background: rgba(0, 0, 0, 0.7);
+    width: 100%;
     height: 48px;
     position: absolute;
-    bottom: -1px;
-    left: -1px;
-    right: -1px;
+    bottom: 0;
+    left: 0;
     z-index: 70;
     opacity: .0;
     border: none;
@@ -322,7 +322,6 @@ div.julia-player {
         margin: 0;
         border: 0; }
       div.julia-player > div.julia-toolbar .julia-slider .julia-slider-track {
-        width: 100%;
         height: 20px;
         background-color: transparent;
         position: absolute;
@@ -356,9 +355,9 @@ div.julia-player {
       outline: 0;
       z-index: 85; }
     div.julia-player > div.julia-toolbar div.julia-progress {
+      width: 100%;
       height: 30px;
-      left: 0px;
-      right: 0;
+      left: 0;
       top: -9px; }
     div.julia-player > div.julia-toolbar div.julia-volume {
       width: 100px;
@@ -399,7 +398,7 @@ div.julia-player {
       z-index: 80; }
 
 @media (max-width: 480px) {
-  div.julia-player > div.julia-toolbar div.julia-volume {
+  div.julia-player div.julia-toolbar div.julia-volume {
     width: 60px;
     right: 48px; }
   div.julia-player button.julia-btn.julia-sound {

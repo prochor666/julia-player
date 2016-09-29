@@ -2,8 +2,8 @@
 * Julia HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.0.4
-* @build: 2016-09-13
+* @version: 1.0.6
+* @build: 2016-09-29
 * @license: MIT
 *
 * @requires:
@@ -16,7 +16,7 @@ var Julia = function(options)
     var origin = this;
 
 
-    // Import origin.options
+    // Import options
     options = typeof options === 'undefined' ? {}: options;
 
 
@@ -87,6 +87,7 @@ var Julia = function(options)
     origin.env = {
         element: origin.options.element,
         instance: {},
+        fullscreenFrame: false,
         ID: __JULIA_INSTANCE__ID__,
         api: {},
         model: {

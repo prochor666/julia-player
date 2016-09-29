@@ -11,12 +11,18 @@ Julia.prototype._Api = function(origin)
     {
         $('#julia-api-'+origin.env.ID).remove();
 
-        apiElement = $('<video class="julia-video" id="julia-api-'+origin.env.ID+'" preload="auto"></video>');
+        apiElement = $('<video class="julia-video" id="julia-api-'+origin.env.ID+'" preload="auto" webkit-playsinline="true" playsinline="true"></video>');
 
         origin.env.instance.prepend(apiElement);
+
         origin.env.api = document.getElementById('julia-api-'+origin.env.ID);
         origin.env.api.controls = false;
         origin.env.apiOk = true;
+
+        if( typeof makeVideoPlayableInline === 'function' )
+        {
+            makeVideoPlayableInline(origin.env.api);
+        }
 
         origin.Base.debug({
             'apiId': origin.env.ID,

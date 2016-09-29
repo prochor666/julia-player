@@ -31,6 +31,19 @@ Julia.prototype._Support = function(origin)
 
 
 
+    self.iOS = function()
+    {
+        if( /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream )
+        {
+            return true;
+        }
+
+        return false;
+    };
+
+
+
+
     self.forceReady = function()
     {
         if( /Firefox/i.test(navigator.userAgent) )

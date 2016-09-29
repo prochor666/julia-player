@@ -14,7 +14,6 @@ How to establish devel environment.
     - CSS minify package [gulp-clean-css](https://www.npmjs.com/package/gulp-clean-css)
     - JavaScript minify package [gulp-minify](https://www.npmjs.com/package/gulp-minify)
     - Concat package [gulp-concat](https://www.npmjs.com/package/gulp-concat)
-    - _optional_, _not-implemented_ Sourcemaps package [gulp-sourcemaps](https://www.npmjs.com/package/gulp-sourcemaps)
 
 How to start.
 

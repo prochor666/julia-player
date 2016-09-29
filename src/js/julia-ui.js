@@ -79,18 +79,32 @@ Julia.prototype._Ui = function(origin)
             origin.env.model.buttons.bigPlay
         ]);
 
-        origin.env.model.toolbar
-        .append([
-            origin.env.model.ranges.progress,
-            origin.env.model.panels.live,
-            origin.env.model.panels.currentTime,
-            origin.env.model.panels.duration,
-            origin.env.model.buttons.play,
-            origin.env.model.buttons.sound,
-            origin.env.model.ranges.volume,
-            origin.env.model.buttons.fullscreen,
-            origin.env.model.labels.goto,
-        ]);
+        if( origin.Support.iOS() === true )
+        {
+            origin.env.model.toolbar
+            .append([
+                origin.env.model.ranges.progress,
+                origin.env.model.panels.live,
+                origin.env.model.panels.currentTime,
+                origin.env.model.panels.duration,
+                origin.env.model.buttons.play,
+                origin.env.model.buttons.fullscreen,
+                origin.env.model.labels.goto,
+            ]);
+        }else{
+            origin.env.model.toolbar
+            .append([
+                origin.env.model.ranges.progress,
+                origin.env.model.panels.live,
+                origin.env.model.panels.currentTime,
+                origin.env.model.panels.duration,
+                origin.env.model.buttons.play,
+                origin.env.model.buttons.sound,
+                origin.env.model.ranges.volume,
+                origin.env.model.buttons.fullscreen,
+                origin.env.model.labels.goto,
+            ]);
+        }
 
         origin.env.instance
         .append([
@@ -106,6 +120,8 @@ Julia.prototype._Ui = function(origin)
         origin.Ui.state(origin.env.model.preloader, '', 'on');
 
         origin.env.instance.insertAfter(origin.env.element);
+
+        origin.env.fullscreenFrame = document.querySelector('#julia-player-'+origin.env.ID);
 
         self.raiseEvent('julia.ui-ready');
 

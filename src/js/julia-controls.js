@@ -118,9 +118,13 @@ Julia.prototype._Controls = function(origin)
                 origin.Ui.icon( origin.env.model.buttons.sound, 'julia-sound-on', 'julia-sound-off' );
 
             break; case 'fullscreen-on':
-                origin.Fullscreen.on();
+
+                origin.Fullscreen.reset(origin.env.instance, origin.env.model, origin.env.api);
+                origin.Fullscreen.on(origin.env.fullscreenFrame);
 
             break; case 'fullscreen-off':
+
+                origin.Fullscreen.reset(origin.env.instance, origin.env.model, origin.env.api);
                 origin.Fullscreen.off();
 
             break; default:

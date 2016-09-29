@@ -1,31 +1,34 @@
 /* *****************************************
 * Julia HTML5 media player
 * Fullscreen
-* media fullscreen behavior
+* player fullscreen behavior
 ****************************************** */
 Julia.prototype._Fullscreen = function(origin)
 {
     var self = this;
 
-    self.on = function()
+    self.on = function(fullscreenFrame)
     {
-        var videoFrame = document.querySelector('#julia-player-'+origin.env.ID);
+        if( fullscreenFrame.requestFullscreen )
+        {
+            fullscreenFrame.requestFullscreen();
 
-        if(videoFrame.requestFullscreen)
+        }else if( fullscreenFrame.msRequestFullscreen )
         {
-            videoFrame.requestFullscreen();
-        } else if (videoFrame.msRequestFullscreen)
+            fullscreenFrame.msRequestFullscreen();
+
+        }else if( fullscreenFrame.mozRequestFullScreen )
         {
-            videoFrame.msRequestFullscreen();
-        } else if (videoFrame.mozRequestFullScreen)
+            fullscreenFrame.mozRequestFullScreen();
+
+        }else if( fullscreenFrame.webkitRequestFullscreen )
         {
-            videoFrame.mozRequestFullScreen();
-        } else if(videoFrame.webkitRequestFullscreen)
-        {
-            videoFrame.webkitRequestFullscreen();
+            fullscreenFrame.webkitRequestFullscreen();
+
         }else{
+
             origin.Base.debug({
-                'fullscreen': 'fullscreen is not supported'
+                'fullscreen': 'Fullscreen is not supported'
             });
         }
     };
@@ -35,18 +38,83 @@ Julia.prototype._Fullscreen = function(origin)
 
     self.off = function()
     {
-        if(document.exitFullscreen)
+        if( document.exitFullscreen )
         {
             document.exitFullscreen();
-        }else if(document.msExitFullscreen)
+
+        }else if( document.msExitFullscreen )
         {
             document.msExitFullscreen();
-        } else if(document.mozCancelFullScreen)
+
+        }else if( document.mozCancelFullScreen )
         {
             document.mozCancelFullScreen();
-        } else if(document.webkitExitFullscreen)
+
+        }else if( document.webkitExitFullscreen )
         {
             document.webkitExitFullscreen();
         }
+    };
+
+
+
+
+    self.reset = function(instance, model, api)
+    {
+        $(document).off('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange');
+
+        // Fullscreen change event handler
+        $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
+        {
+            if(!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement)
+            {
+                origin.Ui.state( instance, 'julia-fullscreen-on', 'julia-fullscreen-off' );
+                origin.Ui.state( model.buttons.fullscreen, 'off', 'on' );
+                origin.Ui.icon( model.buttons.fullscreen, 'julia-fullscreen-exit', 'julia-fullscreen' );
+
+                // Turn off landscape on mobile
+                if(origin.Support.isMobile())
+                {
+                    screen.orientation.unlock();
+                    screen.msLockOrientation.unlock();
+                    screen.mozLockOrientation.unlock();
+                }
+
+                origin.Base.debug({
+                    'fullscreen off' : '#julia-player-'+origin.env.ID
+                });
+
+            }else{
+
+                origin.Ui.state( instance, 'julia-fullscreen-off', 'julia-fullscreen-on' );
+                origin.Ui.state( model.buttons.fullscreen, 'on', 'off' );
+                origin.Ui.icon( model.buttons.fullscreen, 'julia-fullscreen', 'julia-fullscreen-exit' );
+
+                // Force landscape in fullscreen mode on mobile
+                if(origin.Support.isMobile())
+                {
+                    screen.orientation.lock('landscape-primary');
+                    screen.msLockOrientation.lock('landscape-primary');
+                    screen.mozLockOrientation.lock('landscape-primary');
+                }
+
+                origin.Base.debug({
+                    'fullscreen on' : '#julia-player-'+origin.env.ID
+                });
+            }
+
+            origin.Support.resize();
+
+            setTimeout( function()
+            {
+                w = origin.env.api.getAttribute('width');
+
+                origin.env.instance.find('.julia-progress').width(w);
+                origin.env.instance.find('.julia-progress .julia-slider-track').width(w);
+
+                model.sliders.progress.update( origin.Timecode.toPercents( api.currentTime ) );
+            }, 5);
+
+        });
     };
 };

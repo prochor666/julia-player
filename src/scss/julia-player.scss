@@ -227,11 +227,12 @@ div.julia-player {
     ****************************** */
     >div.julia-toolbar {
         background: rgba(0,0,0,.7);
+        width: 100%;
         height: 48px;
         position: absolute;
-        bottom: -1px;
-        left: -1px;
-        right: -1px;
+        bottom: 0;
+        left: 0;
+        //right: 0;
         z-index: 70;
         opacity: .0;
         border: none;
@@ -360,9 +361,9 @@ div.julia-player {
         * === BARS ===
         ****************************** */
         div.julia-progress {
+            width: 100%;
             height: 30px;
-            left: 0px;
-            right: 0;
+            left: 0;
             top: -9px;
         }
 
@@ -432,7 +433,8 @@ div.julia-player {
 @media (max-width: 480px) {
     div.julia-player {
 
-        >div.julia-toolbar {
+        div.julia-toolbar {
+
             div.julia-volume {
                 width: 60px;
                 right: 48px;
