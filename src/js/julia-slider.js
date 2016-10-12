@@ -195,6 +195,11 @@ Julia.prototype._Slider = function(origin, options)
         {
             pos = _position(e);
             pix = _pixels(e);
+
+            if( origin.env.thumbsOk === true && origin.Support.isMobile() === false && origin.options.live === false && origin.options.thumbs === true )
+            {
+                origin.Api.thumb( origin.Timecode.toSeconds( pos ) );
+            }
             origin.Ui.state( origin.env.model.labels.goto, '', 'on' );
             origin.Ui.panel( origin.env.model.labels.goto, origin.Timecode.toHuman( origin.Timecode.toSeconds( pos ) ) );
 

@@ -32,7 +32,6 @@ var Julia = function(options)
     // Unique instance ID
     var __JULIA_INSTANCE__ID__ = Math.floor((Math.random()*10000000)+1);
 
-
     // Default origin.options
     origin.options = {
         source: false,
@@ -46,6 +45,7 @@ var Julia = function(options)
         debugPlayback: false,
         force: false,
         live: false,
+        thumbs: false,
         responsive: true,
         pauseOnBlur: false,
         dimensions: [
@@ -133,6 +133,7 @@ var Julia = function(options)
         source: '',
         duration: 0,
         apiOk: false,
+        thumbsOk: true,
         onTimeRised: [],
         seeking: false,
         dimensions: {

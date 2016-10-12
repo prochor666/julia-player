@@ -9,26 +9,9 @@ Julia.prototype._Loader = function(origin)
 
     self.init = function()
     {
+        //--odn-handle-start--
         origin.env.api.src = '';
-/*
-        if(typeof reloadSource === 'undefined')
-        {
-            reloadSource = false;
-        }
 
-
-        if(reloadSource === true)
-        {
-            origin.Controls.press('stop');
-
-            origin.Api.source();
-
-            // Handle events
-            origin.Events.ui();
-            origin.Events.native();
-        }
-
-*/
         origin.env.useHlsLib = false;
         origin.env.isLive = false;
         origin.env.canPlayMedia = origin.Support.canPlayMedia();
@@ -137,9 +120,9 @@ Julia.prototype._Loader = function(origin)
             origin.env.api.load();
         }
 
+        //--odn-handle-stop--
 
         origin.Ui.state(origin.env.model.preloader, '', 'on');
-
 
         origin.Api.allowStart({
             type: 'origin.Loader'

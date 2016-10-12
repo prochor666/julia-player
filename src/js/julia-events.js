@@ -268,11 +268,25 @@ Julia.prototype._Events = function(origin)
 
 
 
+        origin.env.api.onloadeddata = function(e)
+        {
+        };
+
+
+
+
+        origin.env.api.oncanplaythrough = function(e)
+        {
+        }
+
+
+
+
         // Video position
         origin.env.api.ontimeupdate = function(e)
         {
             currentTimeReadable = origin.Timecode.toHuman( origin.env.api.currentTime.toFixed(2) );
-            
+
             if(origin.env.seeking === false)
             {
                 origin.env.model.sliders.progress.update( origin.Timecode.toPercents( origin.env.api.currentTime ) );
@@ -337,12 +351,14 @@ Julia.prototype._Events = function(origin)
         // Set video duration
         origin.env.api.ondurationchange = function(e)
         {
-            origin.env.duration = origin.env.api.duration;
-
-            if(origin.env.started === false)
+            if( !isNaN(origin.env.api.duration) )
             {
                 origin.env.duration = origin.env.api.duration;
-                origin.env.seeking = false;
+
+                if ( origin.env.started === false )
+                {
+                    origin.env.seeking = false;
+                }
 
                 origin.Base.debug({
                     'duration': origin.env.duration,

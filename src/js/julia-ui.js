@@ -106,6 +106,7 @@ Julia.prototype._Ui = function(origin)
             ]);
         }
 
+        //--odn-handle-start--
         origin.env.instance
         .append([
             origin.env.model.shield,
@@ -127,6 +128,7 @@ Julia.prototype._Ui = function(origin)
         origin.Base.debug({
             'playerInstance': origin.env.instance,
         });
+        //--odn-handle-stop--
     };
 
 
@@ -200,4 +202,4 @@ Julia.prototype._Ui = function(origin)
         origin.env.model.shield.find('img').remove();
     };
 
-}
+};

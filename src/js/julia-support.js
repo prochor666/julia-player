@@ -97,20 +97,21 @@ Julia.prototype._Support = function(origin)
     {
         // Fix video wrapped in inline block, can not get size properlym if inline element detected
         var parentBlock = origin.env.element.parent().css('display').toLowerCase();
-        if(parentBlock == 'inline')
+        if( parentBlock == 'inline' )
         {
             origin.env.element.parent().css({'display': 'block'});
         }
 
         var parentWidth = origin.env.element.parent().width();
-        for(i in origin.options.dimensions)
+
+        for( i in origin.options.dimensions )
         {
             var dim = origin.options.dimensions[i];
-            if(parentWidth>=dim[0])
+            if( parentWidth >= dim[0] )
             {
-                a = self.aspect(parentWidth) == 0 ? dim[1]/dim[0]: self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
-
+                a = self.aspect( dim[0], dim[1] );
                 dimensions = [dim[0],(dim[0]*a)];
+
                 origin.Base.debug({
                     'resizePredefined': dimensions
                 });
@@ -118,7 +119,6 @@ Julia.prototype._Support = function(origin)
             }
         }
 
-        a = self.aspect() == 0 ? dim[1]/dim[0]: self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
         dimensions = [parentWidth, (parentWidth*a)];
 
         origin.Base.debug({

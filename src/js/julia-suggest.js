@@ -39,6 +39,8 @@ Julia.prototype._Suggest = function(origin)
                                 origin.Callback.fn(origin.options.onSuggest, origin.options.suggest[i]);
                             }
 
+                            origin.Api.shadowApi = false;
+
                             origin.options.muted = origin.env.api.muted;
 
                             origin.options.poster = $(this).data('poster');

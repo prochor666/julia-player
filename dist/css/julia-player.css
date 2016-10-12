@@ -150,7 +150,7 @@ div.julia-player {
         ****************************** */ }
     div.julia-player > div.julia-shield > img {
       z-index: 75; }
-    div.julia-player > div.julia-shield > div.julia-preloader {
+    div.julia-player > div.julia-shield div.julia-preloader {
       display: none;
       width: 100%;
       height: 100%;
@@ -163,9 +163,9 @@ div.julia-player {
       margin: 0;
       background-color: rgba(0, 0, 0, 0.7);
       z-index: 79; }
-      div.julia-player > div.julia-shield > div.julia-preloader.on {
+      div.julia-player > div.julia-shield div.julia-preloader.on {
         display: block; }
-      div.julia-player > div.julia-shield > div.julia-preloader > div.julia-preloader-run {
+      div.julia-player > div.julia-shield div.julia-preloader div.julia-preloader-run {
         width: 64px;
         height: 64px;
         line-height: 64px;

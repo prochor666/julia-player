@@ -11,6 +11,7 @@ Julia.prototype._Boot = function(origin)
     {
         origin.Base.debug(origin.options);
 
+        //--odn-handle-start--
         // Set active DOM element
         origin.env.element = origin.options.element;
 
@@ -43,5 +44,6 @@ Julia.prototype._Boot = function(origin)
 
         // Create API
         origin.Api.create();
+        //--odn-handle-stop--
     };
 };

@@ -32,7 +32,6 @@ var Julia = function(options)
     // Unique instance ID
     var __JULIA_INSTANCE__ID__ = Math.floor((Math.random()*10000000)+1);
 
-
     // Default origin.options
     origin.options = {
         source: false,
@@ -46,6 +45,7 @@ var Julia = function(options)
         debugPlayback: false,
         force: false,
         live: false,
+        thumbs: false,
         responsive: true,
         pauseOnBlur: false,
         dimensions: [
@@ -133,6 +133,7 @@ var Julia = function(options)
         source: '',
         duration: 0,
         apiOk: false,
+        thumbsOk: true,
         onTimeRised: [],
         seeking: false,
         dimensions: {
@@ -326,6 +327,16 @@ Julia.prototype._Api = function(origin)
 {
     var self = this;
 
+
+    self.shadowApi = false;
+
+    self.canvas = false;
+    self.context = false;
+    self.imageThumb = false;
+    self.dash = false;
+    self.hls = false;
+    self.imageCache = {};
+
     self.create = function()
     {
         $('#julia-api-'+origin.env.ID).remove();
@@ -423,16 +434,184 @@ Julia.prototype._Api = function(origin)
             // don't let mobile Firefox make decision about readyState, mobile Firefox lie!
             if(origin.env.api.readyState>=3 || (origin.Support.isMobile() === true && origin.env.api.readyState>=2) )
             {
-                origin.Api.allowStart({
+                self.allowStart({
                     type: 'origin.Events.canplaythrough'
                 });
+
             }else{
                 setTimeout( function()
                 {
-                    origin.Api.canplaythrough();
+                    self.canplaythrough();
                 }, 100);
             }
         }
+    };
+
+
+
+
+    // Create shadow api and grab thumbnail
+    self.dim = function( i )
+    {
+        var dim = [origin.env.instance.width(), origin.env.instance.height()];
+        var a = dim[1] / dim[0];
+        var dimensions = [128,(128*a)];
+
+        return dimensions;
+    };
+
+
+
+
+    // Create 100 thumbs
+    self.thumb = function(t)
+    {
+        var dimensions = self.dim( i );
+
+        var width = Math.floor(dimensions[0]);
+        var height = Math.floor(dimensions[1]);
+
+        if( self.shadowApi === false )
+        {
+            self.imageCache = {};
+            
+            origin.env.model.labels.goto.css({
+                width: (dimensions[0]+10)+'px',
+                height: (40 + dimensions[1] + 10)+'px',
+                overflow: 'hidden'
+            });
+
+            self.canvas = document.createElement('canvas');
+            self.canvas.width = width;
+            self.canvas.height = height;
+            self.context = self.canvas.getContext('2d');
+
+            self.imageThumb = document.createElement('img');
+            self.imageThumb.style.width = width+'px';
+            self.imageThumb.style.height = height+'px';
+
+            origin.env.model.labels.goto.find('img').remove();
+            origin.env.model.labels.goto.append(self.imageThumb);
+
+            //document.createElement('video');
+            console.log(origin.env.api);
+
+            self.shadowApi = origin.env.api.cloneNode(true);
+            self.shadowApi.width = width;
+            self.shadowApi.height = height;
+            self.shadowApi.preload = 'auto';
+
+            // ************************
+            // HLS library supported
+            // and HLS requested
+            // ************************
+            if(origin.env.useHlsLib === true)
+            {
+                self.hls = new Hls(origin.options.hlsConfig);
+
+            // ************************
+            // Dash
+            // ************************
+            }else if(origin.env.isDash === true){
+
+            }else{
+
+                self.shadowApi.src = origin.env.source;
+            }
+
+            // ************************
+            // HLS library supported
+            // and HLS requested
+            // ************************
+            if(origin.env.useHlsLib === true)
+            {
+                self.hls.autoLevelCapping = -1;
+                self.hls.attachMedia(self.shadowApi);
+                self.hls.loadSource(origin.env.source);
+
+
+            // ************************
+            // Usig DASH library
+            // ************************
+            }else if(origin.env.isDash === true)
+            {
+                self.dash = dashjs.MediaPlayer().create();
+
+                self.dash.initialize();
+                self.dash.attachView(self.shadowApi);
+                self.dash.attachSource(origin.env.source);
+                self.dash.setAutoPlay(false);
+                self.dash.getDebug().setLogToBrowserConsole(false);
+
+            // ************************
+            // Classic VOD file
+            // ************************
+            }else{
+
+                self.shadowApi.load();
+            }
+        }
+
+        origin.env.thumbsOk = false;
+
+        index = Math.floor(t);
+
+        if( index in self.imageCache )
+        {
+            self.image(width, height, index);
+        }else{
+            self.shadowApi.currentTime = index;
+            self.image(width, height, index);
+        }
+    };
+
+
+
+
+
+    self.image = function(width, height, index)
+    {
+        if( index in self.imageCache )
+        {
+            self.imageThumb.src = self.imageCache[index];
+            origin.env.thumbsOk = true;
+
+        }else if( parseInt(self.shadowApi.readyState) == 4 )
+        {
+            self.context.drawImage(self.shadowApi, 0, 0, width, height);
+
+            dataURL = self.canvas.toDataURL();
+
+            if( dataURL != null && dataURL != undefined )
+            {
+                self.cache(index, dataURL);
+                self.imageThumb.src = dataURL;
+            }
+
+            origin.env.thumbsOk = true;
+
+        }else{
+
+            setTimeout( function()
+            {
+                self.image(width, height, index);
+            }, 70);
+        }
+    };
+
+
+
+
+    self.cache = function(index, data)
+    {
+        if( index in self.imageCache )
+        {
+            return self.imageCache[index];
+        }else{
+            self.imageCache[index] = data;
+        }
+
+        return data;
     };
 };
 
@@ -544,6 +723,7 @@ Julia.prototype._Ui = function(origin)
             ]);
         }
 
+        //--odn-handle-start--
         origin.env.instance
         .append([
             origin.env.model.shield,
@@ -565,6 +745,7 @@ Julia.prototype._Ui = function(origin)
         origin.Base.debug({
             'playerInstance': origin.env.instance,
         });
+        //--odn-handle-stop--
     };
 
 
@@ -638,7 +819,7 @@ Julia.prototype._Ui = function(origin)
         origin.env.model.shield.find('img').remove();
     };
 
-}
+};
 
 /* *****************************************
 * Julia HTML5 media player
@@ -837,6 +1018,11 @@ Julia.prototype._Slider = function(origin, options)
         {
             pos = _position(e);
             pix = _pixels(e);
+
+            if( origin.env.thumbsOk === true && origin.Support.isMobile() === false && origin.options.live === false && origin.options.thumbs === true )
+            {
+                origin.Api.thumb( origin.Timecode.toSeconds( pos ) );
+            }
             origin.Ui.state( origin.env.model.labels.goto, '', 'on' );
             origin.Ui.panel( origin.env.model.labels.goto, origin.Timecode.toHuman( origin.Timecode.toSeconds( pos ) ) );
 
@@ -1172,11 +1358,25 @@ Julia.prototype._Events = function(origin)
 
 
 
+        origin.env.api.onloadeddata = function(e)
+        {
+        };
+
+
+
+
+        origin.env.api.oncanplaythrough = function(e)
+        {
+        }
+
+
+
+
         // Video position
         origin.env.api.ontimeupdate = function(e)
         {
             currentTimeReadable = origin.Timecode.toHuman( origin.env.api.currentTime.toFixed(2) );
-            
+
             if(origin.env.seeking === false)
             {
                 origin.env.model.sliders.progress.update( origin.Timecode.toPercents( origin.env.api.currentTime ) );
@@ -1241,12 +1441,14 @@ Julia.prototype._Events = function(origin)
         // Set video duration
         origin.env.api.ondurationchange = function(e)
         {
-            origin.env.duration = origin.env.api.duration;
-
-            if(origin.env.started === false)
+            if( !isNaN(origin.env.api.duration) )
             {
                 origin.env.duration = origin.env.api.duration;
-                origin.env.seeking = false;
+
+                if ( origin.env.started === false )
+                {
+                    origin.env.seeking = false;
+                }
 
                 origin.Base.debug({
                     'duration': origin.env.duration,
@@ -1360,6 +1562,7 @@ Julia.prototype._Controls = function(origin)
             'action-data': data,
         });
 
+        //--odn-handle-start--
         switch(action)
         {
             case 'play':
@@ -1471,6 +1674,7 @@ Julia.prototype._Controls = function(origin)
             break; default:
 
         }
+        //--odn-handle-stop--
 
         return;
     };
@@ -1576,20 +1780,21 @@ Julia.prototype._Support = function(origin)
     {
         // Fix video wrapped in inline block, can not get size properlym if inline element detected
         var parentBlock = origin.env.element.parent().css('display').toLowerCase();
-        if(parentBlock == 'inline')
+        if( parentBlock == 'inline' )
         {
             origin.env.element.parent().css({'display': 'block'});
         }
 
         var parentWidth = origin.env.element.parent().width();
-        for(i in origin.options.dimensions)
+
+        for( i in origin.options.dimensions )
         {
             var dim = origin.options.dimensions[i];
-            if(parentWidth>=dim[0])
+            if( parentWidth >= dim[0] )
             {
-                a = self.aspect(parentWidth) == 0 ? dim[1]/dim[0]: self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
-
+                a = self.aspect( dim[0], dim[1] );
                 dimensions = [dim[0],(dim[0]*a)];
+
                 origin.Base.debug({
                     'resizePredefined': dimensions
                 });
@@ -1597,7 +1802,6 @@ Julia.prototype._Support = function(origin)
             }
         }
 
-        a = self.aspect() == 0 ? dim[1]/dim[0]: self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
         dimensions = [parentWidth, (parentWidth*a)];
 
         origin.Base.debug({
@@ -1648,6 +1852,8 @@ Julia.prototype._Suggest = function(origin)
                             {
                                 origin.Callback.fn(origin.options.onSuggest, origin.options.suggest[i]);
                             }
+
+                            origin.Api.shadowApi = false;
 
                             origin.options.muted = origin.env.api.muted;
 
@@ -2018,6 +2224,8 @@ Julia.prototype._Inject = function(origin)
 
     self.source = function(options)
     {
+        origin.Api.shadowApi = false;
+        
         $('#julia-player-'+origin.env.ID).remove();
         origin.env.started = false;
 
@@ -2152,6 +2360,7 @@ Julia.prototype._Boot = function(origin)
     {
         origin.Base.debug(origin.options);
 
+        //--odn-handle-start--
         // Set active DOM element
         origin.env.element = origin.options.element;
 
@@ -2184,6 +2393,7 @@ Julia.prototype._Boot = function(origin)
 
         // Create API
         origin.Api.create();
+        //--odn-handle-stop--
     };
 };
 
@@ -2198,26 +2408,9 @@ Julia.prototype._Loader = function(origin)
 
     self.init = function()
     {
+        //--odn-handle-start--
         origin.env.api.src = '';
-/*
-        if(typeof reloadSource === 'undefined')
-        {
-            reloadSource = false;
-        }
 
-
-        if(reloadSource === true)
-        {
-            origin.Controls.press('stop');
-
-            origin.Api.source();
-
-            // Handle events
-            origin.Events.ui();
-            origin.Events.native();
-        }
-
-*/
         origin.env.useHlsLib = false;
         origin.env.isLive = false;
         origin.env.canPlayMedia = origin.Support.canPlayMedia();
@@ -2326,9 +2519,9 @@ Julia.prototype._Loader = function(origin)
             origin.env.api.load();
         }
 
+        //--odn-handle-stop--
 
         origin.Ui.state(origin.env.model.preloader, '', 'on');
-
 
         origin.Api.allowStart({
             type: 'origin.Loader'

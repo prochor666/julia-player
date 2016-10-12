@@ -19,6 +19,7 @@ Julia.prototype._Controls = function(origin)
             'action-data': data,
         });
 
+        //--odn-handle-start--
         switch(action)
         {
             case 'play':
@@ -130,6 +131,7 @@ Julia.prototype._Controls = function(origin)
             break; default:
 
         }
+        //--odn-handle-stop--
 
         return;
     };
