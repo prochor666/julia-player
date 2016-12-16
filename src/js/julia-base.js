@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.0.5
-* @build: 2016-09-29
+* @version: 1.1.0
+* @build: 2016-12-16
 * @license: MIT
 *
 * @requires:
@@ -11,7 +11,7 @@
 * hls.js [optional]
 * dash.js [optional]
 ****************************************** */
-var Julia = function(options)
+var JuliaPlayer = function(options)
 {
     var origin = this;
 
@@ -35,6 +35,7 @@ var Julia = function(options)
     // Default origin.options
     origin.options = {
         source: false,
+        sources: {},
         autoplay: false,
         volume: 25,
         element: $('video'),
@@ -145,6 +146,7 @@ var Julia = function(options)
         suggestPointer: 0,
         suggestClicked: false,
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
+        version: '1.1.0'
     };
 
 
@@ -186,6 +188,15 @@ var Julia = function(options)
     };
 
 
+    // Extend default origin.options with external options
+    $.extend(true, origin.options, options);
+
+    // Debug start
+    if(origin.options.debug === true && window.console )
+    {
+        console.info('=== Julia console debug start, instance '+origin.env.ID+' ===');
+    }
+
 
 
     origin.Ui =             new origin._Ui(origin);
@@ -202,16 +213,6 @@ var Julia = function(options)
     origin.Require =        new origin._Require(origin);
     origin.Boot =           new origin._Boot(origin);
     origin.Loader =         new origin._Loader(origin);
-
-
-    // Extend default origin.options with external options
-    $.extend(true, origin.options, options);
-
-    // Debug start
-    if(origin.options.debug === true && window.console )
-    {
-        console.info('=== Julia console debug start, instance '+origin.env.ID+' ===');
-    }
 
 
     // Embed CSS
@@ -316,4 +317,107 @@ var Julia = function(options)
 
 
     return origin.env.publicApi;
+};
+
+
+
+
+var JuliaPlayerVirtual = function(options)
+{
+    options = typeof options === 'undefined' ? {}: options;
+
+    // Default origin.options
+    var _options = {
+        sources: {},
+        root: $('body'),
+    };
+
+    var __VIRTUAL_ID__ = Math.floor((Math.random()*10000000)+1);
+
+    // Extend default origin.options with external options
+    $.extend(true, _options, options);
+
+
+
+
+
+    var isDOMElement = function( obj )
+    {
+        var _checkInstance = function(elem)
+        {
+            if( ( elem instanceof jQuery && elem.length ) || elem instanceof HTMLElement )
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        if( obj instanceof HTMLCollection && obj.length )
+        {
+                for( var a = 0, len = obj.length; a < len; a++ )
+                {
+
+                if( !_checkInstance( obj[a] ) )
+                {
+                    return false;
+                }
+            }
+
+            return true;
+
+        } else {
+
+            return _checkInstance( obj );
+        }
+    };
+
+
+
+
+    var normalize = function( item )
+    {
+        var norm = $('<video />');
+
+        if( typeof item === 'string' )
+        {
+            norm.attr( 'src', item );
+        }
+
+        if( ( typeof item === 'object' && !isDOMElement( item ) ) )
+        {
+            if( item.hasOwnProperty('src')  )
+            {
+                norm.attr( 'src', item.src );
+
+            }
+
+            if( item.hasOwnProperty('poster')  )
+            {
+                norm.attr( 'poster', item.poster );
+            }
+        }
+
+        norm.css({
+            'display': 'none'
+        });
+
+        return norm;
+    };
+
+
+
+    _collection = $('<div class="---julia-virtual-media-gallery-'+__VIRTUAL_ID__+'--- julia-virtual-gallery" style="display: none;" />');
+
+
+    for( index in _options.sources )
+    {
+        _item = normalize( _options.sources[index] );
+        _collection.append( _item );
+    }
+
+    _options.root.append( _collection );
+    result = _collection.find('video').juliaPlayer( _options );
+
+    return result;
 };

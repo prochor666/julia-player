@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Suppport
 * media & DOM sizing utilities
 ****************************************** */
-Julia.prototype._Support = function(origin)
+JuliaPlayer.prototype._Support = function(origin)
 {
     var self = this;
 
@@ -103,6 +103,7 @@ Julia.prototype._Support = function(origin)
         }
 
         var parentWidth = origin.env.element.parent().width();
+        var a = self.aspect( parseInt( origin.env.element.css('width') ), parseInt( origin.env.element.css('height') ) );
 
         for( i in origin.options.dimensions )
         {

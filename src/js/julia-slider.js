@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Slider controller
 * Progress and volume widget library
 ****************************************** */
-Julia.prototype._Slider = function(origin, options)
+JuliaPlayer.prototype._Slider = function(origin, options)
 {
     var self = this,
 

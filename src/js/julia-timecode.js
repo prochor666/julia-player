@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Timecode
 * utilities for timecode conversion
 ****************************************** */
-Julia.prototype._Timecode = function(origin)
+JuliaPlayer.prototype._Timecode = function(origin)
 {
     var self = this;
 

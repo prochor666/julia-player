@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Persistent settings
 * options are stored in cookies
 ****************************************** */
-Julia.prototype._Persist = function(origin)
+JuliaPlayer.prototype._Persist = function(origin)
 {
     var self = this;
 

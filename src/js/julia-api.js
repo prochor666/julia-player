@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Media element API
 * For now, only video is supported
 ****************************************** */
-Julia.prototype._Api = function(origin)
+JuliaPlayer.prototype._Api = function(origin)
 {
     var self = this;
 
@@ -154,7 +154,7 @@ Julia.prototype._Api = function(origin)
         if( self.shadowApi === false )
         {
             self.imageCache = {};
-            
+
             origin.env.model.labels.goto.css({
                 width: (dimensions[0]+10)+'px',
                 height: (40 + dimensions[1] + 10)+'px',

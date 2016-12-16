@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * User interface
 * complete DOM model
 ****************************************** */
-Julia.prototype._Ui = function(origin)
+JuliaPlayer.prototype._Ui = function(origin)
 {
     var self = this;
 

@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Boot
 * player boot process
 ****************************************** */
-Julia.prototype._Boot = function(origin)
+JuliaPlayer.prototype._Boot = function(origin)
 {
     var self = this;
 

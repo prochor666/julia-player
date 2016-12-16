@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Fullscreen
 * player fullscreen behavior
 ****************************************** */
-Julia.prototype._Fullscreen = function(origin)
+JuliaPlayer.prototype._Fullscreen = function(origin)
 {
     var self = this;
 

@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Require
 * Require vendor libs
 ****************************************** */
-Julia.prototype._Require = function(origin)
+JuliaPlayer.prototype._Require = function(origin)
 {
     var self = this;
 

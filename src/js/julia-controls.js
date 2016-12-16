@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Media element API
 * For now, only video is supported
 ****************************************** */
-Julia.prototype._Controls = function(origin)
+JuliaPlayer.prototype._Controls = function(origin)
 {
     var self = this;
 

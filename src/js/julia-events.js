@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Events
 * DOM & api event handlers and emmiters
 ****************************************** */
-Julia.prototype._Events = function(origin)
+JuliaPlayer.prototype._Events = function(origin)
 {
     var self = this;
 

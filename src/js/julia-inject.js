@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Inject
 * Inject origin code, source change, etc...
 ****************************************** */
-Julia.prototype._Inject = function(origin)
+JuliaPlayer.prototype._Inject = function(origin)
 {
     var self = this;
 
@@ -13,7 +13,7 @@ Julia.prototype._Inject = function(origin)
     self.source = function(options)
     {
         origin.Api.shadowApi = false;
-        
+
         $('#julia-player-'+origin.env.ID).remove();
         origin.env.started = false;
 

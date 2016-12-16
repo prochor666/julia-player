@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Loader
 * player media loader/playback
 ****************************************** */
-Julia.prototype._Loader = function(origin)
+JuliaPlayer.prototype._Loader = function(origin)
 {
     var self = this;
 

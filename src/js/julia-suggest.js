@@ -1,9 +1,9 @@
 /* *****************************************
-* Julia HTML5 media player
+* JuliaPlayer HTML5 media player
 * Suggest
 * suggest playlist engine
 ****************************************** */
-Julia.prototype._Suggest = function(origin)
+JuliaPlayer.prototype._Suggest = function(origin)
 {
     var self = this;
 
