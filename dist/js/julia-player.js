@@ -183,7 +183,7 @@ var JuliaPlayer = function(options)
         suggestPointer: 0,
         suggestClicked: false,
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '1.1.0'
+        version: '1.1.1'
     };
 
 
