@@ -1,6 +1,6 @@
 {
   "name": "julia-player",
-  "version": "1.0.3",
+  "version": "1.1.1",
   "description": "Julia player, responsive, mobile first, HTML5 player with HTTP Live Streaming (HLS) and Dynamic Adaptive Streaming over HTTP (MPEG-DASH) support",
   "main": "gulpfile.js",
   "dependencies": {
@@ -11,7 +11,9 @@
     "gulp-sass": "^2.3.2",
     "gulp-sourcemaps": "^1.6.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "gulp-clean-css": "^2.4.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

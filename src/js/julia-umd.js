@@ -2,8 +2,8 @@
 * JuliaPlayer - HTML5 player
 *
 * @author prochor666@gmail.com
-* @version: 1.1.0
-* @build: 2016-12-16
+* @version: 1.1.1
+* @build: 2017-5-12
 * @license: MIT
 *s
 * @require: jquery

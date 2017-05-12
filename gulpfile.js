@@ -7,7 +7,7 @@ Julia player app builder
 // Gulp && plugins
 var gulp = require('gulp');
 var sass = require('gulp-sass');
-var cleanCss = require('gulp-clean-css');
+var cleanCSS = require('gulp-clean-css');
 var concat = require('gulp-concat');
 var minify = require('gulp-minify');
 var replace = require('gulp-replace');

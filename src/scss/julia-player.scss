@@ -1,8 +1,5 @@
 @import "julia-icons.scss";
 
-
-
-
 /* *****************************
 * === PRELOADER EFFECT ===
 * change to CSS loader
@@ -17,7 +14,6 @@
 
 
 
-
 /* *****************************
 * Julia player style
 * === CONTAINER ===
@@ -28,7 +24,8 @@ div.julia-player {
     position: relative;
     display: inline-block;
     background: rgba(0,0,0,1);
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.9);
+    border: 1px solid rgb(0,0,0);
+
 
     /* *****************************
     * Julia player style
@@ -108,7 +105,7 @@ div.julia-player {
         /* *****************************
         * === PRELOADER ===
         ****************************** */
-        
+
         div.julia-preloader {
 
             display: none;
@@ -234,6 +231,7 @@ div.julia-player {
         position: absolute;
         bottom: 0;
         left: 0;
+        margin-bottom: -1px;
         //right: 0;
         z-index: 70;
         opacity: .0;

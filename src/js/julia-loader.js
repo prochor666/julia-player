@@ -18,7 +18,8 @@ JuliaPlayer.prototype._Loader = function(origin)
 
         if(origin.env.isHls === true)
         {
-            origin.env.useHlsLib = origin.env.canPlayMedia === false && Hls.isSupported() ? true: false;
+            //origin.env.useHlsLib = origin.env.canPlayMedia === false && Hls.isSupported() ? true: false;
+            origin.env.useHlsLib = true;
         }
 
         // ************************

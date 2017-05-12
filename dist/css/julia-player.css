@@ -86,7 +86,7 @@ div.julia-player {
   position: relative;
   display: inline-block;
   background: black;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.9);
+  border: 1px solid black;
   /* *****************************
     * Julia player style
     * Keep UI unselectable
@@ -238,6 +238,7 @@ div.julia-player {
     position: absolute;
     bottom: 0;
     left: 0;
+    margin-bottom: -1px;
     z-index: 70;
     opacity: .0;
     border: none;

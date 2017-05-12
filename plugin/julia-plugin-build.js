@@ -2,8 +2,8 @@
 * JuliaPlayer HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.1.0
-* @build: 2016-12-16
+* @version: 1.1.1
+* @build: 2017-5-12
 * @license: MIT
 *
 * @requires:
@@ -189,6 +189,10 @@ var JuliaPlayer = function(options)
 
 
     // Extend default origin.options with external options
+    if( typeof options.dimensions !== 'undefined' )
+    {
+        origin.options.dimensions = options.dimensions;
+    }
     $.extend(true, origin.options, options);
 
     // Debug start
@@ -2522,7 +2526,8 @@ JuliaPlayer.prototype._Loader = function(origin)
 
         if(origin.env.isHls === true)
         {
-            origin.env.useHlsLib = origin.env.canPlayMedia === false && Hls.isSupported() ? true: false;
+            //origin.env.useHlsLib = origin.env.canPlayMedia === false && Hls.isSupported() ? true: false;
+            origin.env.useHlsLib = true;
         }
 
         // ************************
