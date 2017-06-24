@@ -76,12 +76,22 @@ JuliaPlayer.prototype._Events = function(origin)
             e.preventDefault();
             e.stopPropagation();
 
-            if( origin.options.pauseOnClick === true && origin.Support.isMobile() === false && e.type == 'click' )
+            if( e.type == 'click' )
             {
-                if( origin.env.api.paused === false )
+                if( origin.options.pauseOnClick === true && origin.Support.isMobile() === false && origin.env.started === true )
                 {
-                    origin.Controls.press('pause');
-                }else{
+                    if( origin.env.api.paused === false )
+                    {
+                        origin.Controls.press('pause');
+                    }else{
+                        origin.Controls.press('play');
+                    }
+                }
+
+                if( origin.env.started === false )
+                {
+                    origin.Ui.state( origin.env.model.preloader, '', 'on' );
+                    origin.Loader.init();
                     origin.Controls.press('play');
                 }
             }
@@ -420,10 +430,22 @@ JuliaPlayer.prototype._Events = function(origin)
                         data: data
                     });
 
-                    if(data.fatal === true && origin.env.tries<11)
+                    if(data.fatal === true && origin.env.tries < 100)
                     {
                         // Bring to life again
-
+                        switch (data.type)
+                        {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                // try to recover network error
+                                Hls.startLoad();
+                            break; case Hls.ErrorTypes.MEDIA_ERROR:
+                                // try to recover media error
+                                Hls.recoverMediaError();
+                            break; default:
+                                // try to recover other errors
+                                Hls.startLoad();
+                            break;
+                        }
                     }
 
                 break; default:

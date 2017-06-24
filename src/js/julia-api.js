@@ -174,7 +174,7 @@ JuliaPlayer.prototype._Api = function(origin)
             origin.env.model.labels.goto.append(self.imageThumb);
 
             //document.createElement('video');
-            console.log(origin.env.api);
+            //console.log(origin.env.api);
 
             self.shadowApi = origin.env.api.cloneNode(true);
             self.shadowApi.width = width;

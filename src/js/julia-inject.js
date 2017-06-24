@@ -9,6 +9,19 @@ JuliaPlayer.prototype._Inject = function(origin)
 
 
 
+    self.swap = function(src1, src2)
+    {
+        origin.env.memory = {
+            currentTime: origin.env.api.currentTime,
+            src: src1
+        }
+
+        origin.env.api.src = src2;
+        origin.env.api.src = currentTime = 0;
+        origin.env.api.play();
+    }
+
+
 
     self.source = function(options)
     {

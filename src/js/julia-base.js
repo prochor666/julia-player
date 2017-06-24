@@ -2,8 +2,8 @@
 * JuliaPlayer HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.1.1
-* @build: 2017-5-12
+* @version: 1.1.2
+* @build: 2017-06-24
 * @license: MIT
 *
 * @requires:
@@ -15,19 +15,8 @@ var JuliaPlayer = function(options)
 {
     var origin = this;
 
-
     // Import options
     options = typeof options === 'undefined' ? {}: options;
-
-
-    // Root path workaround
-    var __JULIA_ROOT_PATH__ = 'julia';
-    dir = $('script[src*="julia-player"], script[src*="julia-base"]').attr('src');
-    name = dir.split('/').pop();
-    __JULIA_ROOT_PATH__ = dir.replace('/js/'+name,"");
-
-    // DEV wrokaround
-    __JULIA_ROOT_PATH__ = __JULIA_ROOT_PATH__.replace('src', 'dist');
 
     // Unique instance ID
     var __JULIA_INSTANCE__ID__ = Math.floor((Math.random()*10000000)+1);
@@ -66,8 +55,6 @@ var JuliaPlayer = function(options)
         suggest: [],
         suggestLimit: 4,
         suggestTimeout: 10000,
-        themePath: __JULIA_ROOT_PATH__+'/css/themes',
-        pluginPath: __JULIA_ROOT_PATH__+'/js/lib',
         require: [],
         theme: 'default',
         i18n: {
@@ -146,7 +133,8 @@ var JuliaPlayer = function(options)
         suggestPointer: 0,
         suggestClicked: false,
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '1.1.1'
+        version: '1.1.2',
+        memory: {},
     };
 
 
@@ -218,12 +206,6 @@ var JuliaPlayer = function(options)
     origin.Boot =           new origin._Boot(origin);
     origin.Loader =         new origin._Loader(origin);
 
-
-    // Embed CSS
-    origin.Require.css([
-        __JULIA_ROOT_PATH__+'/css/julia-player.min.css',
-        origin.options.themePath+'/'+origin.options.theme+'/julia.css'
-    ]);
 
 
     // Require scripts
