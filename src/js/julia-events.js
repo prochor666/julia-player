@@ -430,7 +430,8 @@ JuliaPlayer.prototype._Events = function(origin)
                         data: data
                     });
 
-                    if(data.fatal === true && origin.env.tries < 100)
+                    // && origin.env.tries < 100
+                    if(data.fatal === true)
                     {
                         // Bring to life again
                         switch (data.type)
