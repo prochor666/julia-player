@@ -445,7 +445,6 @@ JuliaPlayer.prototype._Events = function(origin)
                             break; default:
                                 // try to recover other errors
                                 Hls.startLoad();
-                            break;
                         }
                     }
 
