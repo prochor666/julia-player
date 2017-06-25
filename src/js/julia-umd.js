@@ -2,7 +2,7 @@
 * JuliaPlayer HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.1.3
+* @version: 1.1.4
 * @build: 2017-06-26
 * @license: MIT
 *s

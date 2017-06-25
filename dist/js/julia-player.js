@@ -2,7 +2,7 @@
 * JuliaPlayer HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.1.3
+* @version: 1.1.4
 * @build: 2017-06-26
 * @license: MIT
 *s
@@ -39,7 +39,7 @@
 * JuliaPlayer HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.1.3
+* @version: 1.1.4
 * @build: 2017-06-26
 * @license: MIT
 *
@@ -170,7 +170,7 @@ var JuliaPlayer = function(options)
         suggestPointer: 0,
         suggestClicked: false,
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '1.1.3',
+        version: '1.1.4',
         memory: {},
     };
 
