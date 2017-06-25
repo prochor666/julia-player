@@ -435,6 +435,8 @@ div.julia-player {
       div.julia-player.julia-theme-default div.julia-toolbar div.julia-label {
         background-color: rgba(0, 0, 0, 0.7);
         color: #dddddd; }
+      div.julia-player.julia-theme-default div.julia-toolbar div.julia-panel {
+        color: #dddddd; }
       div.julia-player.julia-theme-default div.julia-toolbar .julia-slider .julia-slider-fill {
         background-color: #f9f9f9; }
       div.julia-player.julia-theme-default div.julia-toolbar .julia-slider .julia-slider-handle {
@@ -471,6 +473,8 @@ div.julia-player {
       font-family: sans-serif; }
       div.julia-player.julia-theme-aqua div.julia-toolbar div.julia-label {
         background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-aqua div.julia-toolbar div.julia-panel {
         color: #dddddd; }
       div.julia-player.julia-theme-aqua div.julia-toolbar .julia-slider .julia-slider-fill {
         background-color: cyan; }
@@ -509,6 +513,8 @@ div.julia-player {
       div.julia-player.julia-theme-aquamarine div.julia-toolbar div.julia-label {
         background-color: rgba(0, 0, 0, 0.7);
         color: #dddddd; }
+      div.julia-player.julia-theme-aquamarine div.julia-toolbar div.julia-panel {
+        color: #dddddd; }
       div.julia-player.julia-theme-aquamarine div.julia-toolbar .julia-slider .julia-slider-fill {
         background-color: aquamarine; }
       div.julia-player.julia-theme-aquamarine div.julia-toolbar .julia-slider .julia-slider-handle {
@@ -545,6 +551,8 @@ div.julia-player {
       font-family: sans-serif; }
       div.julia-player.julia-theme-crimson div.julia-toolbar div.julia-label {
         background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-crimson div.julia-toolbar div.julia-panel {
         color: #dddddd; }
       div.julia-player.julia-theme-crimson div.julia-toolbar .julia-slider .julia-slider-fill {
         background-color: crimson; }
@@ -583,6 +591,8 @@ div.julia-player {
       div.julia-player.julia-theme-deeppink div.julia-toolbar div.julia-label {
         background-color: rgba(0, 0, 0, 0.7);
         color: #dddddd; }
+      div.julia-player.julia-theme-deeppink div.julia-toolbar div.julia-panel {
+        color: #dddddd; }
       div.julia-player.julia-theme-deeppink div.julia-toolbar .julia-slider .julia-slider-fill {
         background-color: deeppink; }
       div.julia-player.julia-theme-deeppink div.julia-toolbar .julia-slider .julia-slider-handle {
@@ -619,6 +629,8 @@ div.julia-player {
       font-family: sans-serif; }
       div.julia-player.julia-theme-lightskyblue div.julia-toolbar div.julia-label {
         background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-lightskyblue div.julia-toolbar div.julia-panel {
         color: #dddddd; }
       div.julia-player.julia-theme-lightskyblue div.julia-toolbar .julia-slider .julia-slider-fill {
         background-color: lightskyblue; }
@@ -657,6 +669,8 @@ div.julia-player {
       div.julia-player.julia-theme-lime div.julia-toolbar div.julia-label {
         background-color: rgba(0, 0, 0, 0.7);
         color: #dddddd; }
+      div.julia-player.julia-theme-lime div.julia-toolbar div.julia-panel {
+        color: #dddddd; }
       div.julia-player.julia-theme-lime div.julia-toolbar .julia-slider .julia-slider-fill {
         background-color: lime; }
       div.julia-player.julia-theme-lime div.julia-toolbar .julia-slider .julia-slider-handle {
@@ -693,6 +707,8 @@ div.julia-player {
       font-family: sans-serif; }
       div.julia-player.julia-theme-mediumspringgreen div.julia-toolbar div.julia-label {
         background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-mediumspringgreen div.julia-toolbar div.julia-panel {
         color: #dddddd; }
       div.julia-player.julia-theme-mediumspringgreen div.julia-toolbar .julia-slider .julia-slider-fill {
         background-color: mediumspringgreen; }
@@ -731,6 +747,8 @@ div.julia-player {
       div.julia-player.julia-theme-royalblue div.julia-toolbar div.julia-label {
         background-color: rgba(0, 0, 0, 0.7);
         color: #dddddd; }
+      div.julia-player.julia-theme-royalblue div.julia-toolbar div.julia-panel {
+        color: #dddddd; }
       div.julia-player.julia-theme-royalblue div.julia-toolbar .julia-slider .julia-slider-fill {
         background-color: royalblue; }
       div.julia-player.julia-theme-royalblue div.julia-toolbar .julia-slider .julia-slider-handle {
@@ -767,6 +785,8 @@ div.julia-player {
       font-family: sans-serif; }
       div.julia-player.julia-theme-yellow div.julia-toolbar div.julia-label {
         background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-yellow div.julia-toolbar div.julia-panel {
         color: #dddddd; }
       div.julia-player.julia-theme-yellow div.julia-toolbar .julia-slider .julia-slider-fill {
         background-color: #ffcc00; }

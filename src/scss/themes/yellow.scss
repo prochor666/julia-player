@@ -21,6 +21,10 @@ $juliaThemeColorHover: rgba(249,249,249,.7);
             color: $juliaLabelColor;
         }
 
+        div.julia-panel {
+            color: $juliaLabelColor;
+        }
+        
         .julia-slider {
             .julia-slider-fill {
                 background-color: $juliaThemeColor;
