@@ -137,7 +137,6 @@ var JuliaPlayer = function(options)
         memory: {},
     };
 
-
     // Base functions
     origin.Base = {};
 

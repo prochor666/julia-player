@@ -137,7 +137,6 @@ var JuliaPlayer = function(options)
         memory: {},
     };
 
-
     // Base functions
     origin.Base = {};
 
@@ -334,7 +333,87 @@ var JuliaPlayerVirtual = function(options)
 
 
 
-    var isDOMElement = function( obj 
+    var isDOMElement = function( obj )
+    {
+        var _checkInstance = function(elem)
+        {
+            if( ( elem instanceof jQuery && elem.length ) || elem instanceof HTMLElement )
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        if( obj instanceof HTMLCollection && obj.length )
+        {
+                for( var a = 0, len = obj.length; a < len; a++ )
+                {
+
+                if( !_checkInstance( obj[a] ) )
+                {
+                    return false;
+                }
+            }
+
+            return true;
+
+        } else {
+
+            return _checkInstance( obj );
+        }
+    };
+
+
+
+
+    var normalize = function( item )
+    {
+        var norm = $('<video />');
+
+        if( typeof item === 'string' )
+        {
+            norm.attr( 'src', item );
+        }
+
+        if( ( typeof item === 'object' && !isDOMElement( item ) ) )
+        {
+            if( item.hasOwnProperty('src')  )
+            {
+                norm.attr( 'src', item.src );
+
+            }
+
+            if( item.hasOwnProperty('poster')  )
+            {
+                norm.attr( 'poster', item.poster );
+            }
+        }
+
+        norm.css({
+            'display': 'none'
+        });
+
+        return norm;
+    };
+
+
+
+    _collection = $('<div class="---julia-virtual-media-gallery-'+__VIRTUAL_ID__+'--- julia-virtual-gallery" style="display: none;" />');
+
+
+    for( index in _options.sources )
+    {
+        _item = normalize( _options.sources[index] );
+        _collection.append( _item );
+    }
+
+    _options.root.append( _collection );
+    result = _collection.find('video').juliaPlayer( _options );
+
+    return result;
+};
+
 /* *****************************************
 * JuliaPlayer HTML5 media player
 * Media element API
