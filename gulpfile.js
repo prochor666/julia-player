@@ -83,7 +83,7 @@ gulp.task('finalbuild', function()
 // Watch it, Gulp!
 gulp.task('watch', function ()
 {
-    gulp.watch('src/scss/*.scss', ['sass']);
+    gulp.watch(['src/scss/*.scss', 'src/scss/themes/*.scss'], ['sass']);
     gulp.watch('src/js/*.js', ['jsbuild']);
     gulp.watch('plugin/julia-plugin-build.js', ['finalbuild']);
 });

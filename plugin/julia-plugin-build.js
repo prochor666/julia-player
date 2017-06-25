@@ -2,8 +2,8 @@
 * JuliaPlayer HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.1.2
-* @build: 2017-06-24
+* @version: 1.1.3
+* @build: 2017-06-26
 * @license: MIT
 *
 * @requires:
@@ -133,7 +133,7 @@ var JuliaPlayer = function(options)
         suggestPointer: 0,
         suggestClicked: false,
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '1.1.2',
+        version: '1.1.3',
         memory: {},
     };
 
@@ -181,6 +181,7 @@ var JuliaPlayer = function(options)
     {
         origin.options.dimensions = options.dimensions;
     }
+
     $.extend(true, origin.options, options);
 
     // Debug start
@@ -270,6 +271,12 @@ var JuliaPlayer = function(options)
             {
                 origin.options.volume = 25;
             }
+
+            // Set volume for mobile
+            if( origin.Support.isMobile() === true )
+            {
+                origin.options.volume = 100;
+            }
         }
 
         if(typeof muted !=='undefined' && muted.length>0)
@@ -327,87 +334,7 @@ var JuliaPlayerVirtual = function(options)
 
 
 
-    var isDOMElement = function( obj )
-    {
-        var _checkInstance = function(elem)
-        {
-            if( ( elem instanceof jQuery && elem.length ) || elem instanceof HTMLElement )
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        if( obj instanceof HTMLCollection && obj.length )
-        {
-                for( var a = 0, len = obj.length; a < len; a++ )
-                {
-
-                if( !_checkInstance( obj[a] ) )
-                {
-                    return false;
-                }
-            }
-
-            return true;
-
-        } else {
-
-            return _checkInstance( obj );
-        }
-    };
-
-
-
-
-    var normalize = function( item )
-    {
-        var norm = $('<video />');
-
-        if( typeof item === 'string' )
-        {
-            norm.attr( 'src', item );
-        }
-
-        if( ( typeof item === 'object' && !isDOMElement( item ) ) )
-        {
-            if( item.hasOwnProperty('src')  )
-            {
-                norm.attr( 'src', item.src );
-
-            }
-
-            if( item.hasOwnProperty('poster')  )
-            {
-                norm.attr( 'poster', item.poster );
-            }
-        }
-
-        norm.css({
-            'display': 'none'
-        });
-
-        return norm;
-    };
-
-
-
-    _collection = $('<div class="---julia-virtual-media-gallery-'+__VIRTUAL_ID__+'--- julia-virtual-gallery" style="display: none;" />');
-
-
-    for( index in _options.sources )
-    {
-        _item = normalize( _options.sources[index] );
-        _collection.append( _item );
-    }
-
-    _options.root.append( _collection );
-    result = _collection.find('video').juliaPlayer( _options );
-
-    return result;
-};
-
+    var isDOMElement = function( obj 
 /* *****************************************
 * JuliaPlayer HTML5 media player
 * Media element API
@@ -722,8 +649,10 @@ JuliaPlayer.prototype._Ui = function(origin)
             origin.env.instance = {};
         };
 
+        var device = origin.Support.isMobile() === true ? 'mobile': 'computer';
+
         // Main container
-        origin.env.instance = $('<div class="julia-player julia-fullscreen-off julia-theme-'+origin.options.theme+'" id="julia-player-'+origin.env.ID+'">'
+        origin.env.instance = $('<div class="julia-player julia-fullscreen-off julia-theme-'+origin.options.theme+' julia-device-'+device+'" id="julia-player-'+origin.env.ID+'">'
                     +'</div>');
 
         // Containers
@@ -786,32 +715,18 @@ JuliaPlayer.prototype._Ui = function(origin)
             origin.env.model.buttons.bigPlay
         ]);
 
-        if( origin.Support.iOS() === true )
-        {
-            origin.env.model.toolbar
-            .append([
-                origin.env.model.ranges.progress,
-                origin.env.model.panels.live,
-                origin.env.model.panels.currentTime,
-                origin.env.model.panels.duration,
-                origin.env.model.buttons.play,
-                origin.env.model.buttons.fullscreen,
-                origin.env.model.labels.goto,
-            ]);
-        }else{
-            origin.env.model.toolbar
-            .append([
-                origin.env.model.ranges.progress,
-                origin.env.model.panels.live,
-                origin.env.model.panels.currentTime,
-                origin.env.model.panels.duration,
-                origin.env.model.buttons.play,
-                origin.env.model.buttons.sound,
-                origin.env.model.ranges.volume,
-                origin.env.model.buttons.fullscreen,
-                origin.env.model.labels.goto,
-            ]);
-        }
+        origin.env.model.toolbar
+        .append([
+            origin.env.model.ranges.progress,
+            origin.env.model.panels.live,
+            origin.env.model.panels.currentTime,
+            origin.env.model.panels.duration,
+            origin.env.model.buttons.play,
+            origin.env.model.buttons.sound,
+            origin.env.model.ranges.volume,
+            origin.env.model.buttons.fullscreen,
+            origin.env.model.labels.goto,
+        ]);
 
         //--odn-handle-start--
         origin.env.instance
@@ -1592,7 +1507,23 @@ JuliaPlayer.prototype._Events = function(origin)
                 case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
                 case Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
                 case Hls.ErrorDetails.MANIFEST_PARSING_ERROR:
-                case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
+
+                    // reboot api
+                    origin.Api.shadowApi = false;
+
+                    origin.options.muted = origin.env.api.muted;
+
+                    origin.env.started = false;
+                    origin.options.source = origin.options.tempSource;
+                    origin.Api.source();
+                    origin.options.autoplay = true;
+
+                    origin.Ui.panel( origin.env.model.panels.live, origin.options.i18n.liveText );
+
+                    origin.env.model.buttons.bigPlay.click();
+
+
+                break; case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
                 case Hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
                 case Hls.ErrorDetails.LEVEL_SWITCH_ERROR:
                 case Hls.ErrorDetails.FRAG_LOAD_ERROR:
@@ -2507,7 +2438,6 @@ JuliaPlayer.prototype._Boot = function(origin)
             origin.env.dash.reset();
             origin.env.dash = false;
         }
-
 
         // Create UI
         origin.Ui.create();

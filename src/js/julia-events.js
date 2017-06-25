@@ -412,7 +412,23 @@ JuliaPlayer.prototype._Events = function(origin)
                 case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
                 case Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
                 case Hls.ErrorDetails.MANIFEST_PARSING_ERROR:
-                case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
+
+                    // reboot api
+                    origin.Api.shadowApi = false;
+
+                    origin.options.muted = origin.env.api.muted;
+
+                    origin.env.started = false;
+                    origin.options.source = origin.options.tempSource;
+                    origin.Api.source();
+                    origin.options.autoplay = true;
+
+                    origin.Ui.panel( origin.env.model.panels.live, origin.options.i18n.liveText );
+
+                    origin.env.model.buttons.bigPlay.click();
+
+
+                break; case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
                 case Hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
                 case Hls.ErrorDetails.LEVEL_SWITCH_ERROR:
                 case Hls.ErrorDetails.FRAG_LOAD_ERROR:

@@ -33,7 +33,6 @@ JuliaPlayer.prototype._Boot = function(origin)
             origin.env.dash = false;
         }
 
-
         // Create UI
         origin.Ui.create();
 

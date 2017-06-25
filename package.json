@@ -1,6 +1,6 @@
 {
   "name": "julia-player",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Julia player, responsive, mobile first, HTML5 player with HTTP Live Streaming (HLS) and Dynamic Adaptive Streaming over HTTP (MPEG-DASH) support",
   "main": "gulpfile.js",
   "dependencies": {

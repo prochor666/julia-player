@@ -85,7 +85,6 @@ div.julia-player {
   margin: 0;
   position: relative;
   display: inline-block;
-  background: black;
   border: 0;
   /* *****************************
     * Julia player style
@@ -113,7 +112,44 @@ div.julia-player {
     ****************************** */
   /* *****************************
     * === BUTTONS ===
-    ****************************** */ }
+    ****************************** */
+  /* *****************************
+    * === MOBILE ===
+    ****************************** */
+  /* *****************************
+    * === THEMES ===
+    ****************************** */
+  /**/
+  /* *****************************
+* === DEFAULT/WHITE THEME ===
+***************************** */
+  /* *****************************
+* === DEFAULT/WHITE THEME ===
+***************************** */
+  /* *****************************
+* === DEFAULT/WHITE THEME ===
+***************************** */
+  /* *****************************
+* === DEFAULT/WHITE THEME ===
+***************************** */
+  /* *****************************
+* === DEFAULT/WHITE THEME ===
+***************************** */
+  /* *****************************
+* === DEFAULT/WHITE THEME ===
+***************************** */
+  /* *****************************
+* === DEFAULT/WHITE THEME ===
+***************************** */
+  /* *****************************
+* === DEFAULT/WHITE THEME ===
+***************************** */
+  /* *****************************
+* === DEFAULT/WHITE THEME ===
+***************************** */
+  /* *****************************
+* === DEFAULT/WHITE THEME ===
+***************************** */ }
   div.julia-player div, div.julia-player video, div.julia-player canvas {
     padding: 0;
     margin: 0;
@@ -143,7 +179,6 @@ div.julia-player {
     bottom: 0;
     right: 0;
     left: 0;
-    background: transparent;
     z-index: 73;
     /* *****************************
         * === PRELOADER ===
@@ -161,7 +196,6 @@ div.julia-player {
       right: 0;
       padding: 0;
       margin: 0;
-      background-color: rgba(0, 0, 0, 0.7);
       z-index: 79; }
       div.julia-player > div.julia-shield div.julia-preloader.on {
         display: block; }
@@ -169,7 +203,6 @@ div.julia-player {
         width: 64px;
         height: 64px;
         line-height: 64px;
-        border: 2px solid #777;
         padding: 0;
         margin: 0;
         display: block;
@@ -178,6 +211,10 @@ div.julia-player {
         bottom: 50%;
         left: 50%;
         border-radius: 50%;
+        border-width: 2px;
+        border-style: solid;
+        border-top-color: transparent;
+        border-bottom-color: transparent;
         border-left-color: transparent;
         border-right-color: transparent;
         animation: julia-preload-spin 800ms infinite linear;
@@ -193,7 +230,6 @@ div.julia-player {
     bottom: 0;
     right: 0;
     left: 0;
-    background: black;
     z-index: 77;
     display: none;
     /* *****************************
@@ -203,46 +239,37 @@ div.julia-player {
     div.julia-player > div.julia-suggest.on {
       display: block; }
     div.julia-player > div.julia-suggest > div.julia-suggest-item {
+      cursor: pointer;
       width: 50%;
       height: 50%;
       min-height: 80px;
       font-size: 1.1em;
-      color: #F9F9F9;
-      background: black;
       float: left;
       margin: 0;
       padding: 0;
-      cursor: pointer;
       position: relative;
       overflow: hidden; }
       div.julia-player > div.julia-suggest > div.julia-suggest-item > img {
         position: absolute;
         top: 0;
         left: 0; }
-      div.julia-player > div.julia-suggest > div.julia-suggest-item:hover {
-        color: #ABABAB; }
-        div.julia-player > div.julia-suggest > div.julia-suggest-item:hover > div.julia-suggest-item-title {
-          background: rgba(0, 0, 0, 0.8); }
       div.julia-player > div.julia-suggest > div.julia-suggest-item > div.julia-suggest-item-title {
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(0, 0, 0, 0.8);
         padding: 10px;
         text-align: left; }
   div.julia-player > div.julia-toolbar {
-    background: rgba(0, 0, 0, 0.7);
     width: 100%;
     height: 48px;
     position: absolute;
     bottom: 0;
     left: 0;
-    margin-bottom: -1px;
+    margin-bottom: 0;
     z-index: 70;
     opacity: .0;
     border: none;
-    font-family: sans-serif;
     /* *****************************
         * === LABELS ===
         ****************************** */
@@ -266,9 +293,7 @@ div.julia-player {
       outline: 0;
       height: 22px;
       line-height: 22px;
-      font-size: 12px;
-      color: #DDD;
-      background: rgba(0, 0, 0, 0.7); }
+      font-size: 12px; }
       div.julia-player > div.julia-toolbar div.julia-label.julia-label-goto {
         width: 60px;
         left: 30px;
@@ -283,7 +308,6 @@ div.julia-player {
       outline: 0;
       height: 20px;
       font-size: 12px;
-      color: #DDD;
       position: absolute;
       bottom: 6px; }
       div.julia-player > div.julia-toolbar div.julia-panel.julia-currentTime {
@@ -366,7 +390,6 @@ div.julia-player {
       right: 48px;
       bottom: -1px; }
   div.julia-player button.julia-btn {
-    color: #F9F9F9;
     background: transparent;
     border: 0;
     outline: 0;
@@ -378,8 +401,6 @@ div.julia-player {
     bottom: 7px;
     padding: 0;
     margin: 0; }
-    div.julia-player button.julia-btn:hover {
-      color: #FFCC00; }
     div.julia-player button.julia-btn.julia-playback {
       left: 5px; }
     div.julia-player button.julia-btn.julia-sound {
@@ -393,10 +414,389 @@ div.julia-player {
       text-align: center;
       bottom: 50%;
       left: 50%;
+      border-radius: 50%;
       font-size: 72px;
       margin-left: -36px;
       margin-bottom: -36px;
       z-index: 80; }
+      div.julia-player button.julia-btn.julia-big-play i:hover {
+        font-size: 68px; }
+    div.julia-player button.julia-btn i:hover {
+      font-size: 18px; }
+  div.julia-player.julia-device-mobile > div.julia-toolbar div.julia-volume {
+    display: none; }
+  div.julia-player.julia-device-mobile > div.julia-toolbar button.julia-btn.julia-sound {
+    display: none; }
+  div.julia-player.julia-theme-default {
+    background-color: black; }
+    div.julia-player.julia-theme-default div.julia-toolbar {
+      background-color: rgba(0, 0, 0, 0.7);
+      font-family: sans-serif; }
+      div.julia-player.julia-theme-default div.julia-toolbar div.julia-label {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-default div.julia-toolbar .julia-slider .julia-slider-fill {
+        background-color: #f9f9f9; }
+      div.julia-player.julia-theme-default div.julia-toolbar .julia-slider .julia-slider-handle {
+        background-color: #f9f9f9; }
+    div.julia-player.julia-theme-default > div.julia-shield {
+      background-color: transparent; }
+      div.julia-player.julia-theme-default > div.julia-shield div.julia-preloader {
+        background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-default > div.julia-shield div.julia-preloader div.julia-preloader-run {
+          border-top-color: #777777;
+          border-bottom-color: #777777; }
+    div.julia-player.julia-theme-default button.julia-btn {
+      color: #f9f9f9; }
+      div.julia-player.julia-theme-default button.julia-btn.julia-big-play {
+        background-color: rgba(0, 0, 0, 0.7); }
+      div.julia-player.julia-theme-default button.julia-btn:hover {
+        color: rgba(249, 249, 249, 0.7); }
+        div.julia-player.julia-theme-default button.julia-btn:hover.julia-big-play {
+          color: #dddddd;
+          background-color: black; }
+    div.julia-player.julia-theme-default div.julia-suggest {
+      background-color: black; }
+      div.julia-player.julia-theme-default div.julia-suggest div.julia-suggest-item {
+        background-color: black;
+        color: #dddddd; }
+        div.julia-player.julia-theme-default div.julia-suggest div.julia-suggest-item div.julia-suggest-item-title {
+          background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-default div.julia-suggest div.julia-suggest-item:hover {
+          color: rgba(249, 249, 249, 0.7); }
+  div.julia-player.julia-theme-aqua {
+    background-color: black; }
+    div.julia-player.julia-theme-aqua div.julia-toolbar {
+      background-color: rgba(0, 0, 0, 0.7);
+      font-family: sans-serif; }
+      div.julia-player.julia-theme-aqua div.julia-toolbar div.julia-label {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-aqua div.julia-toolbar .julia-slider .julia-slider-fill {
+        background-color: cyan; }
+      div.julia-player.julia-theme-aqua div.julia-toolbar .julia-slider .julia-slider-handle {
+        background-color: cyan; }
+    div.julia-player.julia-theme-aqua > div.julia-shield {
+      background-color: transparent; }
+      div.julia-player.julia-theme-aqua > div.julia-shield div.julia-preloader {
+        background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-aqua > div.julia-shield div.julia-preloader div.julia-preloader-run {
+          border-top-color: cyan;
+          border-bottom-color: cyan; }
+    div.julia-player.julia-theme-aqua button.julia-btn {
+      color: cyan; }
+      div.julia-player.julia-theme-aqua button.julia-btn.julia-big-play {
+        background-color: rgba(0, 0, 0, 0.7); }
+      div.julia-player.julia-theme-aqua button.julia-btn:hover {
+        color: rgba(249, 249, 249, 0.7); }
+        div.julia-player.julia-theme-aqua button.julia-btn:hover.julia-big-play {
+          color: #dddddd;
+          background-color: black; }
+    div.julia-player.julia-theme-aqua div.julia-suggest {
+      background-color: black; }
+      div.julia-player.julia-theme-aqua div.julia-suggest div.julia-suggest-item {
+        background-color: black;
+        color: #dddddd; }
+        div.julia-player.julia-theme-aqua div.julia-suggest div.julia-suggest-item div.julia-suggest-item-title {
+          background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-aqua div.julia-suggest div.julia-suggest-item:hover {
+          color: rgba(249, 249, 249, 0.7); }
+  div.julia-player.julia-theme-aquamarine {
+    background-color: black; }
+    div.julia-player.julia-theme-aquamarine div.julia-toolbar {
+      background-color: rgba(0, 0, 0, 0.7);
+      font-family: sans-serif; }
+      div.julia-player.julia-theme-aquamarine div.julia-toolbar div.julia-label {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-aquamarine div.julia-toolbar .julia-slider .julia-slider-fill {
+        background-color: aquamarine; }
+      div.julia-player.julia-theme-aquamarine div.julia-toolbar .julia-slider .julia-slider-handle {
+        background-color: aquamarine; }
+    div.julia-player.julia-theme-aquamarine > div.julia-shield {
+      background-color: transparent; }
+      div.julia-player.julia-theme-aquamarine > div.julia-shield div.julia-preloader {
+        background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-aquamarine > div.julia-shield div.julia-preloader div.julia-preloader-run {
+          border-top-color: aquamarine;
+          border-bottom-color: aquamarine; }
+    div.julia-player.julia-theme-aquamarine button.julia-btn {
+      color: aquamarine; }
+      div.julia-player.julia-theme-aquamarine button.julia-btn.julia-big-play {
+        background-color: rgba(0, 0, 0, 0.7); }
+      div.julia-player.julia-theme-aquamarine button.julia-btn:hover {
+        color: rgba(249, 249, 249, 0.7); }
+        div.julia-player.julia-theme-aquamarine button.julia-btn:hover.julia-big-play {
+          color: #dddddd;
+          background-color: black; }
+    div.julia-player.julia-theme-aquamarine div.julia-suggest {
+      background-color: black; }
+      div.julia-player.julia-theme-aquamarine div.julia-suggest div.julia-suggest-item {
+        background-color: black;
+        color: #dddddd; }
+        div.julia-player.julia-theme-aquamarine div.julia-suggest div.julia-suggest-item div.julia-suggest-item-title {
+          background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-aquamarine div.julia-suggest div.julia-suggest-item:hover {
+          color: rgba(249, 249, 249, 0.7); }
+  div.julia-player.julia-theme-crimson {
+    background-color: black; }
+    div.julia-player.julia-theme-crimson div.julia-toolbar {
+      background-color: rgba(0, 0, 0, 0.7);
+      font-family: sans-serif; }
+      div.julia-player.julia-theme-crimson div.julia-toolbar div.julia-label {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-crimson div.julia-toolbar .julia-slider .julia-slider-fill {
+        background-color: crimson; }
+      div.julia-player.julia-theme-crimson div.julia-toolbar .julia-slider .julia-slider-handle {
+        background-color: crimson; }
+    div.julia-player.julia-theme-crimson > div.julia-shield {
+      background-color: transparent; }
+      div.julia-player.julia-theme-crimson > div.julia-shield div.julia-preloader {
+        background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-crimson > div.julia-shield div.julia-preloader div.julia-preloader-run {
+          border-top-color: crimson;
+          border-bottom-color: crimson; }
+    div.julia-player.julia-theme-crimson button.julia-btn {
+      color: crimson; }
+      div.julia-player.julia-theme-crimson button.julia-btn.julia-big-play {
+        background-color: rgba(0, 0, 0, 0.7); }
+      div.julia-player.julia-theme-crimson button.julia-btn:hover {
+        color: rgba(249, 249, 249, 0.7); }
+        div.julia-player.julia-theme-crimson button.julia-btn:hover.julia-big-play {
+          color: #dddddd;
+          background-color: black; }
+    div.julia-player.julia-theme-crimson div.julia-suggest {
+      background-color: black; }
+      div.julia-player.julia-theme-crimson div.julia-suggest div.julia-suggest-item {
+        background-color: black;
+        color: #dddddd; }
+        div.julia-player.julia-theme-crimson div.julia-suggest div.julia-suggest-item div.julia-suggest-item-title {
+          background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-crimson div.julia-suggest div.julia-suggest-item:hover {
+          color: rgba(249, 249, 249, 0.7); }
+  div.julia-player.julia-theme-deeppink {
+    background-color: black; }
+    div.julia-player.julia-theme-deeppink div.julia-toolbar {
+      background-color: rgba(0, 0, 0, 0.7);
+      font-family: sans-serif; }
+      div.julia-player.julia-theme-deeppink div.julia-toolbar div.julia-label {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-deeppink div.julia-toolbar .julia-slider .julia-slider-fill {
+        background-color: deeppink; }
+      div.julia-player.julia-theme-deeppink div.julia-toolbar .julia-slider .julia-slider-handle {
+        background-color: deeppink; }
+    div.julia-player.julia-theme-deeppink > div.julia-shield {
+      background-color: transparent; }
+      div.julia-player.julia-theme-deeppink > div.julia-shield div.julia-preloader {
+        background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-deeppink > div.julia-shield div.julia-preloader div.julia-preloader-run {
+          border-top-color: deeppink;
+          border-bottom-color: deeppink; }
+    div.julia-player.julia-theme-deeppink button.julia-btn {
+      color: deeppink; }
+      div.julia-player.julia-theme-deeppink button.julia-btn.julia-big-play {
+        background-color: rgba(0, 0, 0, 0.7); }
+      div.julia-player.julia-theme-deeppink button.julia-btn:hover {
+        color: rgba(249, 249, 249, 0.7); }
+        div.julia-player.julia-theme-deeppink button.julia-btn:hover.julia-big-play {
+          color: #dddddd;
+          background-color: black; }
+    div.julia-player.julia-theme-deeppink div.julia-suggest {
+      background-color: black; }
+      div.julia-player.julia-theme-deeppink div.julia-suggest div.julia-suggest-item {
+        background-color: black;
+        color: #dddddd; }
+        div.julia-player.julia-theme-deeppink div.julia-suggest div.julia-suggest-item div.julia-suggest-item-title {
+          background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-deeppink div.julia-suggest div.julia-suggest-item:hover {
+          color: rgba(249, 249, 249, 0.7); }
+  div.julia-player.julia-theme-lightskyblue {
+    background-color: black; }
+    div.julia-player.julia-theme-lightskyblue div.julia-toolbar {
+      background-color: rgba(0, 0, 0, 0.7);
+      font-family: sans-serif; }
+      div.julia-player.julia-theme-lightskyblue div.julia-toolbar div.julia-label {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-lightskyblue div.julia-toolbar .julia-slider .julia-slider-fill {
+        background-color: lightskyblue; }
+      div.julia-player.julia-theme-lightskyblue div.julia-toolbar .julia-slider .julia-slider-handle {
+        background-color: lightskyblue; }
+    div.julia-player.julia-theme-lightskyblue > div.julia-shield {
+      background-color: transparent; }
+      div.julia-player.julia-theme-lightskyblue > div.julia-shield div.julia-preloader {
+        background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-lightskyblue > div.julia-shield div.julia-preloader div.julia-preloader-run {
+          border-top-color: lightskyblue;
+          border-bottom-color: lightskyblue; }
+    div.julia-player.julia-theme-lightskyblue button.julia-btn {
+      color: lightskyblue; }
+      div.julia-player.julia-theme-lightskyblue button.julia-btn.julia-big-play {
+        background-color: rgba(0, 0, 0, 0.7); }
+      div.julia-player.julia-theme-lightskyblue button.julia-btn:hover {
+        color: rgba(249, 249, 249, 0.7); }
+        div.julia-player.julia-theme-lightskyblue button.julia-btn:hover.julia-big-play {
+          color: #dddddd;
+          background-color: black; }
+    div.julia-player.julia-theme-lightskyblue div.julia-suggest {
+      background-color: black; }
+      div.julia-player.julia-theme-lightskyblue div.julia-suggest div.julia-suggest-item {
+        background-color: black;
+        color: #dddddd; }
+        div.julia-player.julia-theme-lightskyblue div.julia-suggest div.julia-suggest-item div.julia-suggest-item-title {
+          background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-lightskyblue div.julia-suggest div.julia-suggest-item:hover {
+          color: rgba(249, 249, 249, 0.7); }
+  div.julia-player.julia-theme-lime {
+    background-color: black; }
+    div.julia-player.julia-theme-lime div.julia-toolbar {
+      background-color: rgba(0, 0, 0, 0.7);
+      font-family: sans-serif; }
+      div.julia-player.julia-theme-lime div.julia-toolbar div.julia-label {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-lime div.julia-toolbar .julia-slider .julia-slider-fill {
+        background-color: lime; }
+      div.julia-player.julia-theme-lime div.julia-toolbar .julia-slider .julia-slider-handle {
+        background-color: lime; }
+    div.julia-player.julia-theme-lime > div.julia-shield {
+      background-color: transparent; }
+      div.julia-player.julia-theme-lime > div.julia-shield div.julia-preloader {
+        background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-lime > div.julia-shield div.julia-preloader div.julia-preloader-run {
+          border-top-color: lime;
+          border-bottom-color: lime; }
+    div.julia-player.julia-theme-lime button.julia-btn {
+      color: lime; }
+      div.julia-player.julia-theme-lime button.julia-btn.julia-big-play {
+        background-color: rgba(0, 0, 0, 0.7); }
+      div.julia-player.julia-theme-lime button.julia-btn:hover {
+        color: rgba(249, 249, 249, 0.7); }
+        div.julia-player.julia-theme-lime button.julia-btn:hover.julia-big-play {
+          color: #dddddd;
+          background-color: black; }
+    div.julia-player.julia-theme-lime div.julia-suggest {
+      background-color: black; }
+      div.julia-player.julia-theme-lime div.julia-suggest div.julia-suggest-item {
+        background-color: black;
+        color: #dddddd; }
+        div.julia-player.julia-theme-lime div.julia-suggest div.julia-suggest-item div.julia-suggest-item-title {
+          background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-lime div.julia-suggest div.julia-suggest-item:hover {
+          color: rgba(249, 249, 249, 0.7); }
+  div.julia-player.julia-theme-mediumspringgreen {
+    background-color: black; }
+    div.julia-player.julia-theme-mediumspringgreen div.julia-toolbar {
+      background-color: rgba(0, 0, 0, 0.7);
+      font-family: sans-serif; }
+      div.julia-player.julia-theme-mediumspringgreen div.julia-toolbar div.julia-label {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-mediumspringgreen div.julia-toolbar .julia-slider .julia-slider-fill {
+        background-color: mediumspringgreen; }
+      div.julia-player.julia-theme-mediumspringgreen div.julia-toolbar .julia-slider .julia-slider-handle {
+        background-color: mediumspringgreen; }
+    div.julia-player.julia-theme-mediumspringgreen > div.julia-shield {
+      background-color: transparent; }
+      div.julia-player.julia-theme-mediumspringgreen > div.julia-shield div.julia-preloader {
+        background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-mediumspringgreen > div.julia-shield div.julia-preloader div.julia-preloader-run {
+          border-top-color: mediumspringgreen;
+          border-bottom-color: mediumspringgreen; }
+    div.julia-player.julia-theme-mediumspringgreen button.julia-btn {
+      color: mediumspringgreen; }
+      div.julia-player.julia-theme-mediumspringgreen button.julia-btn.julia-big-play {
+        background-color: rgba(0, 0, 0, 0.7); }
+      div.julia-player.julia-theme-mediumspringgreen button.julia-btn:hover {
+        color: rgba(249, 249, 249, 0.7); }
+        div.julia-player.julia-theme-mediumspringgreen button.julia-btn:hover.julia-big-play {
+          color: #dddddd;
+          background-color: black; }
+    div.julia-player.julia-theme-mediumspringgreen div.julia-suggest {
+      background-color: black; }
+      div.julia-player.julia-theme-mediumspringgreen div.julia-suggest div.julia-suggest-item {
+        background-color: black;
+        color: #dddddd; }
+        div.julia-player.julia-theme-mediumspringgreen div.julia-suggest div.julia-suggest-item div.julia-suggest-item-title {
+          background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-mediumspringgreen div.julia-suggest div.julia-suggest-item:hover {
+          color: rgba(249, 249, 249, 0.7); }
+  div.julia-player.julia-theme-royalblue {
+    background-color: black; }
+    div.julia-player.julia-theme-royalblue div.julia-toolbar {
+      background-color: rgba(0, 0, 0, 0.7);
+      font-family: sans-serif; }
+      div.julia-player.julia-theme-royalblue div.julia-toolbar div.julia-label {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-royalblue div.julia-toolbar .julia-slider .julia-slider-fill {
+        background-color: royalblue; }
+      div.julia-player.julia-theme-royalblue div.julia-toolbar .julia-slider .julia-slider-handle {
+        background-color: royalblue; }
+    div.julia-player.julia-theme-royalblue > div.julia-shield {
+      background-color: transparent; }
+      div.julia-player.julia-theme-royalblue > div.julia-shield div.julia-preloader {
+        background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-royalblue > div.julia-shield div.julia-preloader div.julia-preloader-run {
+          border-top-color: royalblue;
+          border-bottom-color: royalblue; }
+    div.julia-player.julia-theme-royalblue button.julia-btn {
+      color: royalblue; }
+      div.julia-player.julia-theme-royalblue button.julia-btn.julia-big-play {
+        background-color: rgba(0, 0, 0, 0.7); }
+      div.julia-player.julia-theme-royalblue button.julia-btn:hover {
+        color: rgba(249, 249, 249, 0.7); }
+        div.julia-player.julia-theme-royalblue button.julia-btn:hover.julia-big-play {
+          color: #dddddd;
+          background-color: black; }
+    div.julia-player.julia-theme-royalblue div.julia-suggest {
+      background-color: black; }
+      div.julia-player.julia-theme-royalblue div.julia-suggest div.julia-suggest-item {
+        background-color: black;
+        color: #dddddd; }
+        div.julia-player.julia-theme-royalblue div.julia-suggest div.julia-suggest-item div.julia-suggest-item-title {
+          background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-royalblue div.julia-suggest div.julia-suggest-item:hover {
+          color: rgba(249, 249, 249, 0.7); }
+  div.julia-player.julia-theme-yellow {
+    background-color: black; }
+    div.julia-player.julia-theme-yellow div.julia-toolbar {
+      background-color: rgba(0, 0, 0, 0.7);
+      font-family: sans-serif; }
+      div.julia-player.julia-theme-yellow div.julia-toolbar div.julia-label {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #dddddd; }
+      div.julia-player.julia-theme-yellow div.julia-toolbar .julia-slider .julia-slider-fill {
+        background-color: #ffcc00; }
+      div.julia-player.julia-theme-yellow div.julia-toolbar .julia-slider .julia-slider-handle {
+        background-color: #ffcc00; }
+    div.julia-player.julia-theme-yellow > div.julia-shield {
+      background-color: transparent; }
+      div.julia-player.julia-theme-yellow > div.julia-shield div.julia-preloader {
+        background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-yellow > div.julia-shield div.julia-preloader div.julia-preloader-run {
+          border-top-color: #ffcc00;
+          border-bottom-color: #ffcc00; }
+    div.julia-player.julia-theme-yellow button.julia-btn {
+      color: #ffcc00; }
+      div.julia-player.julia-theme-yellow button.julia-btn.julia-big-play {
+        background-color: rgba(0, 0, 0, 0.7); }
+      div.julia-player.julia-theme-yellow button.julia-btn:hover {
+        color: rgba(249, 249, 249, 0.7); }
+        div.julia-player.julia-theme-yellow button.julia-btn:hover.julia-big-play {
+          color: #dddddd;
+          background-color: black; }
+    div.julia-player.julia-theme-yellow div.julia-suggest {
+      background-color: black; }
+      div.julia-player.julia-theme-yellow div.julia-suggest div.julia-suggest-item {
+        background-color: black;
+        color: #dddddd; }
+        div.julia-player.julia-theme-yellow div.julia-suggest div.julia-suggest-item div.julia-suggest-item-title {
+          background-color: rgba(0, 0, 0, 0.7); }
+        div.julia-player.julia-theme-yellow div.julia-suggest div.julia-suggest-item:hover {
+          color: rgba(249, 249, 249, 0.7); }
 
 @media (max-width: 480px) {
   div.julia-player div.julia-toolbar div.julia-volume {
@@ -412,6 +812,7 @@ div.julia-player {
 ******************************* */
 div.julia-player,
 div.julia-player > div.julia-toolbar,
+div.julia-player > div.julia-shield > button.julia-btn,
 div.julia-player > div.julia-shield > button.julia-btn.julia-big-play,
 div.julia-player > div.julia-suggest > div.julia-suggest-item {
   -webkit-transition: all 250ms;

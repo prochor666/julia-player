@@ -2,8 +2,8 @@
 * JuliaPlayer HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.1.2
-* @build: 2017-06-24
+* @version: 1.1.3
+* @build: 2017-06-26
 * @license: MIT
 *s
 * @require: jquery
@@ -39,8 +39,8 @@
 * JuliaPlayer HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.1.2
-* @build: 2017-06-24
+* @version: 1.1.3
+* @build: 2017-06-26
 * @license: MIT
 *
 * @requires:
@@ -218,6 +218,7 @@ var JuliaPlayer = function(options)
     {
         origin.options.dimensions = options.dimensions;
     }
+
     $.extend(true, origin.options, options);
 
     // Debug start
@@ -306,6 +307,12 @@ var JuliaPlayer = function(options)
             if(origin.options.volume > 100 || origin.options.volume < 0)
             {
                 origin.options.volume = 25;
+            }
+
+            // Set volume for mobile
+            if( origin.Support.isMobile() === true )
+            {
+                origin.options.volume = 100;
             }
         }
 
@@ -759,8 +766,10 @@ JuliaPlayer.prototype._Ui = function(origin)
             origin.env.instance = {};
         };
 
+        var device = origin.Support.isMobile() === true ? 'mobile': 'computer';
+
         // Main container
-        origin.env.instance = $('<div class="julia-player julia-fullscreen-off julia-theme-'+origin.options.theme+'" id="julia-player-'+origin.env.ID+'">'
+        origin.env.instance = $('<div class="julia-player julia-fullscreen-off julia-theme-'+origin.options.theme+' julia-device-'+device+'" id="julia-player-'+origin.env.ID+'">'
                     +'</div>');
 
         // Containers
@@ -823,32 +832,18 @@ JuliaPlayer.prototype._Ui = function(origin)
             origin.env.model.buttons.bigPlay
         ]);
 
-        if( origin.Support.iOS() === true )
-        {
-            origin.env.model.toolbar
-            .append([
-                origin.env.model.ranges.progress,
-                origin.env.model.panels.live,
-                origin.env.model.panels.currentTime,
-                origin.env.model.panels.duration,
-                origin.env.model.buttons.play,
-                origin.env.model.buttons.fullscreen,
-                origin.env.model.labels.goto,
-            ]);
-        }else{
-            origin.env.model.toolbar
-            .append([
-                origin.env.model.ranges.progress,
-                origin.env.model.panels.live,
-                origin.env.model.panels.currentTime,
-                origin.env.model.panels.duration,
-                origin.env.model.buttons.play,
-                origin.env.model.buttons.sound,
-                origin.env.model.ranges.volume,
-                origin.env.model.buttons.fullscreen,
-                origin.env.model.labels.goto,
-            ]);
-        }
+        origin.env.model.toolbar
+        .append([
+            origin.env.model.ranges.progress,
+            origin.env.model.panels.live,
+            origin.env.model.panels.currentTime,
+            origin.env.model.panels.duration,
+            origin.env.model.buttons.play,
+            origin.env.model.buttons.sound,
+            origin.env.model.ranges.volume,
+            origin.env.model.buttons.fullscreen,
+            origin.env.model.labels.goto,
+        ]);
 
         //--odn-handle-start--
         origin.env.instance
@@ -1629,7 +1624,23 @@ JuliaPlayer.prototype._Events = function(origin)
                 case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
                 case Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
                 case Hls.ErrorDetails.MANIFEST_PARSING_ERROR:
-                case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
+
+                    // reboot api
+                    origin.Api.shadowApi = false;
+
+                    origin.options.muted = origin.env.api.muted;
+
+                    origin.env.started = false;
+                    origin.options.source = origin.options.tempSource;
+                    origin.Api.source();
+                    origin.options.autoplay = true;
+
+                    origin.Ui.panel( origin.env.model.panels.live, origin.options.i18n.liveText );
+
+                    origin.env.model.buttons.bigPlay.click();
+
+
+                break; case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
                 case Hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
                 case Hls.ErrorDetails.LEVEL_SWITCH_ERROR:
                 case Hls.ErrorDetails.FRAG_LOAD_ERROR:
@@ -2544,7 +2555,6 @@ JuliaPlayer.prototype._Boot = function(origin)
             origin.env.dash.reset();
             origin.env.dash = false;
         }
-
 
         // Create UI
         origin.Ui.create();

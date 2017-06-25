@@ -2,8 +2,8 @@
 * JuliaPlayer HTML5 media player
 *
 * @author prochor666@gmail.com
-* @version: 1.1.2
-* @build: 2017-06-24
+* @version: 1.1.3
+* @build: 2017-06-26
 * @license: MIT
 *
 * @requires:
@@ -133,7 +133,7 @@ var JuliaPlayer = function(options)
         suggestPointer: 0,
         suggestClicked: false,
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '1.1.2',
+        version: '1.1.3',
         memory: {},
     };
 
@@ -181,6 +181,7 @@ var JuliaPlayer = function(options)
     {
         origin.options.dimensions = options.dimensions;
     }
+
     $.extend(true, origin.options, options);
 
     // Debug start
@@ -269,6 +270,12 @@ var JuliaPlayer = function(options)
             if(origin.options.volume > 100 || origin.options.volume < 0)
             {
                 origin.options.volume = 25;
+            }
+
+            // Set volume for mobile
+            if( origin.Support.isMobile() === true )
+            {
+                origin.options.volume = 100;
             }
         }
 

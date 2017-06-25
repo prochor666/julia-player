@@ -15,8 +15,10 @@ JuliaPlayer.prototype._Ui = function(origin)
             origin.env.instance = {};
         };
 
+        var device = origin.Support.isMobile() === true ? 'mobile': 'computer';
+
         // Main container
-        origin.env.instance = $('<div class="julia-player julia-fullscreen-off julia-theme-'+origin.options.theme+'" id="julia-player-'+origin.env.ID+'">'
+        origin.env.instance = $('<div class="julia-player julia-fullscreen-off julia-theme-'+origin.options.theme+' julia-device-'+device+'" id="julia-player-'+origin.env.ID+'">'
                     +'</div>');
 
         // Containers
@@ -79,32 +81,18 @@ JuliaPlayer.prototype._Ui = function(origin)
             origin.env.model.buttons.bigPlay
         ]);
 
-        if( origin.Support.iOS() === true )
-        {
-            origin.env.model.toolbar
-            .append([
-                origin.env.model.ranges.progress,
-                origin.env.model.panels.live,
-                origin.env.model.panels.currentTime,
-                origin.env.model.panels.duration,
-                origin.env.model.buttons.play,
-                origin.env.model.buttons.fullscreen,
-                origin.env.model.labels.goto,
-            ]);
-        }else{
-            origin.env.model.toolbar
-            .append([
-                origin.env.model.ranges.progress,
-                origin.env.model.panels.live,
-                origin.env.model.panels.currentTime,
-                origin.env.model.panels.duration,
-                origin.env.model.buttons.play,
-                origin.env.model.buttons.sound,
-                origin.env.model.ranges.volume,
-                origin.env.model.buttons.fullscreen,
-                origin.env.model.labels.goto,
-            ]);
-        }
+        origin.env.model.toolbar
+        .append([
+            origin.env.model.ranges.progress,
+            origin.env.model.panels.live,
+            origin.env.model.panels.currentTime,
+            origin.env.model.panels.duration,
+            origin.env.model.buttons.play,
+            origin.env.model.buttons.sound,
+            origin.env.model.ranges.volume,
+            origin.env.model.buttons.fullscreen,
+            origin.env.model.labels.goto,
+        ]);
 
         //--odn-handle-start--
         origin.env.instance
