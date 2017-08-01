@@ -1,0 +1,32 @@
+$appBg: rgba(0, 0, 0, 1);
+$toolbarBg: rgba(0, 0, 0, .7);
+$toolbarBgGradient: rgba(0, 0, 0, 0), rgba(0, 0, 0, .95);
+$iconBg: rgba(0, 0, 0, 0);
+$sliderFillBg: rgba(249,249,249, 1);
+$sliderFillProgressBg: rgba(0,191,255, 1);
+$sliderBaseBg: rgba(249,249,249, .3);
+$sliderBufferBg: rgba(249,249,249, .7);
+
+$appColor: rgba(249,249,249, 1);
+$preloaderColor: rgba(112,112,112, 1);
+$iconColor: rgba(255,255,255, 1);
+$iconHoverColor: rgba(0,191,255, 1);
+
+$dropdownSelectBg: rgba(17, 17, 17, 1);
+$dropdownBoxShadow: inset 0 1px rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.2);
+$dropdownTextColor: rgba(249,249,249, 1);
+$dropdownTextShadowColor: rgba(0, 0, 0, 1);
+$dropdownBorderColor: rgba(17,17,17,1) rgba(10,10,10,1) rgba(0,0,0,1);
+$dropdownABBorderColor: rgba(136,136,136,1) transparent;
+$dropdownABTopBorderColor: rgba(170,170,170,1);
+$dropdownBgGradient: top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8);
+
+$transitionLength: 180ms;
+
+@keyframes julia-preload-spin {
+	100%{ transform: rotate(360deg); }
+}
+
+@-webkit-keyframes julia-preload-spin {
+	100%{ -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+}

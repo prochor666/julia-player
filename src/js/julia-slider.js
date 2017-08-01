@@ -6,15 +6,10 @@
 JuliaPlayer.prototype._Slider = function(origin, options)
 {
     var self = this,
-
         leftButtonDown = false,
-
         ua = navigator.userAgent,
-
         isChrome = /chrome/i.exec(ua),
-
         isAndroid = /android/i.exec(ua),
-
         hasTouch = 'ontouchstart' in window && !(isChrome && !isAndroid),
 
         _normalize = function(percent)
@@ -31,19 +26,20 @@ JuliaPlayer.prototype._Slider = function(origin, options)
 
         _position = function(e)
         {
-            var pos = hasTouch === true ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
+            var pos = hasTouch === true && e.originalEvent.touches ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
             percent = _posToPercent( pos );
             return percent;
         },
 
         _pixels = function(e)
         {
-            var pos = hasTouch === true ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
+            var pos = hasTouch === true && e.originalEvent.touches ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
             return pos;
         },
 
         model = $('<div class="julia-slider">'
             +'<div class="julia-slider-track" data-julia-slider-component="track"></div>'
+            +'<div class="julia-slider-track-visible" data-julia-slider-component="track-visible"></div>'
             +'<div class="julia-slider-handle" data-julia-slider-component="handle"></div>'
             +'<div class="julia-slider-fill" data-julia-slider-component="fill"></div>'
         +'</div>');
@@ -51,16 +47,14 @@ JuliaPlayer.prototype._Slider = function(origin, options)
         self.model = model.clone();
 
         self.track = self.model.find('[data-julia-slider-component="track"]');
-
+        self.trackVisible = self.model.find('[data-julia-slider-component="track-visible"]');
         self.handle = self.model.find('[data-julia-slider-component="handle"]');
-
         self.fill = self.model.find('[data-julia-slider-component="fill"]');
 
         self.options = {
             element: {},
             value: 0,
-            originVisible: false,
-            eventRise: '',
+            event: '',
             overcall: function(){
                 return;
             }
@@ -69,11 +63,9 @@ JuliaPlayer.prototype._Slider = function(origin, options)
     // Extend custom options
     $.extend(true, self.options, options);
 
-    self.elem = typeof self.options.element === 'object' ? self.options.element: $(self.options.element.toString()),
+    self.elem = self.options.element;
 
     self.value = self.options.value;
-
-
 
 
     // Public methods & props
@@ -84,17 +76,11 @@ JuliaPlayer.prototype._Slider = function(origin, options)
             self.value = _normalize( self.elem.val() );
         }
 
-        if( self.options.originVisible === false )
-        {
-        	self.elem.hide().after( self.model );
-        }else{
-            self.elem.after( self.model );
-        }
+        self.elem.after( self.model );
+        self.elem.hide();
 
         self.slide( self.value, true );
     };
-
-
 
 
     self.update = function( percent )
@@ -106,6 +92,31 @@ JuliaPlayer.prototype._Slider = function(origin, options)
     };
 
 
+    self.buffered = function()
+    {
+        var b = origin.env.api.buffered;
+        self.model.find('.julia-buffer-sequence').remove();
+
+        for( var i = 0; i < b.length; i++ )
+        {
+            var sequenceModel = self.model.find('.julia-buffer-sequence-'+i);
+            _percent1 = _normalize( origin.Timecode.toPercents( b.start( i ) ) );
+            _percent2 = _normalize( origin.Timecode.toPercents( b.end( i ) ) );
+            var pos1 = ( self.track.innerWidth() / 100 ) * _percent1;
+            var pos2 = ( self.track.innerWidth() / 100 ) * _percent2;
+
+            if( sequenceModel.length == 0 )
+            {
+                var sequenceModel = $('<div class="julia-buffer-sequence julia-buffer-sequence-'+i+'"></div>');
+                self.model.append( sequenceModel );
+            }
+
+            sequenceModel.css({
+                'left': pos1 + 'px',
+                'width': ( pos2 - pos1 ) + self.handle.innerWidth() + 'px'
+            });
+        }
+    };
 
 
     self.slide = function( percent, eventPrevent )
@@ -124,8 +135,6 @@ JuliaPlayer.prototype._Slider = function(origin, options)
     };
 
 
-
-
     self.respond = function( percent, eventPrevent )
     {
         if( typeof eventPrevent === 'undefined' )
@@ -139,10 +148,9 @@ JuliaPlayer.prototype._Slider = function(origin, options)
 
             if( eventPrevent === false )
             {
-                $('#julia-player-'+origin.env.ID).trigger({
-                    type: 'julia.'+self.options.eventRise,
-                    percent: percent
-                });
+                origin.event( 'julia.'+self.options.event, origin.env.instance, {
+                    'percent': percent
+                } );
             }
         }
 
@@ -151,14 +159,10 @@ JuliaPlayer.prototype._Slider = function(origin, options)
     }
 
 
-
-
     self.getValue = function()
     {
     	return self.value;
     };
-
-
 
 
     self.sliding = function()
@@ -174,14 +178,15 @@ JuliaPlayer.prototype._Slider = function(origin, options)
     });
 
 
-
-
     self.track.on('click', function(e)
     {
         self.slide( _position(e), false );
     });
 
-
+    self.trackVisible.on('click', function(e)
+    {
+        self.slide( _position(e), false );
+    });
 
 
     self.model.on('click mouseover mousemove mouseout', function(e)
@@ -191,44 +196,42 @@ JuliaPlayer.prototype._Slider = function(origin, options)
             self.slide( _position(e), false );
         }
 
-        if( ( e.type == 'mouseover' || e.type == 'mousemove' ) && self.options.eventRise == 'progress-change' )
+        if( ( e.type == 'mouseover' || e.type == 'mousemove' ) && self.options.event == 'progress-change' && origin.env.started === true )
         {
             pos = _position(e);
             pix = _pixels(e);
 
-            if( origin.env.thumbsOk === true && origin.Support.isMobile() === false && origin.options.live === false && origin.options.thumbs === true )
+            if( origin.Support.isMobile() === false && origin.options.source.live === false && origin.options.thumbs === true )
             {
-                origin.Api.thumb( origin.Timecode.toSeconds( pos ) );
+                origin.Thumbs.thumb( origin.Timecode.toSeconds( pos ) );
             }
-            origin.Ui.state( origin.env.model.labels.goto, '', 'on' );
-            origin.Ui.panel( origin.env.model.labels.goto, origin.Timecode.toHuman( origin.Timecode.toSeconds( pos ) ) );
+            origin.Ui.state( origin.env.labels.goto, '', 'on' );
+            origin.Ui.panel( origin.env.labels.goto, origin.Timecode.toHuman( origin.Timecode.toSeconds( pos ) ) );
 
             left = pix+'px';
-            border = (origin.env.model.labels.goto.innerWidth()/2);
+            border = (origin.env.labels.goto.innerWidth()/2);
 
             if( pix < border )
             {
-                left = (border) + 'px';
+                left = (border + 10) + 'px';
             }
 
-            if( pix > self.model.innerWidth() - border - 10 )
+            if( pix > self.model.innerWidth() - border )
             {
-                left = ( self.model.innerWidth() - border ) + 'px';
+                left = ( self.model.innerWidth() - border + 10 ) + 'px';
             }
 
-            origin.env.model.labels.goto.css({
+            origin.env.labels.goto.css({
                 'left': left,
-                'margin-left': -(origin.env.model.labels.goto.innerWidth()/2)+'px'
+                'margin-left': -(origin.env.labels.goto.innerWidth()/2)+'px'
             });
         }
 
-        if( e.type == 'mouseout' && self.options.eventRise == 'progress-change' )
+        if( e.type == 'mouseout' && self.options.event == 'progress-change' )
         {
-            origin.Ui.state( origin.env.model.labels.goto, 'on', '' );
+            origin.Ui.state( origin.env.labels.goto, 'on', '' );
         }
     });
-
-
 
 
     self.model.on('mousedown touchstart', function(e)
@@ -243,15 +246,11 @@ JuliaPlayer.prototype._Slider = function(origin, options)
     });
 
 
-
-
     $(document).on('mouseup touchend', function(e)
     {
         // Left mouse button deactivate
         leftButtonDown = false;
     });
-
-
 
 
     $(document).on('mousemove touchmove', function(e)

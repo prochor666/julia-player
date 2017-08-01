@@ -1,0 +1,63 @@
+.julia-suggest {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    width: 100%;
+    height: -webkit-calc( 100% - 1px );
+    height: -moz-calc( 100% - 1px );
+    height: calc( 100% - 1px );
+    -webkit-transform: scale(0);
+    -moz-transform: scale(0);
+    -ms-transform: scale(0);
+    transform: scale(0);
+
+    &.on {
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        -webkit-transform: scale(1);
+        -moz-transform: scale(1);
+        -ms-transform: scale(1);
+        transform: scale(1);
+        background-color: $appBg;
+    }
+
+    .julia-suggest-item {
+        cursor: pointer;
+        width: 50%;
+        height: -webkit-calc( 50% - 1px );
+        height: -moz-calc( 50% - 1px );
+        height: calc( 50% - 1px );
+        min-height: 80px;
+        font-size: 1.1em;
+        float: left;
+        margin: 0;
+        padding: 0;
+        position: relative;
+        overflow: hidden;
+        background-color: $appBg;
+
+        img {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .julia-suggest-item-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            text-align: left;
+            background-color: $toolbarBg;
+        }
+
+        &:hover {
+            .julia-suggest-item-title {
+                color: $iconHoverColor;
+            }
+        }
+    }
+}

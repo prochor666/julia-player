@@ -1,0 +1,48 @@
+@font-face {
+    font-family: "WMC";
+    src: url("../fonts/julia-icons.eot");
+    src: url("../fonts/julia-icons.eot?#iefix") format("embedded-opentype"),
+        url("../fonts/julia-icons.woff") format("woff"),
+        url("../fonts/julia-icons.ttf") format("truetype"),
+        url("../fonts/julia-icons.svg#WMC") format("svg");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: "WMC";
+    src: url("../fonts/julia-icons.svg#WMC") format("svg");
+  }
+}
+
+
+.julia-icon {
+    font-family: "WMC";
+    font-style: normal;
+    display: inline;
+
+    &.julia-download:before { content: "\f100"; }
+    &.julia-refresh:before { content: "\f101"; }
+    &.julia-forward:before { content: "\f102"; }
+    &.julia-backward:before { content: "\f103"; }
+    &.julia-close:before { content: "\f104"; }
+    &.julia-fullscreen-exit:before { content: "\f105"; }
+    &.julia-target:before { content: "\f106"; }
+    &.julia-subtitles:before { content: "\f107"; }
+    &.julia-fullscreen:before { content: "\f108"; }
+    &.julia-menu:before { content: "\f109"; }
+    &.julia-dot-menu:before { content: "\f10a"; }
+    &.julia-mark:before { content: "\f10b"; }
+    &.julia-play-circle-inverse:before { content: "\f10c"; }
+    &.julia-play-circle:before { content: "\f10d"; }
+    &.julia-next:before { content: "\f10e"; }
+    &.julia-play:before { content: "\f10f"; }
+    &.julia-play-outline:before { content: "\f110"; }
+    &.julia-pause:before { content: "\f111"; }
+    &.julia-sound-off:before { content: "\f112"; }
+    &.julia-sound-on:before { content: "\f113"; }
+    &.julia-sound-min:before { content: "\f114"; }
+    &.julia-list:before { content: "\f115"; }
+    &.julia-prev:before { content: "\f116"; }
+}

@@ -1,5 +1,5 @@
 /* *****************************************
-* JuliaPlayer HTML5 media player
+* JuliaPlayer HTML5 player
 * Persistent settings
 * options are stored in cookies
 ****************************************** */

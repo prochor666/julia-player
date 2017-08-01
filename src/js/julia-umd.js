@@ -1,13 +1,5 @@
 /* *****************************************
-* JuliaPlayer HTML5 media player
-*
-* @author prochor666@gmail.com
-* @version: 1.1.4
-* @build: 2017-06-26
-* @license: MIT
-*s
-* @require: jquery
-**
+* JuliaPlayer HTML5 player
 * UMD loader
 * Uses CommonJS, AMD or browser globals
 * to export a jQuery plugin & extension.

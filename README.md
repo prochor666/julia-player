@@ -1,9 +1,6 @@
-Julia player
-=============
-
-![julia-player](https://raw.githubusercontent.com/prochor666/julia-player/master/src/img/brand/julia-logo-128x128.png)
-
-Responsive, mobile first, extensible, HTML5 player with HTTP Live Streaming (HLS) and Dynamic Adaptive Streaming over HTTP (MPEG-DASH) support.
+Warp media center
+=================
+Responsive, mobile ready media player
 
 How to establish devel environment.
 
@@ -14,13 +11,16 @@ How to establish devel environment.
     - CSS minify package [gulp-clean-css](https://www.npmjs.com/package/gulp-clean-css)
     - JavaScript minify package [gulp-minify](https://www.npmjs.com/package/gulp-minify)
     - Concat package [gulp-concat](https://www.npmjs.com/package/gulp-concat)
+    - Replace package [gulp-replace](https://www.npmjs.com/package/gulp-replace)
+    - Del package [del](https://www.npmjs.com/package/del)
+    - Fs package [fs](https://www.npmjs.com/package/fs)
 
 How to start.
 
 Run:
 
 ```bash
-user@host:/your/devel/directory/julia# gulp watch
+user@host:/your/devel/directory/warp-media-center# gulp watch
 ```
 
 Now you can start typing in scss and js files. All needle files are generated on the fly.

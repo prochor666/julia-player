@@ -1,6 +1,5 @@
 /* *****************************************
-* JuliaPlayer HTML5 media player
-* Suggest
+* JuliaPlayer HTML5 player
 * suggest playlist engine
 ****************************************** */
 JuliaPlayer.prototype._Suggest = function(origin)
@@ -12,9 +11,9 @@ JuliaPlayer.prototype._Suggest = function(origin)
 
     self.run = function()
     {
-        origin.env.model.suggest.html('');
-        origin.Controls.press('stop');
+        origin.env.suggest.html('');
         origin.env.suggestClicked = false;
+        origin.env.buttons.bigPlay.hide();
 
         if(origin.options.suggest.length > 0)
         {
@@ -23,76 +22,81 @@ JuliaPlayer.prototype._Suggest = function(origin)
             {
                 if(x < origin.options.suggestLimit && origin.options.suggest[i].played === false)
                 {
-                    mode = !!origin.options.suggest[i].live && origin.options.suggest[i].live === true ? 'live': 'vod';
-                    liveText = !!origin.options.suggest[i].liveText ? origin.options.suggest[i].liveText: 'Live';
-                    var poster = !!origin.options.suggest[i].poster ? origin.options.suggest[i].poster: '';
+                    live = !!origin.options.suggest[i].live && origin.options.suggest[i].live === true ? true: false;
+                    file = !!origin.options.suggest[i].file ? origin.options.suggest[i].file: '';
+                    poster = !!origin.options.suggest[i].poster ? origin.options.suggest[i].poster: '';
+                    title = !!origin.options.suggest[i].title ? origin.options.suggest[i].title: '';
+                    mode = !!origin.options.suggest[i].mode ? origin.options.suggest[i].mode: 'legacy';
                     posterImage = poster.length>0 ? '<img src="'+poster+'" width="100%" height="100%">': '';
-                    suggestItemWidget = $('<div class="julia-suggest-item" data-poster="'+poster+'" data-source="'+origin.options.suggest[i].source+'" data-mode="'+mode+'" data-live-text="'+liveText+'" data-index="'+i+'">'
+
+                    suggestItemWidget = $('<div class="julia-suggest-item" data-item-poster="'+poster+'" data-item-file="'+origin.options.suggest[i].file+'" data-mode="'+mode+'" data-item-title="'+origin.options.suggest[i].title+'" data-index="'+i+'" data-item-mode="'+origin.options.suggest[i].mode+'" data-item-live="'+origin.options.suggest[i].live+'">'
                             + posterImage
                             +'<div class="julia-suggest-item-title">'+origin.options.suggest[i].title+'</div>'
                         +'</div>');
 
-                        suggestItemWidget.on('click', function(e)
+                    suggestItemWidget.on('click', function(e)
+                    {
+                        origin.Ui.state( origin.env.preloader, '', 'on' );
+
+                        if(origin.options.onSuggest !== false)
                         {
-                            if(origin.options.onSuggest !== false)
-                            {
-                                origin.Callback.fn(origin.options.onSuggest, origin.options.suggest[i]);
-                            }
+                            origin.Callback.fn(origin.options.onSuggest, origin.options.suggest[i]);
+                        }
 
-                            origin.Api.shadowApi = false;
+                        origin.Thumbs.shadowApi = false;
 
-                            origin.options.muted = origin.env.api.muted;
+                        origin.env.suggestClicked = true;
+                        origin.options.autoplay = true;
+                        origin.options.source = {
+                            file: $(this).data('item-file'),
+                            poster: $(this).data('item-poster'),
+                            title: $(this).data('item-title'),
+                            mode: $(this).data('item-mode'),
+                            live: $(this).data('item-live'),
+                        };
+                        origin.Source.set();
 
-                            origin.options.poster = $(this).data('poster');
-                            origin.env.suggestClicked = true;
-                            origin.env.model.buttons.bigPlay.hide();
-                            origin.env.started = false;
-                            origin.options.source = $(this).data('source');
-                            origin.Api.source();
-                            origin.options.autoplay = true;
-                            origin.options.live = $(this).data('mode') == 'live' ? true: false;
-                            origin.options.i18n.liveText = $(this).data('live-text');
-
-                            origin.Ui.panel( origin.env.model.panels.live, origin.options.i18n.liveText );
-
-                            origin.Base.debug({
-                                suggestRemoveIndex: $(this).data('index'),
-                                suggestRemove: $(this).data('source')
-                            });
-
-                            origin.options.suggest[$(this).data('index')].played = true;
-
-                            origin.Ui.state(origin.env.model.suggest, 'on', '');
-
-                            origin.env.model.buttons.bigPlay.click();
+                        origin.debug({
+                            suggestRemoveIndex: $(this).data('index'),
+                            suggestRemove: $(this).data('item-file')
                         });
 
-                    origin.env.model.suggest.append(suggestItemWidget);
+                        origin.options.suggest[$(this).data('index')].played = true;
+                        origin.Ui.state(origin.env.suggest, 'on', '');
+                        //origin.Controls.press('play');
+                    });
+
+                    origin.debug({
+                        'Suggest item' : suggestItemWidget
+                    });
+
+                    origin.env.suggest.append(suggestItemWidget);
                     x++;
                 }
-            }
+            };
 
             if(x > 0)
             {
-                if(origin.options.suggestTimeout > 0 && origin.Support.isMobile() === false)
+                if(origin.options.suggestTimeout > 0)
                 {
-                    setTimeout( function()
+                    origin.env.suggestTimer = setTimeout( function()
                     {
                         if(origin.env.suggestClicked === false)
                         {
-                            origin.env.model.suggest.find('div.julia-suggest-item:first').click();
+                            origin.env.suggest.find('div.julia-suggest-item:first').click();
                         }
                     }, origin.options.suggestTimeout);
                 }
-                origin.Ui.state(origin.env.model.suggest, '', 'on');
+
+                origin.Ui.state(origin.env.suggest, '', 'on');
             }
 
         }else{
             origin.Fullscreen.off();
         }
 
-        origin.Base.debug({
-            'Suggest' : 'raised'
+        origin.debug({
+            'Suggest' : 'raised'+ origin.options.suggest.length
         });
     };
 };

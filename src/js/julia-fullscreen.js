@@ -1,5 +1,5 @@
 /* *****************************************
-* JuliaPlayer HTML5 media player
+* JuliaPlayer HTML5 player
 * Fullscreen
 * player fullscreen behavior
 ****************************************** */
@@ -7,28 +7,23 @@ JuliaPlayer.prototype._Fullscreen = function(origin)
 {
     var self = this;
 
-    self.on = function(fullscreenFrame)
+    self.on = function()
     {
-        if( fullscreenFrame.requestFullscreen )
+        if( origin.env.fullscreenFrame.requestFullscreen )
         {
-            fullscreenFrame.requestFullscreen();
-
-        }else if( fullscreenFrame.msRequestFullscreen )
+            origin.env.fullscreenFrame.requestFullscreen();
+        }else if( origin.env.fullscreenFrame.msRequestFullscreen )
         {
-            fullscreenFrame.msRequestFullscreen();
-
-        }else if( fullscreenFrame.mozRequestFullScreen )
+            origin.env.fullscreenFrame.msRequestFullscreen();
+        }else if( origin.env.fullscreenFrame.mozRequestFullScreen )
         {
-            fullscreenFrame.mozRequestFullScreen();
-
-        }else if( fullscreenFrame.webkitRequestFullscreen )
+            origin.env.fullscreenFrame.mozRequestFullScreen();
+        }else if( origin.env.fullscreenFrame.webkitRequestFullscreen )
         {
-            fullscreenFrame.webkitRequestFullscreen();
-
+            origin.env.fullscreenFrame.webkitRequestFullscreen();
         }else{
-
-            origin.Base.debug({
-                'fullscreen': 'Fullscreen is not supported'
+            origin.debug({
+                'Fullscreen': 'not supported'
             });
         }
     };
@@ -41,15 +36,12 @@ JuliaPlayer.prototype._Fullscreen = function(origin)
         if( document.exitFullscreen )
         {
             document.exitFullscreen();
-
         }else if( document.msExitFullscreen )
         {
             document.msExitFullscreen();
-
         }else if( document.mozCancelFullScreen )
         {
             document.mozCancelFullScreen();
-
         }else if( document.webkitExitFullscreen )
         {
             document.webkitExitFullscreen();
@@ -58,8 +50,34 @@ JuliaPlayer.prototype._Fullscreen = function(origin)
 
 
 
+    self.landscapeLock = function(lock)
+    {
+        if( origin.Support.isMobile() )
+        {
+            if( screen.orientation ){ sor = screen.orientation; }
+            if( screen.msLockOrientation ){ sor = screen.msLockOrientation; }
+            if( screen.mozLockOrientation ){ sor = screen.mozLockOrientation; }
 
-    self.reset = function(instance, model, api)
+            if( typeof sor !== 'undefined' && sor.lock && typeof sor.lock === 'function' )
+            {
+                if( lock === true )
+                {
+                    sor.lock('landscape-primary').catch(function(err)
+                    {
+                        origin.debug({
+                            'Landscape lock error: ': err
+                        }, true);
+                    });
+                }else if( sor.unlock && typeof sor.unlock === 'function' ){
+                    sor.unlock();
+                }
+            }
+        }
+    };
+
+
+
+    self.reset = function()
     {
         $(document).off('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange');
 
@@ -68,53 +86,30 @@ JuliaPlayer.prototype._Fullscreen = function(origin)
         {
             if(!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement)
             {
-                origin.Ui.state( instance, 'julia-fullscreen-on', 'julia-fullscreen-off' );
-                origin.Ui.state( model.buttons.fullscreen, 'off', 'on' );
-                origin.Ui.icon( model.buttons.fullscreen, 'julia-fullscreen-exit', 'julia-fullscreen' );
+                origin.Ui.state( origin.env.instance, 'julia-fullscreen-on', 'julia-fullscreen-off' );
+                origin.Ui.state( origin.env.buttons.fullscreen, 'off', 'on' );
+                origin.Ui.icon( origin.env.buttons.fullscreen, 'julia-fullscreen-exit', 'julia-fullscreen' );
 
-                // Turn off landscape on mobile
-                if(origin.Support.isMobile())
-                {
-                    screen.orientation.unlock();
-                    screen.msLockOrientation.unlock();
-                    screen.mozLockOrientation.unlock();
-                }
+                self.landscapeLock(false);
 
-                origin.Base.debug({
-                    'fullscreen off' : '#julia-player-'+origin.env.ID
+                origin.debug({
+                    'Fullscreen off' : '#julia-player-'+origin.env.ID
                 });
 
             }else{
 
-                origin.Ui.state( instance, 'julia-fullscreen-off', 'julia-fullscreen-on' );
-                origin.Ui.state( model.buttons.fullscreen, 'on', 'off' );
-                origin.Ui.icon( model.buttons.fullscreen, 'julia-fullscreen', 'julia-fullscreen-exit' );
+                origin.Ui.state( origin.env.instance, 'julia-fullscreen-off', 'julia-fullscreen-on' );
+                origin.Ui.state( origin.env.buttons.fullscreen, 'on', 'off' );
+                origin.Ui.icon( origin.env.buttons.fullscreen, 'julia-fullscreen', 'julia-fullscreen-exit' );
 
-                // Force landscape in fullscreen mode on mobile
-                if(origin.Support.isMobile())
-                {
-                    screen.orientation.lock('landscape-primary');
-                    screen.msLockOrientation.lock('landscape-primary');
-                    screen.mozLockOrientation.lock('landscape-primary');
-                }
+                self.landscapeLock(true);
 
-                origin.Base.debug({
-                    'fullscreen on' : '#julia-player-'+origin.env.ID
+                origin.debug({
+                    'Fullscreen on' : '#julia-player-'+origin.env.ID
                 });
             }
 
             origin.Support.resize();
-
-            setTimeout( function()
-            {
-                w = origin.env.api.getAttribute('width');
-
-                origin.env.instance.find('.julia-progress').width(w);
-                origin.env.instance.find('.julia-progress .julia-slider-track').width(w);
-
-                model.sliders.progress.update( origin.Timecode.toPercents( api.currentTime ) );
-            }, 5);
-
         });
     };
 };

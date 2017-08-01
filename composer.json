@@ -1,15 +1,15 @@
 {
-    "name": "prochor666/julia-player",
+    "name": "prochor666/wmc",
     "type": "library",
-    "description": "Julia player, responsive, mobile first, HTML5 player with HTTP Live Streaming (HLS) and Dynamic Adaptive Streaming over HTTP (MPEG-DASH) support",
-    "keywords": ["player","video"],
-    "homepage": "https://github.com/prochor666/julia-player",
+    "description": "Responsive, mobile ready player",
+    "keywords": ["html5","player"],
+    "homepage": "https://github.com/prochor666/wmc",
     "license": "MIT",
     "authors": [
         {
             "name": "Jan Prochazka",
             "email": "prochor666@gmail.com",
-            "homepage": "http://multizone.cz",
+            "homepage": "https://multizone.cz",
             "role": "Developer"
         }
     ]

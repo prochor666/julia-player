@@ -1,13 +1,5 @@
 /* *****************************************
-* JuliaPlayer HTML5 media player
-*
-* @author prochor666@gmail.com
-* @version: 1.1.4
-* @build: 2017-06-26
-* @license: MIT
-*s
-* @require: jquery
-**
+* JuliaPlayer HTML5 player
 * UMD loader
 * Uses CommonJS, AMD or browser globals
 * to export a jQuery plugin & extension.
@@ -36,19 +28,10 @@
 {
 
 /* *****************************************
-* JuliaPlayer HTML5 media player
-*
-* @author prochor666@gmail.com
-* @version: 1.1.4
-* @build: 2017-06-26
-* @license: MIT
-*
-* @requires:
-* jquery [required]
-* hls.js [optional]
-* dash.js [optional]
+* JuliaPlayer HTML5 player
+* Base object
 ****************************************** */
-var JuliaPlayer = function(options)
+JuliaPlayer = function(options)
 {
     var origin = this;
 
@@ -60,251 +43,364 @@ var JuliaPlayer = function(options)
 
     // Default origin.options
     origin.options = {
-        source: false,
-        sources: {},
+        dev: false,
+        element: $('body'),
         autoplay: false,
-        volume: 25,
-        element: $('video'),
-        muted: false,
-        width: 512,
-        height: 288,
         debug: false,
-        debugPlayback: false,
-        force: false,
-        live: false,
-        thumbs: false,
-        responsive: true,
-        pauseOnBlur: false,
+        dashConfig: {
+        },
         dimensions: [
-            [1920, 1080],
+            [1920,1080],
             [1280,720],
             [960,540],
             [640,360],
             [512,288]
         ],
-        pauseOnClick: false,
-        poster: '',
         hlsConfig: {
             debug: false
         },
-        dashConfig: {
+        i18n: {
+            liveText: 'Live',
+            settings: 'Settings',
+            auto: 'Auto',
+            video: 'Video quality',
+            audio: 'Audio quality',
+            audioTracks: 'Audio tracks',
+            subtitles: 'Subtitles',
+            speed: 'Playback speed',
+            speedItems: [
+                {active: 1, value: 0.25, title: '0.25x'},
+                {active: 1, value: 0.5, title: '0.5x'},
+                {active: 1, value: 1, title: 'Normal'},
+                {active: 1, value: 1.5, title: '1.5x'},
+                {active: 1, value: 2, title: '2x'},
+                {active: 1, value: 2.5, title: '2.5x'},
+                {active: 1, value: 3, title: '3x'},
+            ],
+            videoItems: [
+
+            ],
+            audioItems: [
+
+            ],
+            textItems: [
+                {active: -1, value: -1, title: 'Off'},
+            ],
+        },
+        onClose: false,
+        onCreate: false,
+        onInit: false,
+        onPlay: false,
+        onPause: false,
+        onStop: false,
+        onSuggest: false,
+        onTime: false,
+        pauseOnClick: true,
+        playbackDebug: false,
+        pluginMode: false,
+        responsive: true,
+        plugins: 'julia/dist/js/lib',
+        source: {
+            file: '',
+            poster: '',
+            mode: 'legacy',
+            live: false,
         },
         suggest: [],
         suggestLimit: 4,
         suggestTimeout: 10000,
-        require: [],
-        theme: 'default',
-        i18n: {
-            liveText: 'Live'
-        },
-        onTime: {},
-        triggerHls: {},
-        triggerDash: {},
-        onPlay: false,
-        onPause: false,
-        onStop: false,
-        onPosition: false,
-        onSuggest: false,
+        thumbs: false,
+        zIndexStart: 1,
     };
+
+
+    // Extend default origin.options with external options
+    $.extend(true, origin.options, options);
 
 
     // Environment
     origin.env = {
         element: origin.options.element,
-        instance: {},
-        fullscreenFrame: false,
-        ID: __JULIA_INSTANCE__ID__,
-        api: {},
-        model: {
-            container: '',
-            shield: '',
-            toolbar: '',
-            poster: '',
-            suggest: '',
-            preloader: '',
-            buttons: {
-                bigPlay: '',
-                play: '',
-                sound: '',
-                fullscreen: '',
-            },
-            ranges: {
-                volume: '',
-                progress: ''
-            },
-            sliders: {
-                volume: '',
-                progress: ''
-            },
-            panels: {
-                live: '',
-                currentTime: '',
-                duration: ''
-            },
-            labels: {
-                goto: ''
-            },
-            menus: {
-            }
-        },
-        isLive: false,
-        hls: false,
-        dash: false,
-        canPlayMedia: '',
+        autoplay: origin.options.autoplay,
         canPlayMediaString: '',
-        isHls: false,
-        isDash: false,
-        useHlsLib: false,
-        source: '',
-        duration: 0,
-        apiOk: false,
-        thumbsOk: true,
-        onTimeRised: [],
-        seeking: false,
+        canPlayMedia: false,
+        collection: origin.options.collection,
+        context: typeof window !== 'undefined' && window || global,
+        continuePlayback: false,
         dimensions: {
             width: 0,
             height: 0,
         },
+        errorRecoveryAttempts: 0,
+        errorRecoveryAttemptLimit: 10,
+        fullscreenFrame: false,
+        i18n: origin.options.i18n,
+        ID: __JULIA_INSTANCE__ID__,
+        instance: $(),
+        api: $(),
+        hls: false,
+        dash: false,
+        dashInitialized: false,
+        hlsInitialized: false,
+        audioTrackActive: 0,
+        textTrackActive: 0,
+        shield: $(),
+        toolbars: $(),
+        buttons: $(),
         started: false,
-        publicApi: {},
-        suggestPointer: 0,
-        suggestClicked: false,
+        mode: 'legacy',
+        suggestTimer: false,
+        startupGoto: 0,
+        ranges: {
+            volume: '',
+            progress: ''
+        },
+        sliders: {
+            volume: '',
+            progress: ''
+        },
+        panels: {
+            live: '',
+            currentTime: '',
+            duration: ''
+        },
+        labels: {
+            goto: ''
+        },
+        menus: {
+            settings: ''
+        },
+        suggest: $(),
+        preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '1.1.4',
-        memory: {},
+        version: '2.0.0',
     };
-
-    // Base functions
-    origin.Base = {};
 
 
 
 
     // Console debug
-    origin.Base.debug = function(data)
+    origin.debug = function(data, warn)
     {
+        //--odn-handle-start--
         if(origin.options.debug === true)
         {
+            warn = typeof warn === 'undefined' || warn === false ? false: true;
+
             if(window.console)
             {
-                for(d in data)
+                for(key in data)
                 {
-                    console.log(' - [instance: '+origin.env.ID+'] '+d+' ['+(typeof data[d])+']', data[d]);
+                    if( warn === true && typeof console.warn === 'function' )
+                    {
+                        console.warn(' - JuliaPlayer '+origin.env.ID+' warning - [' + (typeof data[key]) + '], ' + key + ': ', data[key]);
+                    }else{
+                        console.log(' - JuliaPlayer '+origin.env.ID+' debug - [' + (typeof data[key]) + '], ' + key + ': ', data[key]);
+                    }
                 }
             }
         }
+        //--odn-handle-stop--
+    };
+
+
+
+
+    origin.event = function(eventName, elem, data)
+    {
+        var e = typeof elem === 'undefined' ? $(document): elem;
+        var d = typeof data === 'undefined' ? {}: data;
+
+        if( typeof e === 'string' )
+        {
+            e = $(e);
+        }
+
+        origin.debug({
+            'Julia event fired': eventName + ' > '+ elem.prop("tagName") + '.' + elem.prop('className')
+        });
+
+        e.trigger({
+            type: eventName,
+        }, d);
+    };
+
+
+
+
+    /* *****************************************
+    * Require js/css files
+    ****************************************** */
+    origin.js = function(scripts)
+    {
+        if(typeof scripts === 'string')
+        {
+            scripts = [scripts];
+        }
+
+        if(scripts.length == 0)
+        {
+            origin.event("julia.no-scripts", origin.env.instance);
+
+        }else{
+
+            var last = scripts[scripts.length - 1];
+            origin.jsLoad(scripts, 0, last);
+        }
+    };
+
+
+
+
+    origin.jsLoad = function(scripts, i, last)
+    {
+        var script = scripts[i];
+
+        $.getScript(script).done( function()
+        {
+            origin.debug({
+                'Js file loaded': script
+            });
+
+            if( last == script )
+            {
+                origin.event("julia.scripts-loaded", origin.env.instance);
+
+            }else{
+                origin.jsLoad(scripts, i+1, last);
+            }
+        });
     };
 
 
 
 
     // Console stat
-    origin.Base.stats = function()
+    origin.stats = function()
     {
         return {
-            'isDash': origin.env.isDash,
-            'isHls': origin.env.isHls,
-            'useHlsLib': origin.env.useHlsLib,
-            'live': origin.env.isLive,
+            'mode': origin.options.source.mode,
+            'live': origin.options.source.live,
+            'isMobile': origin.Support.isMobile(),
+            'readyState': origin.env.api.readyState,
+            'duration': origin.Timecode.toHuman( origin.env.api.duration ),
+            'position': origin.Timecode.toHuman( origin.env.api.currentTime ),
             'canPlayMediaString': origin.env.canPlayMediaString,
-            'canPlayMedia': origin.env.canPlayMedia,
+            'canPlayMedia': origin.env.canPlayMedia.toString(),
+            'started': origin.env.started.toString(),
+            'api': origin.env.api.paused === true ? 'paused': 'playing',
         };
     };
 
 
-    // Extend default origin.options with external options
-    if( typeof options.dimensions !== 'undefined' )
-    {
-        origin.options.dimensions = options.dimensions;
-    }
 
-    $.extend(true, origin.options, options);
-
+    //--odn-handle-start--
     // Debug start
     if(origin.options.debug === true && window.console )
     {
-        console.info('=== Julia console debug start, instance '+origin.env.ID+' ===');
-    }
+        console.info('=== Julia player init, instance '+origin.env.ID+' ===');
+    };
+    //--odn-handle-stop--
 
-
-
-    origin.Ui =             new origin._Ui(origin);
-    origin.Api =            new origin._Api(origin);
-    origin.Support =        new origin._Support(origin);
-    origin.Controls =       new origin._Controls(origin);
-    origin.Timecode =       new origin._Timecode(origin);
-    origin.Events =         new origin._Events(origin);
-    origin.Persist =        new origin._Persist(origin);
-    origin.Fullscreen =     new origin._Fullscreen(origin);
-    origin.Callback =       new origin._Callback(origin);
-    origin.Suggest =        new origin._Suggest(origin);
-    origin.Inject =         new origin._Inject(origin);
-    origin.Require =        new origin._Require(origin);
-    origin.Boot =           new origin._Boot(origin);
-    origin.Loader =         new origin._Loader(origin);
-
-
-
-    // Require scripts
-    origin.Require.js(origin.options.require);
-
-
-    $('body').on('julia.plugins-loaded julia.no-plugins', '#julia-player-'+origin.env.ID, function(e)
+    // Second step, UI event starts player
+    $(document).on('julia.ui-created', '#julia-'+origin.env.ID, function(e)
     {
-        if(e.namespace == 'plugins-loaded')
-        {
-            origin.Base.debug({
-                'Required plugins loaded': [e.type, e.namespace]
-            });
-
-        }else{
-            origin.Base.debug({
-                'No plugins required': [e.type, e.namespace]
-            });
-        }
-
-        origin.Ui.state(origin.env.model.preloader, 'on', '');
-        origin.env.model.buttons.bigPlay.show();
-
-        // Autostart playback, if possible
-        if(origin.options.autoplay === true && origin.Support.isMobile() === false)
-        {
-            origin.env.model.buttons.bigPlay.click();
-        }
-    });
-
-
-    $('body').on('julia.ui-ready', '#julia-player-'+origin.env.ID, function(e)
-    {
-        origin.env.model.sliders.progress = new origin._Slider( origin, {
-            element: $('#julia-toolbar-'+origin.env.ID+'>div.julia-progress>input.julia-range'),
-            eventRise: 'progress-change'
-        });
-        origin.env.model.sliders.progress.init();
-
-        origin.env.model.sliders.volume = new origin._Slider( origin, {
-            element: $('#julia-toolbar-'+origin.env.ID+'>div.julia-volume>input.julia-range'),
-            eventRise: 'volume-change'
-        });
-        origin.env.model.sliders.volume.init();
-
-        // Size Fix
         origin.Support.resize();
+        origin.Ui.state( origin.env.instance, 'off', '' );
 
-        // Handle events
-        origin.Events.ui();
-        origin.Events.native();
+        var _load = [];
 
-        // Persistent data
-        volume = origin.Persist.get('julia-player-volume');
-        muted = origin.Persist.get('julia-player-muted');
-
-        if(typeof volume !== 'undefined' && volume.length>0)
+        if( typeof origin.env.context.dashjs === 'undefined' )
         {
-            origin.options.volume = parseInt(volume);
+            _load.push(origin.options.plugins+'/dash.all.min.js');
+        }
 
-            if(origin.options.volume > 100 || origin.options.volume < 0)
+        if( typeof origin.env.context.Hls === 'undefined' )
+        {
+            _load.push(origin.options.plugins+'/hls.min.js');
+        }
+
+        origin.js( _load );
+
+        $(document).on('julia.scripts-loaded julia.no-scripts', '#julia-'+origin.env.ID, function(e)
+        {
+            if( !origin.options.source.hasOwnProperty('file')  )
             {
+                origin.options.source.file = '';
+            }
+
+            if( !origin.options.source.hasOwnProperty('poster')  )
+            {
+                origin.options.source.poster = '';
+            }
+
+            if( !origin.options.source.hasOwnProperty('title')  )
+            {
+                origin.options.source.title = '';
+            }
+
+            if( !origin.options.source.hasOwnProperty('mode')  )
+            {
+                origin.options.source.mode = 'legacy';
+            }
+
+            if( !origin.options.source.hasOwnProperty('live')  )
+            {
+                origin.options.source.live = false;
+            }
+
+            origin.env.fullscreenFrame = document.querySelector('#julia-'+origin.env.ID);
+            origin.env.api = document.getElementById('julia-api-'+origin.env.ID);
+
+
+            origin.env.sliders.progress = new origin._Slider( origin, {
+                element: $('#julia-'+origin.env.ID+' .julia-toolbar.julia-toolbar-bottom>div.julia-progress>input.julia-range'),
+                event: 'progress-change',
+            });
+            origin.env.sliders.progress.init();
+
+            origin.env.sliders.volume = new origin._Slider( origin, {
+                element: $('#julia-'+origin.env.ID+' .julia-toolbar.julia-toolbar-bottom>div.julia-volume>input.julia-range'),
+                event: 'volume-change',
+            });
+            origin.env.sliders.volume.init();
+
+            origin.Events.ui();
+
+            // Size Fix
+            origin.Support.resize();
+
+            // Suggest completition
+            origin.options.suggest.map( function(x,i)
+            {
+                origin.options.suggest[i].played = false;
+            });
+
+
+            // Startup fixes, default behavior before media init
+            $('body').on('julia.progress-change', '#julia-'+origin.env.ID, function(e, data)
+            {
+                if( origin.env.started === false )
+                {
+                    origin.env.startupGoto = data.percent;
+                    origin.Controls.press('play');
+                }
+            });
+
+
+            // Persistent data
+            volume = origin.Persist.get('julia-player-volume');
+            muted = origin.Persist.get('julia-player-muted');
+
+            if( ( !isNaN( Number(volume) ) && typeof volume !== 'undefined' ) )
+            {
+                origin.options.volume = parseInt(Number(volume));
+
+                if(origin.options.volume > 100 || origin.options.volume < 0)
+                {
+                    origin.options.volume = 25;
+                }
+            }else{
                 origin.options.volume = 25;
             }
 
@@ -312,275 +408,2302 @@ var JuliaPlayer = function(options)
             if( origin.Support.isMobile() === true )
             {
                 origin.options.volume = 100;
+                origin.options.muted = false;
             }
-        }
 
-        if(typeof muted !=='undefined' && muted.length>0)
-        {
-            origin.options.muted = muted == 'false' ?  false: true;
-        }
+            if( ( !isNaN( Number(muted) ) && typeof muted !== 'undefined' ) && origin.Support.isMobile() === false )
+            {
+                origin.options.muted = Number(muted) === 0 ? false: true;
+            }else{
+                origin.options.muted = false;
+            }
 
+            if(origin.options.onInit !== false)
+            {
+                origin.Callback.fn( origin.options.onInit );
+            }
+
+            origin.env.api.volume = parseFloat(origin.options.volume/100);
+            origin.env.api.muted = origin.options.muted;
+
+            //--odn-handle-start--
+            origin.Source.set();
+            //--odn-handle-stop--
+        });
     });
 
+    // Create player
+    origin.Ui =             new origin._Ui(origin);
+    origin.Events =         new origin._Events(origin);
+    origin.Switcher =       new origin._Switcher(origin);
+    origin.Subtitles =      new origin._Subtitles(origin);
+    origin.Callback =       new origin._Callback(origin);
+    origin.Controls =       new origin._Controls(origin);
+    origin.Fullscreen =     new origin._Fullscreen(origin);
+    origin.Support =        new origin._Support(origin);
+    origin.Suggest =        new origin._Suggest(origin);
+    origin.Source =         new origin._Source(origin);
+    origin.Persist =        new origin._Persist(origin);
+    origin.Timecode =       new origin._Timecode(origin);
+    origin.Thumbs =         new origin._Thumbs(origin);
 
-    // Run player init
-    origin.Boot.run();
+    //--odn-handle-start--
+    origin.Ui.create();
+    origin.Events.init();
+    //--odn-handle-stop--
 
-
-    // Define publicApi
-    origin.env.publicApi = {
-        options: origin.options,
-        shield: origin.env.model.shield,
-        toolbar: origin.env.model.toolbar,
-        api: origin.env.api,
-        ID: origin.env.ID,
-        dimensions: origin.env.dimensions,
-        Controls: origin.Controls,
-        Extend: origin.Base.extend,
-        Support: origin.Support,
-        Timecode: origin.Timecode,
-        Require: origin.Require,
-        Inject: origin.Inject,
-        stats: origin.Base.stats
-    };
-
-
-    return origin.env.publicApi;
+    return origin.options.pluginMode === true ? origin: [origin];
 };
 
-
-
-
-var JuliaPlayerVirtual = function(options)
+/* *****************************************
+* JuliaPlayer HTML5 player
+* Callback
+* event callbacks
+****************************************** */
+JuliaPlayer.prototype._Callback = function(origin)
 {
-    options = typeof options === 'undefined' ? {}: options;
+    var self = this;
 
-    // Default origin.options
-    var _options = {
-        sources: {},
-        root: $('body'),
-    };
-
-    var __VIRTUAL_ID__ = Math.floor((Math.random()*10000000)+1);
-
-    // Extend default origin.options with external options
-    $.extend(true, _options, options);
-
-
-
-
-
-    var isDOMElement = function( obj )
+    self.fn = function(f, data)
     {
-        var _checkInstance = function(elem)
+        data = data||{};
+
+        if( $.inArray(typeof f, ['string', 'function']) > -1 )
         {
-            if( ( elem instanceof jQuery && elem.length ) || elem instanceof HTMLElement )
+            // Callback defined as function name or function
+            // !!! Remember !!!
+            // If you are using typeof string, function must be callable globally (window context)
+            if( typeof f === 'string' )
             {
-                return true;
+                f = window[f];
             }
 
-            return false;
+            f( origin.options, origin.env, data );
+
+            origin.debug({
+                'Callback': typeof f+' raised'
+            });
+
+        }else{
+
+            origin.debug({
+                'Callback': typeof f+' is not a function, but: '+(typeof f)
+            });
+        }
+    };
+
+    // Time update event callbacks
+    self.onTime = function(time, timeNum)
+    {
+        if( typeof origin.options.onTime === 'object' && (time in origin.options.onTime) && origin.env.onTimeRised.indexOf(time) == -1 )
+        {
+            f = origin.options.onTime[time];
+            origin.env.onTimeRised.push(time);
+
+
+            if( $.inArray(typeof f, ['string', 'function']) > -1 )
+            {
+                // Callback defined as function name or function
+                // !!! Remember !!!
+                // If you are using typeof string, function must be callable globally (window context)
+                if( typeof f === 'string' )
+                {
+                    f = window[f];
+                }
+
+                f(origin.options, origin.env, time);
+
+                origin.debug({
+                    'Callback onTime': time+' '+ typeof f +' raised'
+                });
+
+            }else{
+
+                origin.debug({
+                    'Callback onTime': time+' '+ typeof f +' is not a function, but: '+(typeof f)
+                });
+            }
+        }
+    };
+};
+
+/* *****************************************
+* JuliaPlayer HTML5 player
+* Virtual controls
+****************************************** */
+JuliaPlayer.prototype._Controls = function(origin)
+{
+    var self = this;
+
+
+
+
+    self.press = function(action, data)
+    {
+        data = data||{};
+/*
+        origin.debug({
+            'Press action': [action, data]
+        });
+
+*/        switch(action)
+        {
+            case 'play':
+
+                origin.Ui.state( origin.env.preloader, '', 'on' );
+                origin.env.buttons.bigPlay.hide();
+
+                if(origin.options.onPlay !== false)
+                {
+                    origin.Callback.fn(origin.options.onPlay, data);
+                }
+
+                if( origin.env.started === false )
+                {
+                    origin.Source.load();
+                }else{
+                    origin.env.api.play();
+                }
+
+            break; case 'pause':
+
+                if(origin.options.onPause !== false)
+                {
+                    origin.Callback.fn(origin.options.onPause, data);
+                }
+                origin.env.api.pause();
+
+            break; case 'stop':
+
+                if(origin.options.onStop !== false)
+                {
+                    origin.Callback.fn(origin.options.onStop, data);
+                }
+
+                origin.env.api.pause();
+                origin.env.api.currentTime = 0;
+
+                origin.Ui.state( origin.env.buttons.play, 'pause', 'play' );
+                origin.Ui.icon( origin.env.buttons.play, 'julia-pause', 'julia-play' );
+                origin.env.buttons.bigPlay.show();
+                origin.env.sliders.progress.update( 0 );
+
+            break; case 'goto':
+
+                origin.Ui.state( origin.env.preloader, '', 'on' );
+                data.currentTime = isNaN( Number(parseFloat(data.currentTime)) ) ? 0: Number(parseFloat(data.currentTime));
+
+                origin.env.api.currentTime = data.currentTime;
+
+                if(origin.options.onPosition !== false)
+                {
+                    origin.Callback.fn(origin.options.onPosition, data);
+                }
+
+            break; case 'setDuration':
+
+                data.duration = isNaN( Number(parseFloat(data.duration)) ) ? 0: Number(parseFloat(data.duration));
+                origin.Ui.panel( origin.env.panels.duration, origin.Timecode.toHuman(data.duration) );
+
+            break; case 'volume':
+
+                origin.options.volume = data.volume;
+                origin.env.api.volume = parseFloat( data.volume/100 );
+
+                origin.env.sliders.volume.update( data.volume );
+
+                if(data.volume>0)
+                {
+                    origin.Controls.press('sound-on');
+
+                }else{
+                    origin.Controls.press('sound-off');
+                }
+
+            break; case 'sound-on':
+
+                origin.env.api.muted = false;
+                origin.options.muted = false;
+                origin.Persist.set('julia-player-volume', origin.options.volume, 999);
+                origin.Persist.set('julia-player-muted', 0, 999);
+
+                origin.Ui.state( origin.env.buttons.sound, 'off', 'on' );
+                origin.Ui.icon( origin.env.buttons.sound, 'julia-sound-off', 'julia-sound-on' );
+
+            break; case 'sound-off':
+
+                origin.env.api.muted = true;
+                origin.options.muted = true;
+                origin.Persist.set('julia-player-volume', origin.options.volume, 999);
+                origin.Persist.set('julia-player-muted', 1, 999);
+
+                origin.Ui.state( origin.env.buttons.sound, 'on', 'off' );
+                origin.Ui.icon( origin.env.buttons.sound, 'julia-sound-on', 'julia-sound-off' );
+
+            break; case 'fullscreen-on':
+
+                origin.Fullscreen.reset();
+                origin.Fullscreen.on();
+
+            break; case 'fullscreen-off':
+
+                origin.Fullscreen.reset();
+                origin.Fullscreen.off();
+
+            break; default:
+
         }
 
-        if( obj instanceof HTMLCollection && obj.length )
-        {
-                for( var a = 0, len = obj.length; a < len; a++ )
-                {
+        return;
+    };
 
-                if( !_checkInstance( obj[a] ) )
+};
+
+/* *****************************************
+* JuliaPlayer HTML5 player
+* DOM and api events
+****************************************** */
+
+JuliaPlayer.prototype._Events = function(origin)
+{
+    var self = this;
+
+    self.init = function()
+    {
+        //self.native();
+        //self.ui();
+    };
+
+    self.ui = function()
+    {
+        // Bottom bar
+        origin.env.toolbarBottom
+        .off()
+        .on('contextmenu', function(e)
+        {
+            e.stopPropagation();
+            e.preventDefault();
+        })
+        .on('click', '.julia-play.play', function(e)
+        {
+            e.preventDefault();
+            origin.Controls.press('play');
+        })
+        .on('click', '.julia-play.pause', function(e)
+        {
+            e.preventDefault();
+            origin.Controls.press('pause');
+        })
+        .on('click', '.julia-sound.on', function(e)
+        {
+            e.preventDefault();
+            origin.Controls.press('sound-off');
+        })
+        .on('click', '.julia-sound.off', function(e)
+        {
+            e.preventDefault();
+            origin.Controls.press('sound-on');
+        })
+        .on('click', '.julia-fullscreen.on', function(e)
+        {
+            e.preventDefault();
+            origin.Controls.press('fullscreen-on');
+        })
+        .on('click', '.julia-fullscreen.off', function(e)
+        {
+            e.preventDefault();
+            origin.Controls.press('fullscreen-off');
+        })
+        .on('click', '.julia-settings', function(e)
+        {
+            e.preventDefault();
+
+            if( origin.env.menus.settings.hasClass('on') )
+            {
+                origin.Ui.state( origin.env.menus.settings, 'on', '');
+            }else{
+                origin.Ui.state( origin.env.menus.settings, '', 'on');
+            }
+        });
+
+
+        // Top bar
+        origin.env.toolbarTop.off().on('contextmenu', function(e)
+        {
+            e.stopPropagation();
+            e.preventDefault();
+        });
+
+
+        origin.env.menus.speed.off().on('change', '.julia-dropdown-select', function(e)
+        {
+            e.preventDefault();
+
+            if( !isNaN(Number($(this).val())) )
+            {
+                origin.env.api.playbackRate = parseFloat(Number($(this).val()));
+            }
+        });
+
+
+        origin.env.menus.video.off().on('change', '.julia-dropdown-select', function(e)
+        {
+            e.preventDefault();
+
+            origin.debug({
+                'Video bitrate: ': Number($(this).val())
+            });
+
+            if( Number($(this).val()) == '-1' )
+            {
+                origin.Switcher.setAutoBitrate( 'video', true );
+            }else{
+                origin.Switcher.setAutoBitrate( 'video', false );
+                origin.Switcher.setBitrate( 'video', Number($(this).val()) );
+            }
+        });
+
+
+        origin.env.menus.audio.off().on('change', '.julia-dropdown-select', function(e)
+        {
+            e.preventDefault();
+
+            if( Number($(this).val()) == '-1' )
+            {
+                origin.Switcher.setAutoBitrate( 'audio', true );
+            }else{
+                origin.Switcher.setAutoBitrate( 'audio', false );
+                origin.Switcher.setBitrate( 'audio', Number($(this).val()) );
+            }
+        });
+
+
+        origin.env.menus.audioTracks.off().on('change', '.julia-dropdown-select', function(e)
+        {
+            e.preventDefault();
+
+            if( !isNaN(Number($(this).val())) )
+            {
+                origin.env.audioTrackActive = Number($(this).val());
+
+                origin.debug({
+                    'trackIndex': origin.env.audioTrackActive,
+                });
+
+                origin.Switcher.setTrack( 'audio', origin.env.audioTrackActive );
+            }
+        });
+
+
+        origin.env.menus.subtitles.off().on('change', '.julia-dropdown-select', function(e)
+        {
+            e.preventDefault();
+
+            if( !isNaN(Number($(this).val())) )
+            {
+                t = origin.Switcher.getTracks('text');
+                origin.env.textTrackActive = Number($(this).val());
+
+                origin.debug({
+                    'trackIndex': origin.env.textTrackActive,
+                    'trackObj': t[origin.env.textTrackActive]
+                });
+
+                origin.Subtitles.setTrack( origin.env.textTrackActive );
+            }
+        });
+
+
+        origin.env.buttons.bigPlay.off().on('click contextmenu', function(e)
+        {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if(e.type == 'click')
+            {
+                origin.Controls.press('play');
+            }
+        });
+
+
+        // Area click
+        origin.env.shield.off().on('dblclick click contextmenu', function(e)
+        {
+            e.preventDefault();
+            e.stopPropagation();
+
+            origin.Ui.state( origin.env.menus.settings, 'on', '');
+
+            if( e.type == 'click' )
+            {
+                if( origin.options.pauseOnClick === true && origin.Support.isMobile() === false )
                 {
-                    return false;
+                    if( origin.env.api.paused === false )
+                    {
+                        origin.Controls.press('pause');
+                    }else{
+                        origin.Controls.press('play');
+                    }
                 }
             }
 
-            return true;
-
-        } else {
-
-            return _checkInstance( obj );
-        }
-    };
-
-
-
-
-    var normalize = function( item )
-    {
-        var norm = $('<video />');
-
-        if( typeof item === 'string' )
-        {
-            norm.attr( 'src', item );
-        }
-
-        if( ( typeof item === 'object' && !isDOMElement( item ) ) )
-        {
-            if( item.hasOwnProperty('src')  )
+            if( e.type == 'dblclick' )
             {
-                norm.attr( 'src', item.src );
-
+                if( origin.env.instance.hasClass('julia-fullscreen-on') )
+                {
+                    origin.Controls.press('fullscreen-off');
+                }else{
+                    origin.Controls.press('fullscreen-on');
+                }
             }
-
-            if( item.hasOwnProperty('poster')  )
-            {
-                norm.attr( 'poster', item.poster );
-            }
-        }
-
-        norm.css({
-            'display': 'none'
         });
 
-        return norm;
+
+        // Fullscreen toolbar behavior bindings
+        var mouseMoveCleaner;
+
+        origin.env.instance
+        .off('mousemove touchmove', '.julia-shield, .julia-suggest')
+        .off('mouseover mousemove touchmove mouseout', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on')
+        .on('mousemove touchmove', '.julia-shield, .julia-suggest', function(e)
+        {
+            e.preventDefault();
+            origin.env.toolbarBottom.addClass('julia-toolbar-visible');
+            origin.env.toolbarTop.addClass('julia-toolbar-visible');
+            clearTimeout(mouseMoveCleaner);
+
+            mouseMoveCleaner = setTimeout(function()
+            {
+                origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
+                origin.env.toolbarTop.removeClass('julia-toolbar-visible');
+                origin.Ui.state( origin.env.menus.settings, 'on', '');
+            }, 1750);
+        })
+        .on('mouseover mousemove touchmove mouseout', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on', function(e)
+        {
+            e.preventDefault();
+            origin.env.toolbarBottom.addClass('julia-toolbar-visible');
+            origin.env.toolbarTop.addClass('julia-toolbar-visible');
+            clearTimeout(mouseMoveCleaner);
+
+            if( ['mouseout', 'touchend'].lastIndexOf( e.type.toLowerCase() ) > -1 )
+            {
+                mouseMoveCleaner = setTimeout(function(e)
+                {
+                    origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
+                    origin.env.toolbarTop.removeClass('julia-toolbar-visible');
+                    origin.Ui.state( origin.env.menus.settings, 'on', '');
+                }, 1750);
+            }
+        });
+
+
+
+
+        // Bind progressbar change
+        $('body')
+        .off('julia.progress-change', '#julia-'+origin.env.ID)
+        .on('julia.progress-change', '#julia-'+origin.env.ID, function(e, data)
+        {
+            if( origin.env.started === true )
+            {
+                seekTo = origin.Timecode.toSeconds( data.percent );
+                seekTo = seekTo >= origin.env.api.duration ? origin.env.api.duration: seekTo;
+
+                origin.Controls.press('goto', {
+                    currentTime: seekTo
+                });
+            }
+        });
+
+
+
+
+        $('body')
+        .off('julia.volume-change', '#julia-'+origin.env.ID)
+        .on('julia.volume-change', '#julia-'+origin.env.ID, function(e, data)
+        {
+            origin.Controls.press('volume', {
+                volume: data.percent,
+            });
+        });
+
+
+
+
+        // Fullscreen event included
+        $(window).on('resize', function()
+        {
+            origin.Support.resize();
+        });
     };
 
 
 
-    _collection = $('<div class="---julia-virtual-media-gallery-'+__VIRTUAL_ID__+'--- julia-virtual-gallery" style="display: none;" />');
 
-
-    for( index in _options.sources )
+    self.native = function()
     {
-        _item = normalize( _options.sources[index] );
-        _collection.append( _item );
-    }
+        // Video playback detect
+        origin.env.api.onplay = function(e)
+        {
+            origin.Ui.state( origin.env.buttons.play, 'play', 'pause' );
+            origin.Ui.icon( origin.env.buttons.play, 'julia-play', 'julia-pause' );
+            origin.env.buttons.bigPlay.hide();
+            origin.env.sliders.progress.buffered();
+            //origin.Ui.state( origin.env.preloader, 'on', '' );
+            origin.Ui.state( origin.env.suggest, 'on', '' );
+            clearTimeout( origin.env.suggestTimer );
 
-    _options.root.append( _collection );
-    result = _collection.find('video').juliaPlayer( _options );
+            if( origin.env.startupGoto > 0 )
+            {
+                seekTo = origin.Timecode.toSeconds( origin.env.startupGoto );
+                seekTo = seekTo >= origin.env.api.duration ? origin.env.api.duration: seekTo;
+                origin.env.startupGoto = 0;
 
-    return result;
+                origin.Controls.press('goto', {
+                    currentTime: seekTo
+                });
+            }
+        };
+
+
+
+
+        origin.env.api.onplaying = function(e)
+        {
+            origin.Ui.state( origin.env.buttons.play, 'play', 'pause' );
+            origin.Ui.icon( origin.env.buttons.play, 'julia-play', 'julia-pause' );
+            origin.env.sliders.progress.buffered();
+            origin.Ui.state( origin.env.preloader, 'on', '' );
+            origin.Ui.state( origin.env.suggest, 'on', '' );
+            origin.env.started = true;
+            clearTimeout( origin.env.suggestTimer );
+            origin.env.errorRecoveryAttempts = 0;
+
+            origin.Controls.press('setDuration', {
+                'duration': origin.env.api.duration
+            });
+        };
+
+
+
+
+        // Video pause
+        origin.env.api.onpause = function(e)
+        {
+            origin.Ui.state( origin.env.buttons.play, 'pause', 'play' );
+            origin.Ui.icon( origin.env.buttons.play, 'julia-pause', 'julia-play' );
+
+            setTimeout( function()
+            {
+                if( origin.env.api.paused === true || origin.env.api.ended === true )
+                {
+                    origin.env.buttons.bigPlay.show();
+                }
+            }, 400);
+        };
+
+
+
+
+        window.onerror = function(e)
+        {
+            window.__juliaPlayerForceStopAfterFatalError = true;
+        };
+
+
+
+
+        // Errors
+        origin.env.api.onerror = function(e)
+        {
+            origin.debug({
+                'Error event': e.type,
+                'Attempts': origin.env.errorRecoveryAttempts,
+                'Attempt limit': origin.env.errorRecoveryAttemptLimit,
+            });
+
+            origin.Source.recover();
+        };
+
+
+
+
+        origin.env.api.onabort = function(e)
+        {
+            origin.debug({
+                'Error event': e.type,
+                'Attempts': origin.env.errorRecoveryAttempts,
+                'Attempt limit': origin.env.errorRecoveryAttemptLimit,
+            }, true);
+
+            origin.Source.recover();
+        };
+
+
+
+
+        origin.env.api.onemptied = function(e)
+        {
+            origin.debug({
+                'Error event': e.type,
+                'Attempts': origin.env.errorRecoveryAttempts,
+                'Attempt limit': origin.env.errorRecoveryAttemptLimit,
+            }, true);
+
+            origin.Source.recover();
+        };
+
+
+
+
+        origin.env.api.onstalled = function(e)
+        {
+            origin.debug({
+                'Error event': e.type,
+                'Attempts': origin.env.errorRecoveryAttempts,
+                'Attempt limit': origin.env.errorRecoveryAttemptLimit,
+            }, true);
+
+            origin.Source.recover();
+        };
+
+
+
+
+        origin.env.api.onsuspend = function(e)
+        {
+            origin.debug({
+                'Error event': e.type,
+                'Attempts': origin.env.errorRecoveryAttempts,
+                'Attempt limit': origin.env.errorRecoveryAttemptLimit,
+            }, true);
+
+            origin.Source.recover();
+        };
+
+
+
+
+        origin.env.api.onloadeddata = function(e)
+        {
+        };
+
+
+
+
+        origin.env.api.oncanplaythrough = function(e)
+        {
+            origin.Controls.press('setDuration', {
+                'duration': origin.env.api.duration
+            });
+
+            if( origin.env.mode != 'hls' && origin.env.mode != 'dash' )
+            {
+                if( ( origin.env.continuePlayback === true || origin.options.autoplay === true ) && ( origin.env.api.paused === true || origin.env.api.ended === true ) && origin.Support.isMobile() === false && origin.env.started === false )
+                {
+                    origin.env.api.play();
+                }
+            }
+        };
+
+
+
+
+        // Video position
+        origin.env.api.ontimeupdate = function(e)
+        {
+            currentTimeReadable = origin.Timecode.toHuman( origin.env.api.currentTime );
+
+            if(origin.env.api.seeking === false)
+            {
+                origin.env.sliders.progress.update( origin.Timecode.toPercents( origin.env.api.currentTime ) );
+
+                origin.Ui.panel(
+                    origin.env.panels.currentTime,
+                    currentTimeReadable
+                );
+
+                //origin.Ui.state( origin.env.preloader, 'on', '' );
+            }
+
+            origin.env.sliders.progress.buffered();
+            origin.env.errorRecoveryAttempts = 0;
+
+            origin.Callback.onTime(currentTimeReadable, origin.env.api.currentTime);
+        };
+
+
+
+
+        // Video position
+        origin.env.api.onseeked = function(e)
+        {
+            //origin.Ui.state( origin.env.preloader, 'on', '' );
+        };
+
+
+
+
+        // Video position
+        origin.env.api.onseeking = function(e)
+        {
+            origin.Ui.state( origin.env.preloader, '', 'on' );
+        };
+
+
+
+
+        // Volume
+        origin.env.api.onvolumechange = function(e)
+        {
+            if(origin.env.api.muted === false)
+            {
+                origin.env.sliders.volume.update( origin.env.api.volume*100 );
+            }else{
+                origin.env.sliders.volume.update( 0 );
+            }
+        };
+
+
+
+
+        // Set video duration
+        origin.env.api.ondurationchange = function(e)
+        {
+            origin.Controls.press('setDuration', {
+                'duration': origin.env.api.duration
+            });
+        };
+
+
+
+
+        origin.env.api.onended = function(e)
+        {
+            origin.Controls.press('stop');
+            origin.Suggest.run();
+        };
+
+
+
+
+        $(window).on('resize', function()
+        {
+            origin.Support.resize();
+        });
+    };
+
+
+    // Specific events, error handlers
+    self.hlsLibEvents = function()
+    {
+        if( origin.env.mode == 'hls' )
+        {
+            // API READY
+            origin.env.hls.on(origin.env.context.Hls.Events.MEDIA_ATTACHED, function(event, data)
+            {
+                origin.env.hls.loadSource(origin.options.source.file);
+            });
+
+            origin.env.hls.on(origin.env.context.Hls.Events.MANIFEST_PARSED, function(event, data)
+            {
+                bitratesVideo = origin.Switcher.getBitrateList('video');
+                tracksAudio = origin.Switcher.getTracks('audio');
+
+                origin.debug({
+                    'Stream is initialized and ready': event,
+                    'Video bitrate list': bitratesVideo,
+                    //'Audio bitrate list': origin.Switcher.getBitrateList('audio'),
+                    'Audio track list': tracksAudio,
+                    'ABR video bitrate': origin.Switcher.getAutoBitrate('video'),
+                    //'ABR audio bitrate': origin.Switcher.getAutoBitrate('audio'),
+                    'Video bitrate': origin.Switcher.getBitrate('video'),
+                    //'Audio bitrate': origin.Switcher.getBitrate('audio'),
+                });
+
+
+                if( typeof bitratesVideo === 'object' && bitratesVideo && bitratesVideo.length > 1 )
+                {
+                    origin.Ui.state( origin.env.menus.video, '', 'on');
+                    active = origin.Switcher.getAutoBitrate('video') === true ? -1: origin.Switcher.getBitrate('video');
+                    menuItems = origin.Switcher.prepareBitrateMenu( bitratesVideo, [{active: active, value: -1, title: origin.options.i18n.auto}], active );
+                    origin.Ui.menu( origin.env.menus.video, menuItems );
+                    origin.Ui.menuDisabled( origin.env.menus.video, false );
+                }else{
+                    origin.Ui.state( origin.env.menus.video, 'on', '');
+                    origin.Ui.menuDisabled( origin.env.menus.video, true );
+                }
+
+                // Audio tracks
+                if( typeof tracksAudio === 'object' && tracksAudio && tracksAudio.length >  0 )
+                {
+                    origin.Ui.state( origin.env.menus.audioTracks, '', 'on');
+                    active = origin.env.audioTrackActive;
+                    menuItems = origin.Switcher.prepareTrackMenu( tracksAudio, [], active );
+                    origin.Ui.menu( origin.env.menus.audioTracks, menuItems );
+                    origin.Ui.menuDisabled( origin.env.menus.audioTracks, false );
+                }else{
+                    origin.Ui.state( origin.env.menus.audioTracks, 'on', '');
+                    origin.Ui.menuDisabled( origin.env.menus.audioTracks, true );
+                }
+
+                if( origin.env.continuePlayback === true && origin.env.started === true )
+                {
+                    origin.env.api.play();
+                }
+            });
+
+
+            origin.env.hls.on(origin.env.context.Hls.Events.LEVEL_LOADED, function(event, data)
+            {
+                tracksAudio = origin.Switcher.getTracks('audio');
+                // Audio tracks
+                if( typeof tracksAudio === 'object' && tracksAudio && tracksAudio.length > 1 )
+                {
+                    origin.Ui.state( origin.env.menus.audioTracks, '', 'on');
+                    active = origin.env.audioTrackActive;
+                    menuItems = origin.Switcher.prepareTrackMenu( tracksAudio, [], active );
+                    origin.Ui.menu( origin.env.menus.audioTracks, menuItems );
+                    origin.Ui.menuDisabled( origin.env.menus.audioTracks, false );
+                }else{
+                    origin.Ui.state( origin.env.menus.audioTracks, 'on', '');
+                    origin.Ui.menuDisabled( origin.env.menus.audioTracks, true );
+                }
+
+            });
+
+            // Error handling
+            origin.env.hls.on(origin.env.context.Hls.Events.ERROR, function(event, data)
+            {
+                origin.debug({
+                    'Recovering Hls Error': data.details,
+                    'ErrorType': data.type,
+                    'ErrorFatal': data.fatal,
+                    'Data': data,
+                    'Attempts': origin.env.errorRecoveryAttempts,
+                    'Attempt limit': origin.env.errorRecoveryAttemptLimit,
+                }, true);
+
+                if( origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit )
+                {
+                    if( data.fatal === true )
+                    {
+                        // Bring to life again
+                        switch (data.type)
+                        {
+                            case origin.env.context.Hls.ErrorTypes.NETWORK_ERROR:
+                                // try to recover network error
+
+                                origin.env.hls.startLoad();
+
+                            break; case origin.env.context.Hls.ErrorTypes.MEDIA_ERROR:
+
+                                if( origin.env.errorRecoveryAttempts > origin.env.errorRecoveryAttemptLimit/10 )
+                                {
+                                    origin.env.hls.swapAudioCodec();
+                                }
+
+                                // try to recover media error
+                                origin.env.hls.recoverMediaError();
+                            break; default:
+
+                                // try to recover other errors
+                                origin.env.hls.startLoad();
+                        }
+                    }
+
+                    origin.env.errorRecoveryAttempts++;
+
+                }else{
+
+                    origin.Source.recover();
+                }
+            });
+        };
+    };
+
+    // Specific events, error handlers
+    self.dashLibEvents = function()
+    {
+        if( origin.env.mode == 'dash' )
+        {
+            Object.keys(origin.env.context.dashjs.MediaPlayer.events).map( function(eventName, index)
+            {
+                origin.env.dash.on(origin.env.context.dashjs.MediaPlayer.events[eventName], function(event)
+                {
+                    switch(event.type)
+                    {
+                        case origin.env.context.dashjs.MediaPlayer.events.ERROR:
+
+                            origin.debug({
+                                'Recovering Dash Error': eventName,
+                                'ErrorType': event.type,
+                                'Error': event.error,
+                                'Data': event,
+                                'Attempts': origin.env.errorRecoveryAttempts,
+                                'Attempt limit': origin.env.errorRecoveryAttemptLimit,
+                            }, true);
+
+                            if( event.error === 'download' )
+                            {
+                                origin.Source.recover(true);
+                            }else{
+                                origin.Source.recover();
+                            }
+
+                        break;
+                        case origin.env.context.dashjs.MediaPlayer.events.PLAYBACK_ERROR:
+                        case origin.env.context.dashjs.MediaPlayer.events.BUFFER_EMPTY:
+                        case origin.env.context.dashjs.MediaPlayer.events.FRAGMENT_LOADING_ABANDONED:
+
+                            origin.debug({
+                                'Recovering Dash Error': eventName,
+                                'ErrorType': event.type,
+                                'Data': event,
+                                'Attempts': origin.env.errorRecoveryAttempts,
+                                'Attempt limit': origin.env.errorRecoveryAttemptLimit,
+                            }, true);
+
+                            origin.Source.recover();
+
+                        break;
+                        case origin.env.context.dashjs.MediaPlayer.events.MANIFEST_LOADED:
+
+                            origin.debug({
+                                'Dash Manifest loaded': event
+                            });
+
+                            origin.env.dashInitialized = true;
+
+                            if( origin.env.continuePlayback === true && origin.env.started === true )
+                            {
+                                origin.env.api.play();
+                            }
+
+                        break;
+                        case origin.env.context.dashjs.MediaPlayer.events.STREAM_INITIALIZED:
+
+                            bitratesVideo = origin.Switcher.getBitrateList('video');
+                            bitratesAudio = origin.Switcher.getBitrateList('audio');
+                            tracksAudio = origin.Switcher.getTracks('audio');
+
+                            origin.debug({
+                                'Stream is initialized and ready': event,
+                                'Video bitrate list': origin.Switcher.getBitrateList('video'),
+                                'Audio bitrate list': origin.Switcher.getBitrateList('audio'),
+                                'Audio track list': origin.Switcher.getTracks('audio'),
+                                'ABR video bitrate': origin.Switcher.getAutoBitrate('video'),
+                                'ABR audio bitrate': origin.Switcher.getAutoBitrate('audio'),
+                                'Video bitrate': origin.Switcher.getBitrate('video'),
+                                'Audio bitrate': origin.Switcher.getBitrate('audio'),
+                            });
+
+                            // Video bitrates
+                            origin.env.dash.setFastSwitchEnabled( true );
+
+                            if( typeof bitratesVideo === 'object' && bitratesVideo && bitratesVideo.length > 1 )
+                            {
+                                origin.Ui.state( origin.env.menus.video, '', 'on');
+                                active = origin.Switcher.getAutoBitrate('video') === true ? -1: origin.Switcher.getBitrate('video');
+                                menuItems = origin.Switcher.prepareBitrateMenu( bitratesVideo, [{active: active, value: -1, title: origin.options.i18n.auto}], active );
+                                origin.Ui.menu( origin.env.menus.video, menuItems );
+                                origin.Ui.menuDisabled( origin.env.menus.video, false );
+                            }else{
+                                origin.Ui.state( origin.env.menus.video, 'on', '');
+                                origin.Ui.menuDisabled( origin.env.menus.video, true );
+                            }
+
+                            // Audio bitrates
+                            if( typeof bitratesAudio === 'object' && bitratesAudio && bitratesAudio.length > 1 )
+                            {
+                                origin.Ui.state( origin.env.menus.audio, '', 'on');
+                                active = origin.Switcher.getAutoBitrate('audio') === true ? -1: origin.Switcher.getBitrate('audio');
+                                menuItems = origin.Switcher.prepareBitrateMenu( bitratesAudio, [], active );
+                                origin.Ui.menu( origin.env.menus.audio, menuItems );
+                                origin.Ui.menuDisabled( origin.env.menus.audio, false );
+                            }else{
+                                origin.Ui.state( origin.env.menus.audio, 'on', '');
+                                origin.Ui.menuDisabled( origin.env.menus.audio, true );
+                            }
+
+                            // Audio tracks
+                            if( typeof tracksAudio === 'object' && tracksAudio && tracksAudio.length > 1 )
+                            {
+                                origin.Ui.state( origin.env.menus.audioTracks, '', 'on');
+                                active = origin.env.audioTrackActive;
+                                menuItems = origin.Switcher.prepareTrackMenu( tracksAudio, [], active );
+                                origin.Ui.menu( origin.env.menus.audioTracks, menuItems );
+                                origin.Ui.menuDisabled( origin.env.menus.audioTracks, false );
+                            }else{
+                                origin.Ui.state( origin.env.menus.audioTracks, 'on', '');
+                                origin.Ui.menuDisabled( origin.env.menus.audioTracks, true );
+                            }
+
+                        break;
+                        case origin.env.context.dashjs.MediaPlayer.events.TEXT_TRACK_ADDED:
+
+                            // Subtitle tracks
+                            tracksText = origin.Switcher.getTracks('text');
+
+                            origin.debug({
+                                'Text track list': origin.Switcher.getTracks('text'),
+                            });
+
+
+                            if( typeof tracksText === 'object' && tracksText && tracksText.length > 0 )
+                            {
+                                origin.Ui.state( origin.env.menus.subtitles, '', 'on');
+                                active = origin.env.textTrackActive;
+                                menuItems = origin.Switcher.prepareTrackMenu( tracksText, origin.options.i18n.textItems, active );
+                                origin.Ui.menu( origin.env.menus.subtitles, menuItems );
+                                origin.Ui.menuDisabled( origin.env.menus.subtitles, false );
+                            }else{
+                                origin.Ui.state( origin.env.menus.subtitles, 'on', '');
+                                origin.Ui.menuDisabled( origin.env.menus.subtitles, true );
+                            }
+
+                        break;
+                        default:
+/*
+                            origin.debug({
+                                'dashjsEvent': '----------IGNORE---------'+event.type
+                            });
+*/
+                    }
+                });
+            });
+        }
+    };
+};
+
+/* *****************************************
+* JuliaPlayer HTML5 player
+* Fullscreen
+* player fullscreen behavior
+****************************************** */
+JuliaPlayer.prototype._Fullscreen = function(origin)
+{
+    var self = this;
+
+    self.on = function()
+    {
+        if( origin.env.fullscreenFrame.requestFullscreen )
+        {
+            origin.env.fullscreenFrame.requestFullscreen();
+        }else if( origin.env.fullscreenFrame.msRequestFullscreen )
+        {
+            origin.env.fullscreenFrame.msRequestFullscreen();
+        }else if( origin.env.fullscreenFrame.mozRequestFullScreen )
+        {
+            origin.env.fullscreenFrame.mozRequestFullScreen();
+        }else if( origin.env.fullscreenFrame.webkitRequestFullscreen )
+        {
+            origin.env.fullscreenFrame.webkitRequestFullscreen();
+        }else{
+            origin.debug({
+                'Fullscreen': 'not supported'
+            });
+        }
+    };
+
+
+
+
+    self.off = function()
+    {
+        if( document.exitFullscreen )
+        {
+            document.exitFullscreen();
+        }else if( document.msExitFullscreen )
+        {
+            document.msExitFullscreen();
+        }else if( document.mozCancelFullScreen )
+        {
+            document.mozCancelFullScreen();
+        }else if( document.webkitExitFullscreen )
+        {
+            document.webkitExitFullscreen();
+        }
+    };
+
+
+
+    self.landscapeLock = function(lock)
+    {
+        if( origin.Support.isMobile() )
+        {
+            if( screen.orientation ){ sor = screen.orientation; }
+            if( screen.msLockOrientation ){ sor = screen.msLockOrientation; }
+            if( screen.mozLockOrientation ){ sor = screen.mozLockOrientation; }
+
+            if( typeof sor !== 'undefined' && sor.lock && typeof sor.lock === 'function' )
+            {
+                if( lock === true )
+                {
+                    sor.lock('landscape-primary').catch(function(err)
+                    {
+                        origin.debug({
+                            'Landscape lock error: ': err
+                        }, true);
+                    });
+                }else if( sor.unlock && typeof sor.unlock === 'function' ){
+                    sor.unlock();
+                }
+            }
+        }
+    };
+
+
+
+    self.reset = function()
+    {
+        $(document).off('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange');
+
+        // Fullscreen change event handler
+        $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
+        {
+            if(!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement)
+            {
+                origin.Ui.state( origin.env.instance, 'julia-fullscreen-on', 'julia-fullscreen-off' );
+                origin.Ui.state( origin.env.buttons.fullscreen, 'off', 'on' );
+                origin.Ui.icon( origin.env.buttons.fullscreen, 'julia-fullscreen-exit', 'julia-fullscreen' );
+
+                self.landscapeLock(false);
+
+                origin.debug({
+                    'Fullscreen off' : '#julia-player-'+origin.env.ID
+                });
+
+            }else{
+
+                origin.Ui.state( origin.env.instance, 'julia-fullscreen-off', 'julia-fullscreen-on' );
+                origin.Ui.state( origin.env.buttons.fullscreen, 'on', 'off' );
+                origin.Ui.icon( origin.env.buttons.fullscreen, 'julia-fullscreen', 'julia-fullscreen-exit' );
+
+                self.landscapeLock(true);
+
+                origin.debug({
+                    'Fullscreen on' : '#julia-player-'+origin.env.ID
+                });
+            }
+
+            origin.Support.resize();
+        });
+    };
+};
+
+/* *****************************************
+* JuliaPlayer HTML5 player
+* Persistent settings
+* options are stored in cookies
+****************************************** */
+JuliaPlayer.prototype._Persist = function(origin)
+{
+    var self = this;
+
+    self.set = function(name, value, days)
+    {
+        dateObj = new Date();
+        dateObj.setTime(dateObj.getTime() + (days*24*60*60*1000));
+        var expires = 'expires=' + dateObj.toUTCString();
+        document.cookie = name + '=' + value + '; ' + expires + '; path=/';
+    };
+
+
+
+
+    self.get = function(name)
+    {
+        var name = name + '=';
+        var ca = document.cookie.split(';');
+
+        for(var i=0; i<ca.length; i++)
+        {
+            var c = ca[i];
+
+            while(c.charAt(0)==' ')
+            {
+                c = c.substring(1);
+            }
+
+            if(c.indexOf(name) == 0)
+            {
+                return c.substring(name.length,c.length);
+            }
+        }
+
+        return undefined;
+    };
 };
 
 /* *****************************************
 * JuliaPlayer HTML5 media player
-* Media element API
-* For now, only video is supported
+* Slider controller
+* Progress and volume widget library
 ****************************************** */
-JuliaPlayer.prototype._Api = function(origin)
+JuliaPlayer.prototype._Slider = function(origin, options)
+{
+    var self = this,
+        leftButtonDown = false,
+        ua = navigator.userAgent,
+        isChrome = /chrome/i.exec(ua),
+        isAndroid = /android/i.exec(ua),
+        hasTouch = 'ontouchstart' in window && !(isChrome && !isAndroid),
+
+        _normalize = function(percent)
+        {
+            if( percent > 100 ){ return 100; }
+            if( percent < 0 ){ return 0; }
+            return ( Math.round(percent*100) ) / 100;
+        },
+
+        _posToPercent = function(pos)
+        {
+            return _normalize( pos / (self.track.innerWidth()/100) );
+        },
+
+        _position = function(e)
+        {
+            var pos = hasTouch === true && e.originalEvent.touches ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
+            percent = _posToPercent( pos );
+            return percent;
+        },
+
+        _pixels = function(e)
+        {
+            var pos = hasTouch === true && e.originalEvent.touches ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
+            return pos;
+        },
+
+        model = $('<div class="julia-slider">'
+            +'<div class="julia-slider-track" data-julia-slider-component="track"></div>'
+            +'<div class="julia-slider-track-visible" data-julia-slider-component="track-visible"></div>'
+            +'<div class="julia-slider-handle" data-julia-slider-component="handle"></div>'
+            +'<div class="julia-slider-fill" data-julia-slider-component="fill"></div>'
+        +'</div>');
+
+        self.model = model.clone();
+
+        self.track = self.model.find('[data-julia-slider-component="track"]');
+        self.trackVisible = self.model.find('[data-julia-slider-component="track-visible"]');
+        self.handle = self.model.find('[data-julia-slider-component="handle"]');
+        self.fill = self.model.find('[data-julia-slider-component="fill"]');
+
+        self.options = {
+            element: {},
+            value: 0,
+            event: '',
+            overcall: function(){
+                return;
+            }
+        };
+
+    // Extend custom options
+    $.extend(true, self.options, options);
+
+    self.elem = self.options.element;
+
+    self.value = self.options.value;
+
+
+    // Public methods & props
+    self.init = function()
+    {
+        if( ['input'].lastIndexOf( self.elem.prop('tagName').toLowerCase() ) > -1 )
+        {
+            self.value = _normalize( self.elem.val() );
+        }
+
+        self.elem.after( self.model );
+        self.elem.hide();
+
+        self.slide( self.value, true );
+    };
+
+
+    self.update = function( percent )
+    {
+        if( leftButtonDown === false )
+        {
+            self.slide( percent, true );
+        }
+    };
+
+
+    self.buffered = function()
+    {
+        var b = origin.env.api.buffered;
+        self.model.find('.julia-buffer-sequence').remove();
+
+        for( var i = 0; i < b.length; i++ )
+        {
+            var sequenceModel = self.model.find('.julia-buffer-sequence-'+i);
+            _percent1 = _normalize( origin.Timecode.toPercents( b.start( i ) ) );
+            _percent2 = _normalize( origin.Timecode.toPercents( b.end( i ) ) );
+            var pos1 = ( self.track.innerWidth() / 100 ) * _percent1;
+            var pos2 = ( self.track.innerWidth() / 100 ) * _percent2;
+
+            if( sequenceModel.length == 0 )
+            {
+                var sequenceModel = $('<div class="julia-buffer-sequence julia-buffer-sequence-'+i+'"></div>');
+                self.model.append( sequenceModel );
+            }
+
+            sequenceModel.css({
+                'left': pos1 + 'px',
+                'width': ( pos2 - pos1 ) + self.handle.innerWidth() + 'px'
+            });
+        }
+    };
+
+
+    self.slide = function( percent, eventPrevent )
+    {
+        if( typeof eventPrevent === 'undefined' )
+        {
+            eventPrevent = false;
+        }
+
+        self.value = _normalize( percent ) ;
+        var pos = ( self.track.innerWidth() / 100 ) * self.value;
+        self.handle.css({'left': pos+'px'});
+        self.fill.css({'width': pos+2+'px'});
+
+        self.respond( percent, eventPrevent );
+    };
+
+
+    self.respond = function( percent, eventPrevent )
+    {
+        if( typeof eventPrevent === 'undefined' )
+        {
+            eventPrevent = false;
+        }
+
+        if( ['input'].lastIndexOf( self.elem.prop('tagName').toLowerCase() ) > -1 )
+        {
+        	self.elem.val( self.value );
+
+            if( eventPrevent === false )
+            {
+                origin.event( 'julia.'+self.options.event, origin.env.instance, {
+                    'percent': percent
+                } );
+            }
+        }
+
+        // Fix final handle position on track
+        self.track.innerWidth( self.model.innerWidth() - self.handle.innerWidth() );
+    }
+
+
+    self.getValue = function()
+    {
+    	return self.value;
+    };
+
+
+    self.sliding = function()
+    {
+    	return leftButtonDown;
+    };
+
+
+    // Mouse & touch events
+    self.fill.on('click ', function(e)
+    {
+        self.slide( _position(e), false );
+    });
+
+
+    self.track.on('click', function(e)
+    {
+        self.slide( _position(e), false );
+    });
+
+    self.trackVisible.on('click', function(e)
+    {
+        self.slide( _position(e), false );
+    });
+
+
+    self.model.on('click mouseover mousemove mouseout', function(e)
+    {
+        if(e.type == 'click')
+        {
+            self.slide( _position(e), false );
+        }
+
+        if( ( e.type == 'mouseover' || e.type == 'mousemove' ) && self.options.event == 'progress-change' && origin.env.started === true )
+        {
+            pos = _position(e);
+            pix = _pixels(e);
+
+            if( origin.Support.isMobile() === false && origin.options.source.live === false && origin.options.thumbs === true )
+            {
+                origin.Thumbs.thumb( origin.Timecode.toSeconds( pos ) );
+            }
+            origin.Ui.state( origin.env.labels.goto, '', 'on' );
+            origin.Ui.panel( origin.env.labels.goto, origin.Timecode.toHuman( origin.Timecode.toSeconds( pos ) ) );
+
+            left = pix+'px';
+            border = (origin.env.labels.goto.innerWidth()/2);
+
+            if( pix < border )
+            {
+                left = (border + 10) + 'px';
+            }
+
+            if( pix > self.model.innerWidth() - border )
+            {
+                left = ( self.model.innerWidth() - border + 10 ) + 'px';
+            }
+
+            origin.env.labels.goto.css({
+                'left': left,
+                'margin-left': -(origin.env.labels.goto.innerWidth()/2)+'px'
+            });
+        }
+
+        if( e.type == 'mouseout' && self.options.event == 'progress-change' )
+        {
+            origin.Ui.state( origin.env.labels.goto, 'on', '' );
+        }
+    });
+
+
+    self.model.on('mousedown touchstart', function(e)
+    {
+        // Left mouse button activate
+        if(e.type == 'touchstart')
+        {
+            self.slide( _position(e), false );
+        }
+
+        leftButtonDown = true;
+    });
+
+
+    $(document).on('mouseup touchend', function(e)
+    {
+        // Left mouse button deactivate
+        leftButtonDown = false;
+    });
+
+
+    $(document).on('mousemove touchmove', function(e)
+    {
+        if(leftButtonDown === true)
+        {
+            self.slide( _position(e) );
+        }
+    });
+
+    return self;
+};
+
+/* *****************************************
+* JuliaPlayer HTML5 player
+* Create api source
+****************************************** */
+JuliaPlayer.prototype._Source = function(origin)
+{
+    var self = this;
+    var source;
+
+    self.set = function(_source)
+    {
+        origin.env.errorRecoveryAttempts = 0;
+
+        origin.Subtitles.textTracksCleaner();
+
+        origin.Ui.reset();
+        origin.Ui.state( origin.env.preloader, '', 'on' );
+
+        origin.env.continuePlayback = false;
+
+        if( typeof window.__juliaPlayerForceStopAfterFatalError === 'boolean' && window.__juliaPlayerForceStopAfterFatalError === true )
+        {
+            origin.Controls.press('stop');
+            window.__juliaPlayerForceStopAfterFatalError = false;
+        }
+
+        if( origin.env.api.paused === false )
+        {
+            origin.env.api.pause();
+            origin.env.continuePlayback = true;
+        };
+
+        origin.env.started = false;
+
+        source = typeof origin.options.source === 'object' ? origin.options.source: {};
+        _source = typeof _source === 'object' ? _source: {};
+
+        source.file = Object.keys(_source).indexOf('file') > -1 ? _source.file: source.file;
+        source.poster = Object.keys(_source).indexOf('poster') > -1 ? _source.poster: source.poster;
+        source.mode = Object.keys(_source).indexOf('mode') > -1 ? _source.mode: source.mode;
+        source.title = Object.keys(_source).indexOf('title') > -1 ? _source.title: source.title;
+        source.live = Object.keys(_source).indexOf('live') > -1 ? _source.live: source.live;
+
+        source.live = typeof source.live === 'undefined' ? false: source.live;
+        source.mode = typeof source.mode === 'undefined' ? 'legacy': source.mode;
+
+        if( origin.env.context.Hls.isSupported() !== true )
+        {
+            source.mode = 'hlsnative';
+        }
+
+        origin.env.mode = source.mode;
+
+        origin.Ui.panel(
+            origin.env.panels.title,
+            source.title
+        );
+
+        origin.debug({
+            'Api file': source.file,
+            'Api poster': source.poster,
+            'Api mode': source.mode
+        });
+
+        origin.env.api.poster = source.poster;
+
+        //origin.Support.canPlayMedia();
+
+        if( source.live === true )
+        {
+            origin.Ui.state( origin.env.toolbarBottom, '', 'live' );
+        }else{
+            origin.Ui.state( origin.env.toolbarBottom, 'live', '' );
+        }
+
+        if( origin.options.muted === true )
+        {
+            origin.Controls.press('sound-off');
+        }else{
+            origin.Controls.press('sound-on');
+        };
+
+        origin.Events.native();
+
+        $(document)
+        .off('julia.api-mode', '#julia-'+origin.env.ID)
+        .on('julia.api-mode', '#julia-'+origin.env.ID, function(e)
+        {
+            if( ( origin.env.continuePlayback === true || origin.options.autoplay === true ) && ( origin.env.api.paused === true || origin.env.api.ended === true ) && origin.env.started === false )
+            {
+                origin.debug({
+                    'Trying to load source': origin.env.api.src,
+                });
+
+                origin.Source.load();
+            }
+        });
+
+        origin.Source.mode();
+    };
+
+
+    self.mode = function()
+    {
+
+        try {
+
+            if(origin.env.dash !== false && origin.env.dashInitialized === true)
+            {
+                origin.env.dash.reset();
+                origin.env.dash = false;
+            };
+
+            if(origin.env.hls !== false && origin.env.hlsInitialized === true)
+            {
+                origin.env.hls.destroy();
+                origin.env.hls = false;
+            };
+
+        }catch(err)
+        {
+            origin.debug({ 'Error': err }, true);
+        }
+
+        switch(source.mode)
+        {
+            case 'dash':
+                origin.env.dash = origin.env.context.dashjs.MediaPlayer().create();
+            break;
+            case 'hls':
+                origin.env.hls = new origin.env.context.Hls(origin.options.hlsConfig);
+            break;
+            default:
+        };
+
+        origin.event('julia.api-mode', origin.env.instance);
+    };
+
+
+    self.load = function()
+    {
+        origin.env.continuePlayback = true;
+        origin.Ui.state( origin.env.preloader, '', 'on' );
+
+        switch(source.mode)
+        {
+            case 'dash':
+
+                try {
+                    origin.env.dash.initialize(origin.env.api, source.file, origin.options.autoplay);
+                    origin.env.dash.getDebug().setLogToBrowserConsole(origin.options.playbackDebug);
+                    origin.Events.dashLibEvents();
+
+                    origin.event('julia.api-load', origin.env.instance);
+
+                }catch(err)
+                {
+                    origin.debug({ 'Error': err }, true);
+                    self.recover(true);
+                }
+
+            break;
+            case 'hls':
+
+                try {
+                    origin.env.hls.autoLevelCapping = -1;
+                    origin.env.hls.attachMedia(origin.env.api);
+                    origin.Events.hlsLibEvents();
+                    origin.env.hlsInitialized = true;
+
+                    origin.event('julia.api-load', origin.env.instance);
+                }catch(err)
+                {
+                    origin.debug({ 'Error': err }, true);
+                    self.recover(true);
+                }
+
+            break;
+            default:
+
+                try {
+                    origin.env.api.src = source.file;
+                    origin.env.api.load();
+
+                    origin.event('julia.api-load', origin.env.instance);
+                }catch(err)
+                {
+                    origin.debug({ 'Error': err }, true);
+                    self.recover(true);
+                }
+        };
+
+        if( origin.env.started === false || origin.options.autoplay === true )
+        {
+            self.firstPlay();
+        }
+    };
+
+
+    self.recover = function(force)
+    {
+        if( origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || ( typeof force !== 'undefined' && force === true ) )
+        {
+            origin.Controls.press('stop');
+            origin.Source.set();
+        }else{
+            origin.env.errorRecoveryAttempts++;
+        }
+    }
+
+
+    self.firstPlay = function()
+    {
+        if( origin.Support.isMobile() === false )
+        {
+            setTimeout( function()
+            {
+                if( origin.env.api.readyState > 2 )
+                {
+                    origin.env.api.play();
+                }else{
+                    self.firstPlay();
+                }
+
+            }, 300 );
+
+        }else{
+
+            setTimeout( function()
+            {
+                origin.env.api.play();
+
+                setTimeout( function()
+                {
+                    if( origin.env.api.readyState < 2 && origin.env.api.paused === true )
+                    {
+                        origin.Ui.state( origin.env.buttons.play, 'pause', 'play' );
+                        origin.Ui.icon( origin.env.buttons.play, 'julia-pause', 'julia-play' );
+                        origin.env.buttons.bigPlay.show();
+                    }
+                }, 300 );
+            }, 300);
+        }
+    };
+};
+
+/* *****************************************
+* JuliaPlayer HTML5 player
+* suggest playlist engine
+****************************************** */
+JuliaPlayer.prototype._Suggest = function(origin)
+{
+    var self = this;
+
+
+
+
+    self.run = function()
+    {
+        origin.env.suggest.html('');
+        origin.env.suggestClicked = false;
+        origin.env.buttons.bigPlay.hide();
+
+        if(origin.options.suggest.length > 0)
+        {
+            x = 0;
+            for(var i in origin.options.suggest)
+            {
+                if(x < origin.options.suggestLimit && origin.options.suggest[i].played === false)
+                {
+                    live = !!origin.options.suggest[i].live && origin.options.suggest[i].live === true ? true: false;
+                    file = !!origin.options.suggest[i].file ? origin.options.suggest[i].file: '';
+                    poster = !!origin.options.suggest[i].poster ? origin.options.suggest[i].poster: '';
+                    title = !!origin.options.suggest[i].title ? origin.options.suggest[i].title: '';
+                    mode = !!origin.options.suggest[i].mode ? origin.options.suggest[i].mode: 'legacy';
+                    posterImage = poster.length>0 ? '<img src="'+poster+'" width="100%" height="100%">': '';
+
+                    suggestItemWidget = $('<div class="julia-suggest-item" data-item-poster="'+poster+'" data-item-file="'+origin.options.suggest[i].file+'" data-mode="'+mode+'" data-item-title="'+origin.options.suggest[i].title+'" data-index="'+i+'" data-item-mode="'+origin.options.suggest[i].mode+'" data-item-live="'+origin.options.suggest[i].live+'">'
+                            + posterImage
+                            +'<div class="julia-suggest-item-title">'+origin.options.suggest[i].title+'</div>'
+                        +'</div>');
+
+                    suggestItemWidget.on('click', function(e)
+                    {
+                        origin.Ui.state( origin.env.preloader, '', 'on' );
+
+                        if(origin.options.onSuggest !== false)
+                        {
+                            origin.Callback.fn(origin.options.onSuggest, origin.options.suggest[i]);
+                        }
+
+                        origin.Thumbs.shadowApi = false;
+
+                        origin.env.suggestClicked = true;
+                        origin.options.autoplay = true;
+                        origin.options.source = {
+                            file: $(this).data('item-file'),
+                            poster: $(this).data('item-poster'),
+                            title: $(this).data('item-title'),
+                            mode: $(this).data('item-mode'),
+                            live: $(this).data('item-live'),
+                        };
+                        origin.Source.set();
+
+                        origin.debug({
+                            suggestRemoveIndex: $(this).data('index'),
+                            suggestRemove: $(this).data('item-file')
+                        });
+
+                        origin.options.suggest[$(this).data('index')].played = true;
+                        origin.Ui.state(origin.env.suggest, 'on', '');
+                        //origin.Controls.press('play');
+                    });
+
+                    origin.debug({
+                        'Suggest item' : suggestItemWidget
+                    });
+
+                    origin.env.suggest.append(suggestItemWidget);
+                    x++;
+                }
+            };
+
+            if(x > 0)
+            {
+                if(origin.options.suggestTimeout > 0)
+                {
+                    origin.env.suggestTimer = setTimeout( function()
+                    {
+                        if(origin.env.suggestClicked === false)
+                        {
+                            origin.env.suggest.find('div.julia-suggest-item:first').click();
+                        }
+                    }, origin.options.suggestTimeout);
+                }
+
+                origin.Ui.state(origin.env.suggest, '', 'on');
+            }
+
+        }else{
+            origin.Fullscreen.off();
+        }
+
+        origin.debug({
+            'Suggest' : 'raised'+ origin.options.suggest.length
+        });
+    };
+};
+
+/* *****************************************
+* JuliaPlayer HTML5 player
+* Suppport utilities
+****************************************** */
+JuliaPlayer.prototype._Support = function(origin)
+{
+    var self = this;
+
+
+    self.aspect = function(w,h)
+    {
+        return w>0 && h>0 ? h/w: 0;
+    };
+
+
+    self.bitrate = function(bites)
+    {
+        var i = -1;
+        var biteUnits = ['kbps', 'Mbps', 'Gbps'];
+        do {
+            bites = bites / 1000;
+            i++;
+        } while (bites > 1000);
+
+        return Math.max(bites, 0.1).toFixed(1) + biteUnits[i];
+    };
+
+
+    self.forceReadyState = function()
+    {
+        if( /Firefox/i.test(navigator.userAgent) )
+        {
+            return true;
+        }
+
+        return false;
+    };
+
+
+    self.isMobile = function()
+    {
+        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile/i.test(navigator.userAgent) )
+        {
+            return true;
+        }
+
+        return false;
+    };
+
+
+    self.iOS = function()
+    {
+        if( /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream )
+        {
+            return true;
+        }
+
+        return false;
+    };
+
+
+    self.isVisible = function()
+    {
+        var rect = document.querySelector('#julia-'+origin.env.ID).getBoundingClientRect();
+        var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+        return !( rect.bottom < 0 || rect.top - viewHeight >= 0 );
+    };
+
+
+    self.canPlayMedia = function()
+    {
+        origin.env.canPlayMediaString = origin.env.mode == 'legacy' ? origin.env.api.canPlayType('video/mp4'): origin.env.api.canPlayType('application/vnd.apple.mpegURL');
+        origin.env.canPlayMedia = (origin.env.canPlayMediaString == 'probably' || origin.env.canPlayMediaString == 'maybe');
+        return origin.env.canPlayMedia;
+    };
+
+
+    self.resize = function()
+    {
+        // Player dimensions
+        defaultDim = origin.env.element.width() ? [origin.env.element.width(), origin.env.element.height()]: [origin.options.width, origin.options.height];
+        dimensions = origin.options.responsive === true ? self.getSize(): defaultDim;
+
+        origin.env.instance.width(dimensions[0]);
+        origin.env.instance.height(dimensions[1]);
+
+        origin.env.wrapper.width(dimensions[0]);
+        origin.env.wrapper.height(dimensions[1]);
+
+        origin.env.dimensions.width = dimensions[0];
+        origin.env.dimensions.height = dimensions[1];
+
+        // Small size fix, BAD BOY!
+        $('.julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-currentTime, .julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-duration')
+        .css({
+            'display': dimensions[0] < 360 ? 'none': 'block'
+        });
+
+        origin.env.api.setAttribute('width', '100%');
+        origin.env.api.setAttribute('height', '100%');
+    };
+
+
+    self.getSize = function()
+    {
+        // Fix video wrapped in inline block, can not get size properlym if inline element detected
+        var parentBlock = origin.env.element.parent().css('display').toLowerCase();
+        if( parentBlock == 'inline' )
+        {
+            origin.env.element.parent().css({'display': 'block'});
+        }
+
+        var parentWidth = origin.env.element.parent().width();
+
+        for( i in origin.options.dimensions )
+        {
+            dim = origin.options.dimensions[i];
+
+            if( parentWidth >= dim[0] )
+            {
+                dimensions = [dim[0],( dim[0]*self.aspect( dim[0], dim[1] ) )];
+                return dimensions;
+            }
+        }
+
+        dimensions = [parentWidth, (parentWidth*self.aspect( dim[0], dim[1] ))];
+
+        return dimensions;
+    };
+};
+
+/* *****************************************
+* JuliaPlayer HTML5 player
+* Subtitles
+* Play optional subtitles
+****************************************** */
+JuliaPlayer.prototype._Subtitles = function(origin)
+{
+    var self = this;
+
+    self.setTrack = function(track)
+    {
+        switch( origin.env.mode )
+        {
+            case 'dash':
+                return origin.env.dash.setTextTrack(track);
+            break; default:
+                //---------
+        };
+    }
+
+
+    self.textTracksCleaner = function()
+    {
+        var tracks = origin.env.api.textTracks;
+
+        if( tracks && tracks.length && tracks.length > 0 && tracks.length > 0 )
+        {
+            for( i in tracks )
+            {
+                track = tracks[i];
+
+                if( track && track.kind && ( track.kind == 'subtitles' || track.kind == 'captions' ) )
+                {
+                    track.mode = 'disabled';
+                }
+            }
+        }
+    };
+};
+
+/* *****************************************
+* JuliaPlayer HTML5 player
+* Switcher
+* detect and switch video and audio tracks
+****************************************** */
+JuliaPlayer.prototype._Switcher = function(origin)
+{
+    var self = this;
+
+
+    self.getBitrateList = function(type)
+    {
+        switch( origin.env.mode )
+        {
+            case 'dash':
+                return origin.env.dash.getBitrateInfoListFor(type);
+            break; case 'hls':
+                return origin.env.hls.levels;
+            break; default:
+                return [];
+        };
+    };
+
+
+    // Manual bitrate
+    self.getBitrate = function(type)
+    {
+        switch( origin.env.mode )
+        {
+            case 'dash':
+                return origin.env.dash.getQualityFor(type);
+            break; case 'hls':
+                return origin.env.hls.currentLevel;
+            break; default:
+                return 0;
+        };
+    };
+
+
+    self.setBitrate = function(type, value)
+    {
+        switch( origin.env.mode )
+        {
+            case 'dash':
+                origin.env.dash.setQualityFor(type, value);
+            break; case 'hls':
+                origin.env.hls.currentLevel = value;
+            break; default:
+                //---------
+        };
+    };
+
+
+    // Automatic bitrate
+    self.getAutoBitrate = function(type)
+    {
+        switch( origin.env.mode )
+        {
+            case 'dash':
+                return origin.env.dash.getAutoSwitchQualityFor(type);
+            break; case 'hls':
+                return origin.env.hls.autoLevelEnabled;
+            break; default:
+                return true;
+        };
+    };
+
+
+    self.setAutoBitrate = function(type, value)
+    {
+        switch( origin.env.mode )
+        {
+            case 'dash':
+                origin.env.dash.setAutoSwitchQualityFor(type, value);
+            break; case 'hls':
+
+                if(type == 'video' && value === true)
+                {
+                    origin.env.hls.currentLevel = -1;
+                }
+            break; default:
+                //---------
+        };
+    };
+
+
+    self.getTracks = function(type)
+    {
+        switch( origin.env.mode )
+        {
+            case 'dash':
+                return origin.env.dash.getTracksFor(type);
+            break; case 'hls':
+                return origin.env.hls.audioTracks;
+            break; default:
+                //---------
+        };
+    }
+
+
+    self.setTrack = function(type, track)
+    {
+        switch( origin.env.mode )
+        {
+            case 'dash':
+                t = origin.Switcher.getTracks(type);
+                origin.env.dash.setCurrentTrack(t[track]);
+            break; case 'hls':
+                origin.env.hls.audioTrack = track;
+            break; default:
+                //---------
+        };
+    }
+
+
+
+    self.prepareTrackMenu = function(data, menuData, active)
+    {
+        menuData = typeof menuData !== 'object' ? []: menuData;
+        active = typeof active !== 'number' ? 1: active;
+
+        switch( origin.env.mode )
+        {
+            case 'dash':
+                for( i in data )
+                {
+                    menuData.push({
+                        active: active,
+                        value: i,
+                        title: data[i].lang,
+                    });
+                }
+
+            break; case 'hls':
+
+                for( i in data )
+                {
+                    menuData.push({
+                        active: active,
+                        value: i,
+                        title: data[i].name ? data[i].name: data[i].lang,
+                    });
+                }
+
+            break; default:
+        }
+        return menuData;
+    }
+
+
+    self.prepareBitrateMenu = function(data, menuData, active)
+    {
+        menuData = typeof menuData !== 'object' ? []: menuData;
+        active = typeof active !== 'number' ? 0: active;
+
+        switch( origin.env.mode )
+        {
+            case 'dash':
+                for( i in data )
+                {
+                    menuData.push({
+                        active: active,
+                        value: data[i].qualityIndex,
+                        title: origin.Support.bitrate( data[i].bitrate ),
+                    });
+                }
+            break; case 'hls':
+
+                for( i in data )
+                {
+                    menuData.push({
+                        active: active,
+                        value: i,
+                        title: origin.Support.bitrate( data[i].bitrate ),
+                    });
+                }
+            break; default:
+        }
+
+        return menuData;
+    }
+};
+
+/* *****************************************
+* JuliaPlayer HTML5 media player
+* Timecode
+* utilities for timecode conversion
+****************************************** */
+JuliaPlayer.prototype._Timecode = function(origin)
+{
+    var self = this;
+
+    self.toPercents = function(currentTime)
+    {
+        duration = origin.env.api.duration;
+        if( isNaN(duration) || typeof Number(duration) !== 'number' )
+        {
+            duration = 0;
+        }
+
+        if( isNaN(currentTime) || typeof Number(currentTime) !== 'number' )
+        {
+            currentTime = 0;
+        }
+
+        return duration > 0 ? ( currentTime / duration ) * 100: 0;
+    },
+
+
+
+
+    self.toSeconds = function(percent)
+    {
+        duration = origin.env.api.duration;
+        if( isNaN(duration) || typeof Number(duration) !== 'number' )
+        {
+            duration = 0;
+        }
+
+        if( isNaN(percent) || typeof Number(percent) !== 'number' )
+        {
+            percent = 0;
+        }
+
+        return ( duration / 100 ) * percent;
+    },
+
+
+
+
+    self.toNum = function(human)
+    {
+        human = human.split(':');
+        human.reverse();
+        s = parseInt(human[0]);
+        m = human.length>1 ? parseInt(human[1]): 0;
+        h = human.length>2 ? parseInt(human[3]): 0;
+        t = s + m*60 + h*60*60;
+        return t;
+    },
+
+
+
+
+    self.toHuman = function(time)
+    {
+        if( isNaN(time) || typeof Number(time) !== 'number' )
+        {
+            time = 0;
+        }
+
+        time = time.toString().split('.');
+        s = time[0];
+        H = Math.floor(s/3600);
+        M = Math.floor( ( s - (H*3600) ) / 60 );
+        S = Math.floor( ( s - (H*3600) - (M*60) ) );
+
+        H = ('0'+H.toString()).slice(-2);
+        M = ('0'+M.toString()).slice(-2);
+        S = ('0'+S.toString()).slice(-2);
+
+        str = H>0 ? H+':'+M+':'+S: M+':'+S;
+
+        return str;
+    };
+};
+
+/* *****************************************
+* JuliaPlayer HTML5 player
+* Timeline thumbnails
+****************************************** */
+JuliaPlayer.prototype._Thumbs = function(origin)
 {
     var self = this;
 
 
     self.shadowApi = false;
-
     self.canvas = false;
     self.context = false;
     self.imageThumb = false;
-    self.dash = false;
-    self.hls = false;
     self.imageCache = {};
-
-    self.create = function()
-    {
-        $('#julia-api-'+origin.env.ID).remove();
-
-        apiElement = $('<video class="julia-video" id="julia-api-'+origin.env.ID+'" preload="auto" webkit-playsinline="true" playsinline="true"></video>');
-
-        origin.env.instance.prepend(apiElement);
-
-        origin.env.api = document.getElementById('julia-api-'+origin.env.ID);
-        origin.env.api.controls = false;
-        origin.env.apiOk = true;
-
-        if( typeof makeVideoPlayableInline === 'function' )
-        {
-            makeVideoPlayableInline(origin.env.api);
-        }
-
-        origin.Base.debug({
-            'apiId': origin.env.ID,
-            'api': origin.env.api,
-        });
-    };
-
-
-
-
-    self.source = function()
-    {
-        protoSource = origin.env.element.prop('src') ? origin.env.element.prop('src'): origin.env.element.find('source').prop('src');
-        origin.env.source = origin.options.source && origin.options.source.length>0 ? origin.options.source: protoSource;
-
-        origin.env.isHls = origin.env.source.indexOf('.m3u8') == -1 ? false: true;
-        if(origin.options.force === 'hls')
-        {
-            origin.env.isHls = true;
-        }
-
-        origin.env.isDash = origin.env.source.indexOf('.mpd') || origin.env.source.indexOf('.ism') == -1 ? false: true;
-        if(origin.options.force === 'dash')
-        {
-            origin.env.isDash = true;
-        }
-
-        origin.Base.debug({
-            'Api source isHls': origin.env.isHls,
-            'Api source isDash': origin.env.isDash,
-            'Source': origin.env.source
-        });
-
-        // Poster image
-        origin.env.model.poster = origin.options.poster && origin.options.poster.length>0 ? origin.options.poster: origin.env.element.prop('poster');
-        origin.Ui.posterSet();
-    };
-
-
-
-
-    // First play with some handlers
-    self.allowStart = function(e)
-    {
-        // Init actions
-        origin.Controls.press('setDuration', {
-            'duration': origin.Timecode.toHuman( origin.env.duration )
-        });
-
-        // Set mute if needed
-        if(origin.options.muted === true)
-        {
-            origin.Controls.press('sound-off');
-        }else{
-            origin.Controls.press('sound-on');
-
-            // Set initial volume
-            origin.Controls.press('volume', {
-                'volume': origin.options.volume
-            });
-        }
-
-        origin.Base.debug({
-            'eventType': e.type,
-            'duration': origin.env.api.duration,
-            'readyState': origin.env.api.readyState
-        });
-    };
-
-
-
-
-    // Bind can play by ready state / fake readyState
-    // Because of Firefox cannot bind canplaythrough event with HLS.js properly
-    self.canplaythrough = function()
-    {
-        if(origin.env.started === false)
-        {
-            // don't let mobile Firefox make decision about readyState, mobile Firefox lie!
-            if(origin.env.api.readyState>=3 || (origin.Support.isMobile() === true && origin.env.api.readyState>=2) )
-            {
-                self.allowStart({
-                    type: 'origin.Events.canplaythrough'
-                });
-
-            }else{
-                setTimeout( function()
-                {
-                    self.canplaythrough();
-                }, 100);
-            }
-        }
-    };
-
-
 
 
     // Create shadow api and grab thumbnail
@@ -608,7 +2731,7 @@ JuliaPlayer.prototype._Api = function(origin)
         {
             self.imageCache = {};
 
-            origin.env.model.labels.goto.css({
+            origin.env.labels.goto.css({
                 width: (dimensions[0]+10)+'px',
                 height: (40 + dimensions[1] + 10)+'px',
                 overflow: 'hidden'
@@ -623,8 +2746,8 @@ JuliaPlayer.prototype._Api = function(origin)
             self.imageThumb.style.width = width+'px';
             self.imageThumb.style.height = height+'px';
 
-            origin.env.model.labels.goto.find('img').remove();
-            origin.env.model.labels.goto.append(self.imageThumb);
+            origin.env.labels.goto.find('img').remove();
+            origin.env.labels.goto.append(self.imageThumb);
 
             //document.createElement('video');
             //console.log(origin.env.api);
@@ -638,41 +2761,41 @@ JuliaPlayer.prototype._Api = function(origin)
             // HLS library supported
             // and HLS requested
             // ************************
-            if(origin.env.useHlsLib === true)
+            if(origin.env.mode === 'hls')
             {
                 self.hls = new Hls(origin.options.hlsConfig);
 
             // ************************
             // Dash
             // ************************
-            }else if(origin.env.isDash === true){
+            }else if(origin.env.mode === 'dash'){
 
             }else{
 
-                self.shadowApi.src = origin.env.source;
+                self.shadowApi.src = origin.options.source.file;
             }
 
             // ************************
             // HLS library supported
             // and HLS requested
             // ************************
-            if(origin.env.useHlsLib === true)
+            if(origin.env.mode === 'hls')
             {
                 self.hls.autoLevelCapping = -1;
                 self.hls.attachMedia(self.shadowApi);
-                self.hls.loadSource(origin.env.source);
+                self.hls.loadSource(origin.options.source.file);
 
 
             // ************************
             // Usig DASH library
             // ************************
-            }else if(origin.env.isDash === true)
+            }else if(origin.env.mode === 'dash')
             {
                 self.dash = dashjs.MediaPlayer().create();
 
                 self.dash.initialize();
                 self.dash.attachView(self.shadowApi);
-                self.dash.attachSource(origin.env.source);
+                self.dash.attachSource(origin.options.source.file);
                 self.dash.setAutoPlay(false);
                 self.dash.getDebug().setLogToBrowserConsole(false);
 
@@ -749,142 +2872,211 @@ JuliaPlayer.prototype._Api = function(origin)
 };
 
 /* *****************************************
-* JuliaPlayer HTML5 media player
-* User interface
-* complete DOM model
+* JuliaPlayer HTML5 player
+* User interface, DOM model
 ****************************************** */
 JuliaPlayer.prototype._Ui = function(origin)
 {
     var self = this;
 
+
+
+
     self.create = function()
     {
-        if(origin.env.instance.length>0)
+        if( origin.env.instance.length > 0 )
         {
             origin.env.instance.remove();
-            origin.env.instance = {};
-        };
+        }
 
-        var device = origin.Support.isMobile() === true ? 'mobile': 'computer';
+        platformClass = origin.Support.isMobile() === false ? 'julia-desktop': 'julia-mobile';
+
 
         // Main container
-        origin.env.instance = $('<div class="julia-player julia-fullscreen-off julia-theme-'+origin.options.theme+' julia-device-'+device+'" id="julia-player-'+origin.env.ID+'">'
-                    +'</div>');
+        origin.env.instance = $('<div class="julia-player off julia-fullscreen-off julia-'+origin.env.ID+' '+platformClass+'" id="julia-'+origin.env.ID+'"></div>');
 
-        // Containers
-        origin.env.model.shield = $('<div class="julia-shield" id="julia-shield-'+origin.env.ID+'"></div>');
 
-        origin.env.model.preloader = $('<div class="julia-preloader">'
-            +'<div class="julia-preloader-run"></div></div>');
+        // Wrapper
+        origin.env.wrapper = $('<div class="julia-wrapper"><video class="julia-video" id="julia-api-'+origin.env.ID+'" preload="auto" webkit-playsinline playsinline></video></div>');
 
-        origin.env.model.suggest = $('<div class="julia-suggest" id="julia-suggest-'+origin.env.ID+'"></div>');
 
-        origin.env.model.toolbar = $('<div class="julia-toolbar" id="julia-toolbar-'+origin.env.ID+'"></div>');
+        // Shield
+        origin.env.shield = $('<div class="julia-shield"></div>');
+
+        // Preloader
+        origin.env.preloader = $('<div class="julia-preloader"></div>');
+
+
+        // Suggest
+        origin.env.suggest = $('<div class="julia-suggest" id="julia-suggest-'+origin.env.ID+'"></div>');
+
+
+        // Toolbars
+        origin.env.toolbarTop = $('<div class="julia-toolbar julia-toolbar-top" id="julia-toolbar-top-'+origin.env.ID+'"></div>');
+        origin.env.toolbarBottom = $('<div class="julia-toolbar julia-toolbar-bottom" id="julia-toolbar-bottom-'+origin.env.ID+'"></div>');
+        origin.env.toolbarLeft = $('<div class="julia-toolbar "julia-toolbar-left" id="julia-toolbar-left-'+origin.env.ID+'"></div>');
+        origin.env.toolbarRight = $('<div class="julia-toolbar "julia-toolbar-right" id="julia-toolbar-right-'+origin.env.ID+'"></div>');
+
 
         // Buttons
-        origin.env.model.buttons.bigPlay = $('<button class="julia-btn julia-big-play"><i class="julia-icon julia-play-circle"></i></button>');
+        origin.env.buttons.bigPlay = $('<button class="julia-btn julia-big-play"><i class="julia-icon julia-play-circle"></i></button>');
 
-        origin.env.model.buttons.play = $('<button class="julia-btn julia-playback play">'
+        origin.env.buttons.play = $('<button class="julia-btn julia-play play">'
         +'    <i class="julia-icon julia-play"></i>'
         +'</button>');
 
-        origin.env.model.buttons.sound = $('<button class="julia-btn julia-sound on">'
-        +'    <i class="julia-icon julia-sound-on"></i>'
+        origin.env.buttons.next = $('<button class="julia-btn julia-next" title="'+origin.env.i18n.next+'">'
+        +'    <i class="julia-icon julia-chevron-right"></i>'
         +'</button>');
 
-        origin.env.model.buttons.fullscreen = $('<button class="julia-btn julia-fullscreen-toggle on">'
+        origin.env.buttons.previous = $('<button class="julia-btn julia-previous" title="'+origin.env.i18n.previous+'">'
+        +'    <i class="julia-icon julia-chevron-left"></i>'
+        +'</button>');
+
+        origin.env.buttons.close = $('<button class="julia-btn julia-close" title="'+origin.env.i18n.close+'">'
+        +'    <i class="julia-icon julia-close"></i>'
+        +'</button>');
+
+        origin.env.buttons.fullscreen = $('<button class="julia-btn julia-fullscreen on">'
         +'    <i class="julia-icon julia-fullscreen"></i>'
         +'</button>');
 
+        origin.env.buttons.sound = $('<button class="julia-btn julia-sound on">'
+        +'    <i class="julia-icon julia-sound-on"></i>'
+        +'</button>');
+
+        origin.env.buttons.settings = $('<button class="julia-btn julia-settings off">'
+        +'    <i class="julia-icon julia-dot-menu"></i>'
+        +'</button>');
+
+
         // Range bars
-        origin.env.model.ranges.volume = $('<div class="julia-volume">'
+        origin.env.ranges.volume = $('<div class="julia-volume">'
         +'  <input type="range" value="'+origin.options.volume+'" min="0" max="100" step="1" class="julia-range">'
         +'</div>');
 
-        origin.env.model.ranges.progress = $('<div class="julia-progress">'
+        origin.env.ranges.progress = $('<div class="julia-progress">'
         +'  <input type="range" value="0" min="0" max="100" step="'+origin.env.progressStep+'" class="julia-range">'
         +'</div>');
 
+
+        // Labels
+        origin.env.labels.goto = $('<div class="julia-label julia-label-goto">'
+        +'    <span>00:00:00</span>'
+        +'</div>');
+
+
+        // Menus
+        origin.env.menus.settings = $('<div class="julia-menu julia-menu-settings">'
+        +'    <div class="julia-menu-title">'+origin.options.i18n.settings+'</div>'
+        +'    <table><tbody></tbody></table>'+
+        +'</div>');
+
+
+        // Menu blocks
+        origin.env.menus.video = $('<tr class="julia-menu-item julia-menu-item-video"><td class="julia-menu-item-title">'
+        +origin.options.i18n.video+'</td><td><div class="julia-dropdown"><select name="video" class="julia-dropdown-select" disabled="disabled"></select></div>'
+        +'</td></tr>');
+
+        origin.env.menus.audio = $('<tr class="julia-menu-item julia-menu-item-audio"><td class="julia-menu-item-title">'
+        +origin.options.i18n.audio+'</td><td><div class="julia-dropdown"><select name="audio" class="julia-dropdown-select" disabled="disabled"></select></div>'
+        +'</td></tr>');
+
+        origin.env.menus.audioTracks = $('<tr class="julia-menu-item julia-menu-item-audioTracks"><td class="julia-menu-item-title">'
+        +origin.options.i18n.audioTracks+'</td><td><div class="julia-dropdown"><select name="audioTracks" class="julia-dropdown-select" disabled="disabled"></select></div>'
+        +'</td></tr>');
+
+        origin.env.menus.subtitles = $('<tr class="julia-menu-item julia-menu-item-subtitles"><td class="julia-menu-item-title">'
+        +origin.options.i18n.subtitles+'</td><td><div class="julia-dropdown"><select name="subtitles" class="julia-dropdown-select" disabled="disabled"></select></div>'
+        +'</td></tr>');
+
+        origin.env.menus.speed = $('<tr class="julia-menu-item julia-menu-item-speed on"><td class="julia-menu-item-title">'
+        +origin.options.i18n.speed+'</td><td><div class="julia-dropdown"><select name="speed" class="julia-dropdown-select"></select></div>'
+        +'</td></tr>');
+
         // Passive info panels
-        origin.env.model.panels.live = $('<div class="julia-panel julia-live-indicator">'
+        origin.env.panels.title = $('<div class="julia-panel julia-title">'
+        +'    <span></span>'
+        +'</div>');
+
+        origin.env.panels.live = $('<div class="julia-panel julia-live-indicator">'
         +'    <span>'+origin.options.i18n.liveText+'</span>'
         +'</div>');
 
-        origin.env.model.panels.currentTime = $('<div class="julia-panel julia-currentTime">'
-        +'    <span>00:00:00</span>&nbsp;/&nbsp;'
-        +'</div>');
-
-        origin.env.model.panels.duration = $('<div class="julia-panel julia-duration">'
+        origin.env.panels.currentTime = $('<div class="julia-panel julia-currentTime">'
         +'    <span>00:00:00</span>'
         +'</div>');
 
-        // Labels
-        origin.env.model.labels.goto = $('<div class="julia-label julia-label-goto">'
+        origin.env.panels.duration = $('<div class="julia-panel julia-duration">'
         +'    <span>00:00:00</span>'
         +'</div>');
-
-
-        // Compose player object
-        origin.env.model.shield
-        .append([
-            origin.env.model.preloader,
-            origin.env.model.buttons.bigPlay
-        ]);
-
-        origin.env.model.toolbar
-        .append([
-            origin.env.model.ranges.progress,
-            origin.env.model.panels.live,
-            origin.env.model.panels.currentTime,
-            origin.env.model.panels.duration,
-            origin.env.model.buttons.play,
-            origin.env.model.buttons.sound,
-            origin.env.model.ranges.volume,
-            origin.env.model.buttons.fullscreen,
-            origin.env.model.labels.goto,
-        ]);
 
         //--odn-handle-start--
-        origin.env.instance
-        .append([
-            origin.env.model.shield,
-            origin.env.model.suggest,
-            origin.env.model.toolbar
+        origin.env.toolbarBottom.append([
+            origin.env.buttons.play,
+            origin.env.buttons.sound,
+            origin.env.buttons.fullscreen,
+            origin.env.buttons.settings,
+            origin.env.ranges.progress,
+            origin.env.ranges.volume,
+            origin.env.panels.currentTime,
+            origin.env.panels.duration,
+            origin.env.labels.goto,
         ]);
 
-        // Player default states
-        origin.env.element.hide();
-        origin.env.model.toolbar.hide();
-        origin.env.model.buttons.bigPlay.hide();
-        origin.Ui.state(origin.env.model.preloader, '', 'on');
-        origin.env.instance.insertAfter(origin.env.element);
+        origin.env.toolbarTop.append([
+            origin.env.panels.title
+        ]);
 
-        origin.env.fullscreenFrame = document.querySelector('#julia-player-'+origin.env.ID);
+        // Build menu
+        origin.env.menus.settings.find('tbody').append([
+            origin.env.menus.video,
+            origin.env.menus.audio,
+            origin.env.menus.audioTracks,
+            origin.env.menus.speed,
+            origin.env.menus.subtitles,
+        ]);
 
-        self.raiseEvent('julia.ui-ready');
+        origin.Ui.menu( origin.env.menus.speed, origin.options.i18n.speedItems );
 
-        origin.Base.debug({
-            'playerInstance': origin.env.instance,
+        // Compose content DOM object
+        origin.env.wrapper.append([
+            origin.env.shield,
+            origin.env.suggest,
+            origin.env.buttons.bigPlay,
+            origin.env.preloader,
+            origin.env.toolbarTop,
+            origin.env.toolbarBottom,
+            origin.env.toolbarLeft,
+            origin.env.toolbarRight,
+            origin.env.menus.settings,
+        ]);
+
+        // Compose final object
+        origin.env.instance
+        .append([
+            origin.env.wrapper
+        ]);
+
+        origin.env.element.append( origin.env.instance );
+
+        origin.debug({
+            'Julia instance created': origin.env.instance,
+            'Julia instance appended to': origin.env.element,
         });
+
+        // Video api
+        origin.env.api = document.getElementById('julia-api-'+origin.env.ID);
+        origin.env.api.controls = false;
+
+        origin.debug({
+            'Api object': 'julia-api-'+origin.env.ID,
+        });
+
+        self.zIndexize();
+        origin.Ui.state(origin.env.instance, '', 'on');
+        origin.event('julia.ui-created', origin.env.instance);
         //--odn-handle-stop--
-    };
-
-
-
-
-    self.raiseEvent = function(eventName)
-    {
-        setTimeout( function()
-        {
-            if($('#julia-player-'+origin.env.ID).length == 1)
-            {
-                $('#julia-player-'+origin.env.ID).trigger({
-                    type: eventName,
-                });
-            }else{
-                self.raiseEvent(eventName);
-            }
-        }, 10);
     };
 
 
@@ -892,7 +3084,8 @@ JuliaPlayer.prototype._Ui = function(origin)
 
     self.icon = function(element, remove, add)
     {
-        element.find('i')
+        element
+        .find('i')
         .removeClass(remove)
         .addClass(add);
     };
@@ -902,7 +3095,8 @@ JuliaPlayer.prototype._Ui = function(origin)
 
     self.state = function(element, remove, add)
     {
-        element.removeClass(remove)
+        element
+        .removeClass(remove)
         .addClass(add);
     };
 
@@ -917,1798 +3111,82 @@ JuliaPlayer.prototype._Ui = function(origin)
 
 
 
-    self.posterSet = function()
+    self.reset = function()
     {
-        self.posterUnset();
+        origin.Ui.state( origin.env.menus.video, 'on', '');
+        origin.Ui.menuDisabled( origin.env.menus.video, true );
 
-        if(origin.env.model.poster.length > 0)
-        {
-            img = $('<img src="'+origin.env.model.poster+'" width="100%" height="100%">')
-            origin.env.model.shield.append(img);
+        origin.Ui.state( origin.env.menus.audio, 'on', '');
+        origin.Ui.menuDisabled( origin.env.menus.audio, true );
 
-            origin.Base.debug({
-                poster: origin.env.model.poster,
-            })
-        }
+        origin.Ui.state( origin.env.menus.audioTracks, 'on', '');
+        origin.Ui.menuDisabled( origin.env.menus.audioTracks, true );
+
+        origin.Ui.state( origin.env.menus.subtitles, 'on', '');
+        origin.Ui.menuDisabled( origin.env.menus.subtitles, true );
     };
 
 
 
 
-    self.posterUnset = function()
+    self.menu = function(element, data)
     {
-        origin.env.model.shield.find('img').remove();
-    };
+        element.find('select>option').remove();
 
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Slider controller
-* Progress and volume widget library
-****************************************** */
-JuliaPlayer.prototype._Slider = function(origin, options)
-{
-    var self = this,
-
-        leftButtonDown = false,
-
-        ua = navigator.userAgent,
-
-        isChrome = /chrome/i.exec(ua),
-
-        isAndroid = /android/i.exec(ua),
-
-        hasTouch = 'ontouchstart' in window && !(isChrome && !isAndroid),
-
-        _normalize = function(percent)
+        for( i in data )
         {
-            if( percent > 100 ){ return 100; }
-            if( percent < 0 ){ return 0; }
-            return ( Math.round(percent*100) ) / 100;
-        },
-
-        _posToPercent = function(pos)
-        {
-            return _normalize( pos / (self.track.innerWidth()/100) );
-        },
-
-        _position = function(e)
-        {
-            var pos = hasTouch === true ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
-            percent = _posToPercent( pos );
-            return percent;
-        },
-
-        _pixels = function(e)
-        {
-            var pos = hasTouch === true ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
-            return pos;
-        },
-
-        model = $('<div class="julia-slider">'
-            +'<div class="julia-slider-track" data-julia-slider-component="track"></div>'
-            +'<div class="julia-slider-handle" data-julia-slider-component="handle"></div>'
-            +'<div class="julia-slider-fill" data-julia-slider-component="fill"></div>'
-        +'</div>');
-
-        self.model = model.clone();
-
-        self.track = self.model.find('[data-julia-slider-component="track"]');
-
-        self.handle = self.model.find('[data-julia-slider-component="handle"]');
-
-        self.fill = self.model.find('[data-julia-slider-component="fill"]');
-
-        self.options = {
-            element: {},
-            value: 0,
-            originVisible: false,
-            eventRise: '',
-            overcall: function(){
-                return;
-            }
-        };
-
-    // Extend custom options
-    $.extend(true, self.options, options);
-
-    self.elem = typeof self.options.element === 'object' ? self.options.element: $(self.options.element.toString()),
-
-    self.value = self.options.value;
-
-
-
-
-    // Public methods & props
-    self.init = function()
-    {
-        if( ['input'].lastIndexOf( self.elem.prop('tagName').toLowerCase() ) > -1 )
-        {
-            self.value = _normalize( self.elem.val() );
-        }
-
-        if( self.options.originVisible === false )
-        {
-        	self.elem.hide().after( self.model );
-        }else{
-            self.elem.after( self.model );
-        }
-
-        self.slide( self.value, true );
-    };
-
-
-
-
-    self.update = function( percent )
-    {
-        if( leftButtonDown === false )
-        {
-            self.slide( percent, true );
-        }
-    };
-
-
-
-
-    self.slide = function( percent, eventPrevent )
-    {
-        if( typeof eventPrevent === 'undefined' )
-        {
-            eventPrevent = false;
-        }
-
-        self.value = _normalize( percent ) ;
-        var pos = ( self.track.innerWidth() / 100 ) * self.value;
-        self.handle.css({'left': pos+'px'});
-        self.fill.css({'width': pos+2+'px'});
-
-        self.respond( percent, eventPrevent );
-    };
-
-
-
-
-    self.respond = function( percent, eventPrevent )
-    {
-        if( typeof eventPrevent === 'undefined' )
-        {
-            eventPrevent = false;
-        }
-
-        if( ['input'].lastIndexOf( self.elem.prop('tagName').toLowerCase() ) > -1 )
-        {
-        	self.elem.val( self.value );
-
-            if( eventPrevent === false )
+            s = $('<option value="'+data[i].value+'">'+data[i].title+'</option>');
+            if( Object.keys(data[i]).indexOf('active') > -1 && data[i].value == data[i].active )
             {
-                $('#julia-player-'+origin.env.ID).trigger({
-                    type: 'julia.'+self.options.eventRise,
-                    percent: percent
-                });
+                s.prop('selected', true);
             }
+            element.find('select').append(s);
         }
-
-        // Fix final handle position on track
-        self.track.innerWidth( self.model.innerWidth() - self.handle.innerWidth() );
-    }
-
-
-
-
-    self.getValue = function()
-    {
-    	return self.value;
     };
 
 
 
 
-    self.sliding = function()
+    self.menuDisabled = function(element, state)
     {
-    	return leftButtonDown;
+        element.find('select').prop('disabled', state);
     };
 
 
-    // Mouse & touch events
-    self.fill.on('click ', function(e)
+
+
+    self.zIndexize = function()
     {
-        self.slide( _position(e), false );
-    });
+        var indexHighest = origin.options.zIndexStart;
 
+        var layers = [
+            origin.env.instance,
+            origin.env.wrapper,
+            $('#julia-api-'+origin.env.ID),
+            origin.env.preloader,
+            origin.env.shield,
+            origin.env.suggest,
+            origin.env.toolbarTop,
+            origin.env.toolbarLeft,
+            origin.env.toolbarRight,
+            origin.env.toolbarBottom,
+            origin.env.menus.settings,
+            origin.env.buttons.bigPlay,
+        ];
 
-
-
-    self.track.on('click', function(e)
-    {
-        self.slide( _position(e), false );
-    });
-
-
-
-
-    self.model.on('click mouseover mousemove mouseout', function(e)
-    {
-        if(e.type == 'click')
-        {
-            self.slide( _position(e), false );
-        }
-
-        if( ( e.type == 'mouseover' || e.type == 'mousemove' ) && self.options.eventRise == 'progress-change' )
-        {
-            pos = _position(e);
-            pix = _pixels(e);
-
-            if( origin.env.thumbsOk === true && origin.Support.isMobile() === false && origin.options.live === false && origin.options.thumbs === true )
-            {
-                origin.Api.thumb( origin.Timecode.toSeconds( pos ) );
-            }
-            origin.Ui.state( origin.env.model.labels.goto, '', 'on' );
-            origin.Ui.panel( origin.env.model.labels.goto, origin.Timecode.toHuman( origin.Timecode.toSeconds( pos ) ) );
-
-            left = pix+'px';
-            border = (origin.env.model.labels.goto.innerWidth()/2);
-
-            if( pix < border )
-            {
-                left = (border) + 'px';
-            }
-
-            if( pix > self.model.innerWidth() - border - 10 )
-            {
-                left = ( self.model.innerWidth() - border ) + 'px';
-            }
-
-            origin.env.model.labels.goto.css({
-                'left': left,
-                'margin-left': -(origin.env.model.labels.goto.innerWidth()/2)+'px'
+        layers.map(function(x,i) {
+            layers[i].css({
+                'z-index': indexHighest + i
             });
-        }
-
-        if( e.type == 'mouseout' && self.options.eventRise == 'progress-change' )
-        {
-            origin.Ui.state( origin.env.model.labels.goto, 'on', '' );
-        }
-    });
-
-
-
-
-    self.model.on('mousedown touchstart', function(e)
-    {
-        // Left mouse button activate
-        if(e.type == 'touchstart')
-        {
-            self.slide( _position(e), false );
-        }
-
-        leftButtonDown = true;
-    });
-
-
-
-
-    $(document).on('mouseup touchend', function(e)
-    {
-        // Left mouse button deactivate
-        leftButtonDown = false;
-    });
-
-
-
-
-    $(document).on('mousemove touchmove', function(e)
-    {
-        if(leftButtonDown === true)
-        {
-            self.slide( _position(e) );
-        }
-    });
-
-    return self;
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Events
-* DOM & api event handlers and emmiters
-****************************************** */
-JuliaPlayer.prototype._Events = function(origin)
-{
-    var self = this;
-
-    // Bind user action & DOM events
-    self.ui = function()
-    {
-        // Buttons
-        origin.env.model.toolbar.on('contextmenu', function(e)
-        {
-            e.preventDefault();
-        })
-        .on('click', '.julia-playback.play', function(e)
-        {
-            e.preventDefault();
-            origin.Controls.press('play');
-        })
-        .on('click', '.julia-playback.pause', function(e)
-        {
-            e.preventDefault();
-            origin.Controls.press('pause');
-        })
-        .on('click', '.julia-sound.on', function(e)
-        {
-            e.preventDefault();
-            origin.Controls.press('sound-off');
-        })
-        .on('click', '.julia-sound.off', function(e)
-        {
-            e.preventDefault();
-            origin.Controls.press('sound-on');
-        })
-        .on('click', '.julia-fullscreen-toggle.on', function(e)
-        {
-            e.preventDefault();
-            origin.Controls.press('fullscreen-on');
-        })
-        .on('click', '.julia-fullscreen-toggle.off', function(e)
-        {
-            e.preventDefault();
-            origin.Controls.press('fullscreen-off');
-        });
-
-
-
-
-        // Big play
-        origin.env.model.shield.on('click contextmenu', '.julia-big-play', function(e)
-        {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if(e.type == 'click')
-            {
-                if(origin.env.started === false)
-                {
-                    origin.Ui.state( origin.env.model.preloader, '', 'on' );
-                    origin.Loader.init();
-                }
-
-                origin.Controls.press('play');
-            }
-        });
-
-
-
-
-        // Area click
-        origin.env.model.shield.on('dblclick click contextmenu', function(e)
-        {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if( e.type == 'click' )
-            {
-                if( origin.options.pauseOnClick === true && origin.Support.isMobile() === false && origin.env.started === true )
-                {
-                    if( origin.env.api.paused === false )
-                    {
-                        origin.Controls.press('pause');
-                    }else{
-                        origin.Controls.press('play');
-                    }
-                }
-
-                if( origin.env.started === false )
-                {
-                    origin.Ui.state( origin.env.model.preloader, '', 'on' );
-                    origin.Loader.init();
-                    origin.Controls.press('play');
-                }
-            }
-
-            if( e.type == 'dblclick' )
-            {
-                if( origin.env.instance.hasClass('julia-fullscreen-on') )
-                {
-                    origin.Controls.press('fullscreen-off');
-                }else{
-                    origin.Controls.press('fullscreen-on');
-                }
-            }
-        });
-
-
-
-
-        // Fullscreen toolbar behavior bindings
-        var mouseMoveCleaner;
-
-        origin.env.instance.on('mousemove touchmove', '#julia-shield-'+origin.env.ID+', #julia-suggest-'+origin.env.ID, function(e)
-        {
-            e.preventDefault();
-            origin.env.model.toolbar.addClass('julia-toolbar-visible');
-            clearTimeout(mouseMoveCleaner);
-
-            mouseMoveCleaner = setTimeout(function()
-            {
-                origin.env.model.toolbar.removeClass('julia-toolbar-visible');
-            }, 1750);
-        })
-        .on('mouseover mousemove touchmove mouseout', '#julia-toolbar-'+origin.env.ID+'.julia-toolbar-visible', function(e)
-        {
-            e.preventDefault();
-            origin.env.model.toolbar.addClass('julia-toolbar-visible');
-            clearTimeout(mouseMoveCleaner);
-
-            if( ['mouseout', 'touchend'].lastIndexOf( e.type.toLowerCase() ) > -1 )
-            {
-                mouseMoveCleaner = setTimeout(function(e)
-                {
-                    origin.env.model.toolbar.removeClass('julia-toolbar-visible');
-                }, 1750);
-            }
-        });
-
-
-
-
-        // Bind progressbar change
-        $('body').on('julia.progress-change', '#julia-player-'+origin.env.ID, function(e, percent)
-        {
-            seekTo = origin.Timecode.toSeconds( e.percent );
-            seekTo = seekTo >= origin.env.duration ? origin.env.duration: seekTo.toFixed(2);
-
-            origin.Controls.press('goto', {
-                currentTime: seekTo
-            });
-        });
-
-
-
-
-        $('body').on('julia.volume-change', '#julia-player-'+origin.env.ID, function(e, percent)
-        {
-            origin.Controls.press('volume', {
-                volume: e.percent,
-            });
-        });
-
-
-
-
-        // Fullscreen event included
-        $(window).on('resize', function()
-        {
-            origin.Support.resize();
-        });
-    };
-
-
-
-
-    // Native video api
-    self.native = function()
-    {
-        if(origin.Support.forceReady()===true && origin.env.isHls === true)
-        {
-            origin.Api.canplaythrough();
-        }else{
-            origin.env.api.oncanplaythrough = function(e)
-            {
-                origin.env.duration = origin.env.api.duration;
-
-                if(origin.env.started === false && origin.env.api.readyState >= 3)
-                {
-                    origin.Api.allowStart(e);
-                }
-            }
-        }
-
-
-
-
-        // Video playback detect
-        origin.env.api.onplay = function(e)
-        {
-            origin.Ui.state( origin.env.model.buttons.play, 'play', 'pause' );
-            origin.Ui.icon( origin.env.model.buttons.play, 'julia-play', 'julia-pause' );
-            origin.env.model.buttons.bigPlay.hide();
-            //origin.Ui.state( origin.env.model.preloader, 'on', '' );
-            origin.Ui.posterUnset();
-            origin.env.model.toolbar.show();
-        };
-
-
-
-
-        origin.env.api.onplaying = function(e)
-        {
-            origin.Ui.state( origin.env.model.buttons.play, 'play', 'pause' );
-            origin.Ui.icon( origin.env.model.buttons.play, 'julia-play', 'julia-pause' );
-            origin.env.model.buttons.bigPlay.hide();
-            origin.env.model.suggest.html('');
-            origin.Ui.state( origin.env.model.suggest, 'on', '' );
-            //origin.Ui.posterUnset();
-            origin.env.model.toolbar.show();
-
-            origin.Controls.press('setDuration', {
-                'duration': origin.Timecode.toHuman( origin.env.duration )
-            });
-            origin.env.started = true;
-        };
-
-
-
-
-        // Video pause
-        origin.env.api.onpause = function(e)
-        {
-            origin.Ui.state( origin.env.model.buttons.play, 'pause', 'play' );
-            origin.Ui.icon( origin.env.model.buttons.play, 'julia-pause', 'julia-play' );
-
-            setTimeout( function()
-            {
-                if( origin.env.api.paused === true )
-                {
-                    origin.env.model.buttons.bigPlay.show();
-                }
-            }, 350);
-        };
-
-
-
-
-        // Errors
-        origin.env.api.onerror = function(e)
-        {
-
-        };
-
-
-
-
-        origin.env.api.onemptied = function(e)
-        {
-        };
-
-
-
-
-        origin.env.api.onstalled = function(e)
-        {
-        };
-
-
-
-
-        origin.env.api.onsuspend = function(e)
-        {
-        };
-
-
-
-
-        origin.env.api.onloadeddata = function(e)
-        {
-        };
-
-
-
-
-        origin.env.api.oncanplaythrough = function(e)
-        {
-        }
-
-
-
-
-        // Video position
-        origin.env.api.ontimeupdate = function(e)
-        {
-            currentTimeReadable = origin.Timecode.toHuman( origin.env.api.currentTime.toFixed(2) );
-
-            if(origin.env.seeking === false)
-            {
-                origin.env.model.sliders.progress.update( origin.Timecode.toPercents( origin.env.api.currentTime ) );
-
-                origin.Ui.panel(
-                    origin.env.model.panels.currentTime,
-                    currentTimeReadable
-                );
-
-                origin.Ui.state( origin.env.model.preloader, 'on', '' );
-            }
-
-            origin.Callback.onTime(currentTimeReadable, origin.env.api.currentTime);
-
-            if(origin.options.debugPlayback === true)
-            {
-                origin.Base.debug({
-                    'duration/current': origin.env.duration+'/'+origin.env.api.currentTime.toFixed(2)+' > '+currentTimeReadable
-                });
-            }
-        };
-
-
-
-
-        // Video position
-        origin.env.api.onseeked = function(e)
-        {
-            origin.env.seeking = false;
-        };
-
-
-
-
-        // Video position
-        origin.env.api.onseeking = function(e)
-        {
-            origin.Ui.state( origin.env.model.preloader, '', 'on' );
-            origin.env.seeking = true;
-        };
-
-
-
-
-        // Volume
-        origin.env.api.onvolumechange = function(e)
-        {
-            if(origin.env.api.muted === false)
-            {
-                //origin.Ui.volume( origin.env.api.volume*100 );
-                origin.env.model.sliders.volume.update( origin.env.api.volume*100 );
-
-            }else{
-                //origin.Ui.volume( 0 );
-                origin.env.model.sliders.volume.update( 0 );
-            }
-        };
-
-
-
-
-        // Set video duration
-        origin.env.api.ondurationchange = function(e)
-        {
-            if( !isNaN(origin.env.api.duration) )
-            {
-                origin.env.duration = origin.env.api.duration;
-
-                if ( origin.env.started === false )
-                {
-                    origin.env.seeking = false;
-                }
-
-                origin.Base.debug({
-                    'duration': origin.env.duration,
-                    'readyState': origin.env.api.readyState,
-                    'started': origin.env.started
-                });
-            }
-        };
-
-
-
-
-        // Bind playback end event
-        origin.env.api.onended = function(e)
-        {
-            origin.Suggest.run();
-        };
-
-
-
-
-        $(window).on('blur', function()
-        {
-            if( origin.options.pauseOnBlur === true && origin.env.api.paused === false && origin.env.started === true )
-            {
-                origin.Controls.press('pause');
-            }
-        });
-    };
-
-
-
-
-    // Specific events, error handlers
-    self.hlsLibEvents = function()
-    {
-        origin.env.hls.on(Hls.Events.ERROR, function(event, data)
-        {
-            switch(data.details)
-            {
-                case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
-                case Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
-                case Hls.ErrorDetails.MANIFEST_PARSING_ERROR:
-
-                    // reboot api
-                    origin.Api.shadowApi = false;
-
-                    origin.options.muted = origin.env.api.muted;
-
-                    origin.env.started = false;
-                    origin.options.source = origin.options.tempSource;
-                    origin.Api.source();
-                    origin.options.autoplay = true;
-
-                    origin.Ui.panel( origin.env.model.panels.live, origin.options.i18n.liveText );
-
-                    origin.env.model.buttons.bigPlay.click();
-
-
-                break; case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
-                case Hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
-                case Hls.ErrorDetails.LEVEL_SWITCH_ERROR:
-                case Hls.ErrorDetails.FRAG_LOAD_ERROR:
-                case Hls.ErrorDetails.FRAG_LOOP_LOADING_ERROR:
-                case Hls.ErrorDetails.FRAG_LOAD_TIMEOUT:
-                case Hls.ErrorDetails.FRAG_DECRYPT_ERROR:
-                case Hls.ErrorDetails.FRAG_PARSING_ERROR:
-                case Hls.ErrorDetails.BUFFER_APPEND_ERROR:
-                case Hls.ErrorDetails.BUFFER_APPENDING_ERROR:
-
-                    origin.Base.debug({
-                        recoveringError: data.details,
-                        errorType: data.type,
-                        errorFatal: data.fatal,
-                        data: data
-                    });
-
-                    // && origin.env.tries < 100
-                    if(data.fatal === true)
-                    {
-                        // Bring to life again
-                        switch (data.type)
-                        {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                // try to recover network error
-                                Hls.startLoad();
-                            break; case Hls.ErrorTypes.MEDIA_ERROR:
-                                // try to recover media error
-                                Hls.recoverMediaError();
-                            break; default:
-                                // try to recover other errors
-                                Hls.startLoad();
-                        }
-                    }
-
-                break; default:
-            }
-        });
-    };
-
-
-    // Specific events, error handlers
-    self.dashLibEvents = function()
-    {
-        origin.env.dash.on(dashjs.MediaPlayer.events, function(event, data)
-        {
-            switch(data.details)
-            {
-                case dashjs.MediaPlayer.events.ERROR:
-
-                    origin.Base.debug({
-                        recoveringError: dashjs.MediaPlayer.events.ERROR
-                    });
-
-                break; default:
-            }
+            return x;
         });
     };
 };
 
 /* *****************************************
-* JuliaPlayer HTML5 media player
-* Media element API
-* For now, only video is supported
-****************************************** */
-JuliaPlayer.prototype._Controls = function(origin)
-{
-    var self = this;
-
-
-
-
-    self.press = function(action, data)
-    {
-        data = data||{};
-
-        origin.Base.debug({
-            'action': action,
-            'action-data': data,
-        });
-
-        //--odn-handle-start--
-        switch(action)
-        {
-            case 'play':
-
-                if(origin.options.onPlay !== false)
-                {
-                    origin.Callback.fn(origin.options.onPlay, data);
-                }
-
-                origin.env.model.buttons.bigPlay.hide();
-                origin.env.api.play();
-
-            break; case 'pause':
-
-                if(origin.options.onPause !== false)
-                {
-                    origin.Callback.fn(origin.options.onPause, data);
-                }
-
-                origin.env.api.pause();
-
-            break; case 'stop':
-
-                if(origin.options.onStop !== false)
-                {
-                    origin.Callback.fn(origin.options.onStop, data);
-                }
-
-                origin.env.api.pause();
-                origin.env.api.currentTime = 0;
-
-                origin.Ui.state( origin.env.model.buttons.play, 'pause', 'play' );
-                origin.Ui.icon( origin.env.model.buttons.play, 'julia-pause', 'julia-play' );
-                origin.env.model.buttons.bigPlay.show();
-                origin.env.model.sliders.progress.update( 0 );
-
-            break; case 'goto':
-
-                origin.Ui.state( origin.env.model.preloader, '', 'on' );
-                origin.env.api.currentTime = data.currentTime;
-
-                if(origin.options.onPosition !== false)
-                {
-                    origin.Callback.fn(origin.options.onPosition, data);
-                }
-
-            break; case 'setDuration':
-
-                origin.Ui.panel( origin.env.model.panels.duration, data.duration );
-
-                if(origin.env.started === false)
-                {
-                    origin.env.model.sliders.progress.update( 0 );
-                }
-
-                origin.Base.debug({
-                    'setDuration': data.duration
-                });
-
-            break; case 'volume':
-
-                origin.options.volume = data.volume;
-                origin.env.api.volume = data.volume/100;
-
-                origin.Base.debug({
-                    'volume is': origin.env.api.volume
-                });
-
-                origin.env.model.sliders.volume.update( data.volume );
-
-                if(data.volume>0)
-                {
-                    origin.Controls.press('sound-on');
-
-                }else{
-                    origin.Controls.press('sound-off');
-                }
-
-            break; case 'sound-on':
-
-                origin.env.api.muted = false;
-                origin.options.muted = false;
-                origin.Persist.set('julia-player-volume', origin.options.volume, 999);
-                origin.Persist.set('julia-player-muted', origin.options.muted, 999);
-
-                origin.Ui.state( origin.env.model.buttons.sound, 'off', 'on' );
-                origin.Ui.icon( origin.env.model.buttons.sound, 'julia-sound-off', 'julia-sound-on' );
-
-            break; case 'sound-off':
-
-                origin.env.api.muted = true;
-                origin.options.muted = true;
-                origin.Persist.set('julia-player-volume', origin.options.volume, 999);
-                origin.Persist.set('julia-player-muted', origin.options.muted, 999);
-
-                origin.Ui.state( origin.env.model.buttons.sound, 'on', 'off' );
-                origin.Ui.icon( origin.env.model.buttons.sound, 'julia-sound-on', 'julia-sound-off' );
-
-            break; case 'fullscreen-on':
-
-                origin.Fullscreen.reset(origin.env.instance, origin.env.model, origin.env.api);
-                origin.Fullscreen.on(origin.env.fullscreenFrame);
-
-            break; case 'fullscreen-off':
-
-                origin.Fullscreen.reset(origin.env.instance, origin.env.model, origin.env.api);
-                origin.Fullscreen.off();
-
-            break; default:
-
-        }
-        //--odn-handle-stop--
-
-        return;
-    };
-
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Suppport
-* media & DOM sizing utilities
-****************************************** */
-JuliaPlayer.prototype._Support = function(origin)
-{
-    var self = this;
-
-
-
-
-    self.aspect = function(w,h)
-    {
-        return w>0 && h>0 ? h/w: 0;
-    };
-
-
-
-
-    self.isMobile = function()
-    {
-        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile/i.test(navigator.userAgent) )
-        {
-            return true;
-        }
-
-        return false;
-    };
-
-
-
-
-    self.iOS = function()
-    {
-        if( /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream )
-        {
-            return true;
-        }
-
-        return false;
-    };
-
-
-
-
-    self.forceReady = function()
-    {
-        if( /Firefox/i.test(navigator.userAgent) )
-        {
-            return true;
-        }
-
-        return false;
-    };
-
-
-
-
-    self.canPlayMedia = function()
-    {
-        var vid = document.createElement('video');
-        vid.id = 'video-cap-test-'+origin.env.ID;
-        origin.env.canPlayMediaString = vid.canPlayType('application/vnd.apple.mpegURL');
-        $('#video-cap-test'+origin.env.ID).remove();
-        return (origin.env.canPlayMediaString == 'probably' || origin.env.canPlayMediaString == 'maybe');
-    };
-
-
-
-
-    self.resize = function()
-    {
-        // Player dimensions
-        defaultDim = origin.env.element.width() ? [origin.env.element.width(), origin.env.element.height()]: [origin.options.width, origin.options.height];
-        dimensions = origin.options.responsive === true ? self.getSize(): defaultDim;
-
-        origin.Base.debug({
-            'resizeDefaults': defaultDim,
-            'resize': dimensions
-        });
-
-        origin.env.instance.width(dimensions[0]);
-        origin.env.instance.height(dimensions[1]);
-
-        origin.env.dimensions.width = dimensions[0];
-        origin.env.dimensions.height = dimensions[1];
-
-        origin.env.api.setAttribute('width', '100%');
-        origin.env.api.setAttribute('height', '100%');
-    };
-
-
-
-
-    self.getSize = function()
-    {
-        // Fix video wrapped in inline block, can not get size properlym if inline element detected
-        var parentBlock = origin.env.element.parent().css('display').toLowerCase();
-        if( parentBlock == 'inline' )
-        {
-            origin.env.element.parent().css({'display': 'block'});
-        }
-
-        var parentWidth = origin.env.element.parent().width();
-        var a = self.aspect( parseInt( origin.env.element.css('width') ), parseInt( origin.env.element.css('height') ) );
-
-        for( i in origin.options.dimensions )
-        {
-            var dim = origin.options.dimensions[i];
-            if( parentWidth >= dim[0] )
-            {
-                a = self.aspect( dim[0], dim[1] );
-                dimensions = [dim[0],(dim[0]*a)];
-
-                origin.Base.debug({
-                    'resizePredefined': dimensions
-                });
-                return dimensions;
-            }
-        }
-
-        dimensions = [parentWidth, (parentWidth*a)];
-
-        origin.Base.debug({
-            'resizeFallback': dimensions
-        });
-
-        return dimensions;
-    };
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Suggest
-* suggest playlist engine
-****************************************** */
-JuliaPlayer.prototype._Suggest = function(origin)
-{
-    var self = this;
-
-
-
-
-    self.run = function()
-    {
-        origin.env.model.suggest.html('');
-        origin.Controls.press('stop');
-        origin.env.suggestClicked = false;
-
-        if(origin.options.suggest.length > 0)
-        {
-            x = 0;
-            for(var i in origin.options.suggest)
-            {
-                if(x < origin.options.suggestLimit && origin.options.suggest[i].played === false)
-                {
-                    mode = !!origin.options.suggest[i].live && origin.options.suggest[i].live === true ? 'live': 'vod';
-                    liveText = !!origin.options.suggest[i].liveText ? origin.options.suggest[i].liveText: 'Live';
-                    var poster = !!origin.options.suggest[i].poster ? origin.options.suggest[i].poster: '';
-                    posterImage = poster.length>0 ? '<img src="'+poster+'" width="100%" height="100%">': '';
-                    suggestItemWidget = $('<div class="julia-suggest-item" data-poster="'+poster+'" data-source="'+origin.options.suggest[i].source+'" data-mode="'+mode+'" data-live-text="'+liveText+'" data-index="'+i+'">'
-                            + posterImage
-                            +'<div class="julia-suggest-item-title">'+origin.options.suggest[i].title+'</div>'
-                        +'</div>');
-
-                        suggestItemWidget.on('click', function(e)
-                        {
-                            if(origin.options.onSuggest !== false)
-                            {
-                                origin.Callback.fn(origin.options.onSuggest, origin.options.suggest[i]);
-                            }
-
-                            origin.Api.shadowApi = false;
-
-                            origin.options.muted = origin.env.api.muted;
-
-                            origin.options.poster = $(this).data('poster');
-                            origin.env.suggestClicked = true;
-                            origin.env.model.buttons.bigPlay.hide();
-                            origin.env.started = false;
-                            origin.options.source = $(this).data('source');
-                            origin.Api.source();
-                            origin.options.autoplay = true;
-                            origin.options.live = $(this).data('mode') == 'live' ? true: false;
-                            origin.options.i18n.liveText = $(this).data('live-text');
-
-                            origin.Ui.panel( origin.env.model.panels.live, origin.options.i18n.liveText );
-
-                            origin.Base.debug({
-                                suggestRemoveIndex: $(this).data('index'),
-                                suggestRemove: $(this).data('source')
-                            });
-
-                            origin.options.suggest[$(this).data('index')].played = true;
-
-                            origin.Ui.state(origin.env.model.suggest, 'on', '');
-
-                            origin.env.model.buttons.bigPlay.click();
-                        });
-
-                    origin.env.model.suggest.append(suggestItemWidget);
-                    x++;
-                }
-            }
-
-            if(x > 0)
-            {
-                if(origin.options.suggestTimeout > 0 && origin.Support.isMobile() === false)
-                {
-                    setTimeout( function()
-                    {
-                        if(origin.env.suggestClicked === false)
-                        {
-                            origin.env.model.suggest.find('div.julia-suggest-item:first').click();
-                        }
-                    }, origin.options.suggestTimeout);
-                }
-                origin.Ui.state(origin.env.model.suggest, '', 'on');
-            }
-
-        }else{
-            origin.Fullscreen.off();
-        }
-
-        origin.Base.debug({
-            'Suggest' : 'raised'
-        });
-    };
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Fullscreen
-* player fullscreen behavior
-****************************************** */
-JuliaPlayer.prototype._Fullscreen = function(origin)
-{
-    var self = this;
-
-    self.on = function(fullscreenFrame)
-    {
-        if( fullscreenFrame.requestFullscreen )
-        {
-            fullscreenFrame.requestFullscreen();
-
-        }else if( fullscreenFrame.msRequestFullscreen )
-        {
-            fullscreenFrame.msRequestFullscreen();
-
-        }else if( fullscreenFrame.mozRequestFullScreen )
-        {
-            fullscreenFrame.mozRequestFullScreen();
-
-        }else if( fullscreenFrame.webkitRequestFullscreen )
-        {
-            fullscreenFrame.webkitRequestFullscreen();
-
-        }else{
-
-            origin.Base.debug({
-                'fullscreen': 'Fullscreen is not supported'
-            });
-        }
-    };
-
-
-
-
-    self.off = function()
-    {
-        if( document.exitFullscreen )
-        {
-            document.exitFullscreen();
-
-        }else if( document.msExitFullscreen )
-        {
-            document.msExitFullscreen();
-
-        }else if( document.mozCancelFullScreen )
-        {
-            document.mozCancelFullScreen();
-
-        }else if( document.webkitExitFullscreen )
-        {
-            document.webkitExitFullscreen();
-        }
-    };
-
-
-
-
-    self.reset = function(instance, model, api)
-    {
-        $(document).off('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange');
-
-        // Fullscreen change event handler
-        $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e)
-        {
-            if(!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement)
-            {
-                origin.Ui.state( instance, 'julia-fullscreen-on', 'julia-fullscreen-off' );
-                origin.Ui.state( model.buttons.fullscreen, 'off', 'on' );
-                origin.Ui.icon( model.buttons.fullscreen, 'julia-fullscreen-exit', 'julia-fullscreen' );
-
-                // Turn off landscape on mobile
-                if(origin.Support.isMobile())
-                {
-                    screen.orientation.unlock();
-                    screen.msLockOrientation.unlock();
-                    screen.mozLockOrientation.unlock();
-                }
-
-                origin.Base.debug({
-                    'fullscreen off' : '#julia-player-'+origin.env.ID
-                });
-
-            }else{
-
-                origin.Ui.state( instance, 'julia-fullscreen-off', 'julia-fullscreen-on' );
-                origin.Ui.state( model.buttons.fullscreen, 'on', 'off' );
-                origin.Ui.icon( model.buttons.fullscreen, 'julia-fullscreen', 'julia-fullscreen-exit' );
-
-                // Force landscape in fullscreen mode on mobile
-                if(origin.Support.isMobile())
-                {
-                    screen.orientation.lock('landscape-primary');
-                    screen.msLockOrientation.lock('landscape-primary');
-                    screen.mozLockOrientation.lock('landscape-primary');
-                }
-
-                origin.Base.debug({
-                    'fullscreen on' : '#julia-player-'+origin.env.ID
-                });
-            }
-
-            origin.Support.resize();
-
-            setTimeout( function()
-            {
-                w = origin.env.api.getAttribute('width');
-
-                origin.env.instance.find('.julia-progress').width(w);
-                origin.env.instance.find('.julia-progress .julia-slider-track').width(w);
-
-                model.sliders.progress.update( origin.Timecode.toPercents( api.currentTime ) );
-            }, 5);
-
-        });
-    };
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Persistent settings
-* options are stored in cookies
-****************************************** */
-JuliaPlayer.prototype._Persist = function(origin)
-{
-    var self = this;
-
-    self.set = function(name, value, days)
-    {
-        dateObj = new Date();
-        dateObj.setTime(dateObj.getTime() + (days*24*60*60*1000));
-        var expires = 'expires=' + dateObj.toUTCString();
-        document.cookie = name + '=' + value + '; ' + expires + '; path=/';
-    };
-
-
-
-
-    self.get = function(name)
-    {
-        var name = name + '=';
-        var ca = document.cookie.split(';');
-
-        for(var i=0; i<ca.length; i++)
-        {
-            var c = ca[i];
-
-            while(c.charAt(0)==' ')
-            {
-                c = c.substring(1);
-            }
-
-            if(c.indexOf(name) == 0)
-            {
-                return c.substring(name.length,c.length);
-            }
-        }
-
-        return undefined;
-    };
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Timecode
-* utilities for timecode conversion
-****************************************** */
-JuliaPlayer.prototype._Timecode = function(origin)
-{
-    var self = this;
-
-    self.toPercents = function(currentTime)
-    {
-        p = (currentTime/origin.env.duration)*100;
-        return p;
-    },
-
-
-
-
-    self.toSeconds = function(percent)
-    {
-        t = (origin.env.duration/100)*percent;
-        return t;
-    },
-
-
-
-
-    self.toNum = function(human)
-    {
-        human = human.split(':');
-        human.reverse();
-        s = parseInt(human[0]);
-        m = human.length>1 ? parseInt(human[1]): 0;
-        h = human.length>2 ? parseInt(human[3]): 0;
-        t = s + m*60 + h*60*60;
-        return t;
-    },
-
-
-
-
-    self.toHuman = function(time)
-    {
-        time = time.toString().split('.');
-        s = time[0];
-        H = Math.floor(s/3600);
-        M = Math.floor( ( s - (H*3600) ) / 60 );
-        S = Math.floor( ( s - (H*3600) - (M*60) ) );
-
-        H = ('0'+H.toString()).slice(-2);
-        M = ('0'+M.toString()).slice(-2);
-        S = ('0'+S.toString()).slice(-2);
-
-        str = H>0 ? H+':'+M+':'+S: M+':'+S;
-
-        return str;
-    };
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Callback
-* event callbacks
-****************************************** */
-JuliaPlayer.prototype._Callback = function(origin)
-{
-    var self = this;
-
-    self.fn = function(f, data)
-    {
-        data = data||{};
-
-        if( $.inArray(typeof f, ['string', 'function', 'object']) > -1 )
-        {
-            // Callback defined as function name or function
-            // !!! Remember !!!
-            // If you are using typeof string, function must be callable globally (window context)
-            if( typeof f === 'string' )
-            {
-                f = window[f];
-            }
-
-            f(origin.options, origin.env, data);
-
-            origin.Base.debug({
-                'Callback': typeof f+' raised'
-            });
-
-        }else{
-
-            origin.Base.debug({
-                'Callback': typeof f+' is not a function, but: '+(typeof f)
-            });
-        }
-    };
-
-
-
-
-    // Time update event callbacks
-    self.onTime = function(time, timeNum)
-    {
-        if( (time in origin.options.onTime) && origin.env.onTimeRised.indexOf(time) == -1 )
-        {
-            f = origin.options.onTime[time];
-            origin.env.onTimeRised.push(time);
-
-
-            if( $.inArray(typeof f, ['string', 'function', 'object']) > -1 )
-            {
-                // Callback defined as function name or function
-                // !!! Remember !!!
-                // If you are using typeof string, function must be callable globally (window context)
-                if( typeof f === 'string' )
-                {
-                    f = window[f];
-                }
-
-                f(origin.options, origin.env, time);
-
-                origin.Base.debug({
-                    'Callback onTime': time+' '+ typeof f +' raised'
-                });
-
-            }else{
-
-                origin.Base.debug({
-                    'Callback onTime': time+' '+ typeof f +' is not a function, but: '+(typeof f)
-                });
-            }
-        }
-    };
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Inject
-* Inject origin code, source change, etc...
-****************************************** */
-JuliaPlayer.prototype._Inject = function(origin)
-{
-    var self = this;
-
-
-
-    self.swap = function(src1, src2)
-    {
-        origin.env.memory = {
-            currentTime: origin.env.api.currentTime,
-            src: src1
-        }
-
-        origin.env.api.src = src2;
-        origin.env.api.src = currentTime = 0;
-        origin.env.api.play();
-    }
-
-
-
-    self.source = function(options)
-    {
-        origin.Api.shadowApi = false;
-
-        $('#julia-player-'+origin.env.ID).remove();
-        origin.env.started = false;
-
-        $.extend(true, origin.options, options);
-
-        // Run player
-        origin.Boot.run();
-
-        if( origin.options.live === true )
-        {
-            origin.env.isLive = true;
-            origin.Ui.panel( origin.env.model.panels.live, origin.options.i18n.liveText );
-            origin.Ui.state( origin.env.model.toolbar, '', 'live' );
-        }else{
-            origin.env.isLive = false;
-            origin.Ui.panel( origin.env.model.panels.live, '' );
-            origin.Ui.state( origin.env.model.toolbar, 'live', '' );
-        }
-
-        origin.Ui.state(origin.env.model.preloader, 'on', '');
-
-        // Autostart playback, if possible
-        if(origin.options.autoplay === true && origin.Support.isMobile() === false)
-        {
-            origin.env.model.buttons.bigPlay.click();
-        }else{
-            origin.env.model.buttons.bigPlay.show();
-        }
-    };
-
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Require
-* Require vendor libs
-****************************************** */
-JuliaPlayer.prototype._Require = function(origin)
-{
-    var self = this;
-
-    self.js = function(scripts)
-    {
-        if(typeof scripts === 'string')
-        {
-            scripts = [scripts];
-        }
-
-        if(scripts.length == 0)
-        {
-            self.raiseEvent("julia.no-plugins");
-
-        }else{
-
-            var last = scripts[scripts.length - 1];
-            self.load(scripts, 0, last);
-        }
-    };
-
-
-
-
-    self.raiseEvent = function(eventName)
-    {
-        setTimeout( function()
-        {
-            if($('#julia-player-'+origin.env.ID).length == 1)
-            {
-                $('#julia-player-'+origin.env.ID).trigger({
-                    type: eventName,
-                });
-            }else{
-                self.raiseEvent(eventName);
-            }
-        }, 20);
-    };
-
-
-
-
-    self.load = function(scripts, i, last)
-    {
-        var script = scripts[i];
-
-        origin.Base.debug({
-            'Require-js request': script
-        });
-
-        $.getScript(script).done( function()
-        {
-            origin.Base.debug({
-                'Require-js loaded': script
-            });
-
-            if( last == script )
-            {
-                self.raiseEvent("julia.plugins-loaded");
-
-            }else{
-                self.load(scripts, i+1, last);
-            }
-        });
-    };
-
-
-
-
-    self.css = function(styles)
-    {
-        if(typeof styles === 'string')
-        {
-            styles = [styles];
-        }
-
-        for(i in styles)
-        {
-            $('head').append($('<link rel="stylesheet" type="text/css" href="'+styles[i]+'">'));
-        }
-    };
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Boot
-* player boot process
-****************************************** */
-JuliaPlayer.prototype._Boot = function(origin)
-{
-    var self = this;
-
-    self.run = function()
-    {
-        origin.Base.debug(origin.options);
-
-        //--odn-handle-start--
-        // Set active DOM element
-        origin.env.element = origin.options.element;
-
-        // Suggest init
-        for(i in origin.options.suggest)
-        {
-            origin.options.suggest[i].played = false;
-        }
-
-        if(origin.env.hls !== false)
-        {
-            origin.env.hls.destroy();
-            origin.env.hls = false;
-        }
-
-        if(origin.env.dash !== false)
-        {
-            origin.env.dash.reset();
-            origin.env.dash = false;
-        }
-
-        // Create UI
-        origin.Ui.create();
-
-
-        // Source select, poster select
-        origin.Api.source();
-
-
-        // Create API
-        origin.Api.create();
-        //--odn-handle-stop--
-    };
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
-* Loader
-* player media loader/playback
-****************************************** */
-JuliaPlayer.prototype._Loader = function(origin)
-{
-    var self = this;
-
-    self.init = function()
-    {
-        //--odn-handle-start--
-        origin.env.api.src = '';
-
-        origin.env.useHlsLib = false;
-        origin.env.isLive = false;
-        origin.env.canPlayMedia = origin.Support.canPlayMedia();
-
-        if(origin.env.isHls === true)
-        {
-            //origin.env.useHlsLib = origin.env.canPlayMedia === false && Hls.isSupported() ? true: false;
-            origin.env.useHlsLib = true;
-        }
-
-        // ************************
-        // HLS library supported
-        // and HLS requested
-        // ************************
-        if(origin.env.useHlsLib === true)
-        {
-            origin.env.hls = new Hls(origin.options.hlsConfig);
-
-        // ************************
-        // Dash
-        // ************************
-        }else if(origin.env.isDash === true){
-
-            //origin.env.api.src = origin.env.source;
-        }else{
-
-            origin.env.api.src = origin.env.source;
-        }
-
-        if(origin.options.live === true)
-        {
-            origin.env.isLive = true;
-            origin.Ui.state(origin.env.model.toolbar, '', 'live');
-        }else{
-
-            origin.env.isLive = false;
-            origin.Ui.state(origin.env.model.toolbar, 'live', '');
-        }
-
-
-        // ************************
-        // HLS library supported
-        // and HLS requested
-        // ************************
-        if(origin.env.useHlsLib === true)
-        {
-            origin.Events.hlsLibEvents();
-            origin.env.hls.autoLevelCapping = -1;
-            origin.env.hls.attachMedia(origin.env.api);
-            origin.env.hls.loadSource(origin.env.source);
-
-            // API READY
-            origin.env.hls.on(Hls.Events.MEDIA_ATTACHED, function(event, data)
-            {
-
-                // DETECT LEVEL DATA
-                origin.env.hls.on(Hls.Events.LEVEL_LOADED, function(event, data)
-                {
-
-                });
-
-
-                for(x in origin.options.triggerHls)
-                {
-                    handle = origin.options.triggerHls[x];
-
-                    if(typeof window[handle] === 'function')
-                    {
-                        origin.env.hls.on(Hls.Events[x], function(event, data)
-                        {
-                            window[handle](origin.env.apiId, event, data);
-                        });
-
-                    }else{
-
-                        origin.Base.debug({
-                            'triggerHlsError': handle+' is not a function'
-                        });
-                    }
-                }
-            });
-
-        // ************************
-        // Usig DASH library
-        // ************************
-        }else if(origin.env.isDash === true)
-        {
-            origin.env.dash = dashjs.MediaPlayer().create();
-
-            origin.env.dash.initialize();
-            origin.env.dash.attachView(origin.env.api);
-            origin.env.dash.attachSource(origin.env.source);
-            origin.env.dash.setAutoPlay(origin.options.autoplay);
-
-            if(origin.options.debug === false)
-            {
-                origin.env.dash.getDebug().setLogToBrowserConsole(false);
-            }
-
-            origin.Events.dashLibEvents();
-
-        // ************************
-        // Classic VOD file
-        // ************************
-        }else{
-
-            origin.env.api.load();
-        }
-
-        //--odn-handle-stop--
-
-        origin.Ui.state(origin.env.model.preloader, '', 'on');
-
-        origin.Api.allowStart({
-            type: 'origin.Loader'
-        });
-
-        //origin.Controls.press('play');
-    };
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 media player
+* JuliaPlayer HTML5 player
 * jQuery plugin & extension
 ****************************************** */
-
 
 // Extension for non DOM context
 (function($)
@@ -2716,87 +3194,17 @@ JuliaPlayer.prototype._Loader = function(origin)
     $.extend({
         juliaPlayer: function ( options )
         {
-            return new JuliaPlayerVirtual( options );
+            return new JuliaPlayer( options );
         }
     });
 })($);
 
-
-
 // Build jQuery plugin
 jQuery.fn.juliaPlayer = function(options)
 {
-    // API wrappers
-    this.play = function()
-    {
-        $(this).data('juliaplayer').Controls.press('play');
-    };
+    var collection = [];
 
-    this.setOptions = function(options)
-    {
-        $.extend(true, $(this).data('juliaplayer').options, options);
-    };
-
-    this.options = function()
-    {
-        return $(this).data('juliaplayer').options;
-    };
-
-    this.source = function(options)
-    {
-        $(this).data('juliaplayer').Inject.source(options);
-    };
-
-    this.api = function()
-    {
-        return $(this).data('juliaplayer').api;
-    };
-
-    this.pause = function()
-    {
-        $(this).data('juliaplayer').Controls.press('pause');
-    };
-
-    this.stop = function()
-    {
-        $(this).data('juliaplayer').Controls.press('stop');
-    };
-
-    this.goto = function(t)
-    {
-        $(this).data('juliaplayer').Controls.press('goto', {
-            currentTime: t
-        });
-    };
-
-    this.mute = function()
-    {
-        if($(this).data('juliaplayer').api.muted === false)
-        {
-            $(this).data('juliaplayer').Controls.press('sound-off');
-        }else{
-            $(this).data('juliaplayer').Controls.press('sound-on');
-        }
-    };
-
-    this.volume = function(volume)
-    {
-        $(this).data('juliaplayer').Controls.press('volume', {
-            volume: volume
-        });
-    };
-
-    this.getID = function()
-    {
-        return $(this).data('juliaplayer').ID;
-    };
-
-    this.stats = function()
-    {
-        return $(this).data('juliaplayer').stats();
-    };
-
-    return this.each( function()
+    this.each( function()
     {
         // Return if this element already has a plugin instance
         if( $(this).data('juliaplayer') )
@@ -2804,15 +3212,33 @@ jQuery.fn.juliaPlayer = function(options)
             return;
         }
 
-        options = typeof options === 'undefined' ? {}: options;
-        options.element = $(this);
+        options = typeof options === 'object' ? options: {};
+
+        options.source = {
+            file: $(this).prop('src') ? $(this).prop('src'): $(this).find('source').prop('src'),
+            poster: $(this).prop('poster') ? $(this).prop('poster'): '',
+            title: $(this).data('title') ? $(this).data('title'): '',
+            mode: $(this).data('mode') ? $(this).data('mode'): 'legacy',
+            live: $(this).data('live') && $(this).data('live').toString().toLowerCase() == 'true' ? true: false,
+        };
+
+        options.element = $(this).parent();
+        options.pluginMode = true;
+
+        $(this).css({
+            display: 'none'
+        })
 
         // Pass options to constructor
         var julia = new JuliaPlayer(options);
 
         // Store plugin object in element's data
         $(this).data('juliaplayer', julia);
+
+        collection.push( julia );
     });
+
+    return collection;
 };
 
 

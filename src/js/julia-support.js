@@ -1,13 +1,10 @@
 /* *****************************************
-* JuliaPlayer HTML5 media player
-* Suppport
-* media & DOM sizing utilities
+* JuliaPlayer HTML5 player
+* Suppport utilities
 ****************************************** */
 JuliaPlayer.prototype._Support = function(origin)
 {
     var self = this;
-
-
 
 
     self.aspect = function(w,h)
@@ -16,6 +13,28 @@ JuliaPlayer.prototype._Support = function(origin)
     };
 
 
+    self.bitrate = function(bites)
+    {
+        var i = -1;
+        var biteUnits = ['kbps', 'Mbps', 'Gbps'];
+        do {
+            bites = bites / 1000;
+            i++;
+        } while (bites > 1000);
+
+        return Math.max(bites, 0.1).toFixed(1) + biteUnits[i];
+    };
+
+
+    self.forceReadyState = function()
+    {
+        if( /Firefox/i.test(navigator.userAgent) )
+        {
+            return true;
+        }
+
+        return false;
+    };
 
 
     self.isMobile = function()
@@ -29,8 +48,6 @@ JuliaPlayer.prototype._Support = function(origin)
     };
 
 
-
-
     self.iOS = function()
     {
         if( /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream )
@@ -42,31 +59,20 @@ JuliaPlayer.prototype._Support = function(origin)
     };
 
 
-
-
-    self.forceReady = function()
+    self.isVisible = function()
     {
-        if( /Firefox/i.test(navigator.userAgent) )
-        {
-            return true;
-        }
-
-        return false;
+        var rect = document.querySelector('#julia-'+origin.env.ID).getBoundingClientRect();
+        var viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+        return !( rect.bottom < 0 || rect.top - viewHeight >= 0 );
     };
-
-
 
 
     self.canPlayMedia = function()
     {
-        var vid = document.createElement('video');
-        vid.id = 'video-cap-test-'+origin.env.ID;
-        origin.env.canPlayMediaString = vid.canPlayType('application/vnd.apple.mpegURL');
-        $('#video-cap-test'+origin.env.ID).remove();
-        return (origin.env.canPlayMediaString == 'probably' || origin.env.canPlayMediaString == 'maybe');
+        origin.env.canPlayMediaString = origin.env.mode == 'legacy' ? origin.env.api.canPlayType('video/mp4'): origin.env.api.canPlayType('application/vnd.apple.mpegURL');
+        origin.env.canPlayMedia = (origin.env.canPlayMediaString == 'probably' || origin.env.canPlayMediaString == 'maybe');
+        return origin.env.canPlayMedia;
     };
-
-
 
 
     self.resize = function()
@@ -75,22 +81,24 @@ JuliaPlayer.prototype._Support = function(origin)
         defaultDim = origin.env.element.width() ? [origin.env.element.width(), origin.env.element.height()]: [origin.options.width, origin.options.height];
         dimensions = origin.options.responsive === true ? self.getSize(): defaultDim;
 
-        origin.Base.debug({
-            'resizeDefaults': defaultDim,
-            'resize': dimensions
-        });
-
         origin.env.instance.width(dimensions[0]);
         origin.env.instance.height(dimensions[1]);
+
+        origin.env.wrapper.width(dimensions[0]);
+        origin.env.wrapper.height(dimensions[1]);
 
         origin.env.dimensions.width = dimensions[0];
         origin.env.dimensions.height = dimensions[1];
 
+        // Small size fix, BAD BOY!
+        $('.julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-currentTime, .julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-duration')
+        .css({
+            'display': dimensions[0] < 360 ? 'none': 'block'
+        });
+
         origin.env.api.setAttribute('width', '100%');
         origin.env.api.setAttribute('height', '100%');
     };
-
-
 
 
     self.getSize = function()
@@ -103,28 +111,19 @@ JuliaPlayer.prototype._Support = function(origin)
         }
 
         var parentWidth = origin.env.element.parent().width();
-        var a = self.aspect( parseInt( origin.env.element.css('width') ), parseInt( origin.env.element.css('height') ) );
 
         for( i in origin.options.dimensions )
         {
-            var dim = origin.options.dimensions[i];
+            dim = origin.options.dimensions[i];
+
             if( parentWidth >= dim[0] )
             {
-                a = self.aspect( dim[0], dim[1] );
-                dimensions = [dim[0],(dim[0]*a)];
-
-                origin.Base.debug({
-                    'resizePredefined': dimensions
-                });
+                dimensions = [dim[0],( dim[0]*self.aspect( dim[0], dim[1] ) )];
                 return dimensions;
             }
         }
 
-        dimensions = [parentWidth, (parentWidth*a)];
-
-        origin.Base.debug({
-            'resizeFallback': dimensions
-        });
+        dimensions = [parentWidth, (parentWidth*self.aspect( dim[0], dim[1] ))];
 
         return dimensions;
     };

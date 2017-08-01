@@ -9,8 +9,18 @@ JuliaPlayer.prototype._Timecode = function(origin)
 
     self.toPercents = function(currentTime)
     {
-        p = (currentTime/origin.env.duration)*100;
-        return p;
+        duration = origin.env.api.duration;
+        if( isNaN(duration) || typeof Number(duration) !== 'number' )
+        {
+            duration = 0;
+        }
+
+        if( isNaN(currentTime) || typeof Number(currentTime) !== 'number' )
+        {
+            currentTime = 0;
+        }
+
+        return duration > 0 ? ( currentTime / duration ) * 100: 0;
     },
 
 
@@ -18,8 +28,18 @@ JuliaPlayer.prototype._Timecode = function(origin)
 
     self.toSeconds = function(percent)
     {
-        t = (origin.env.duration/100)*percent;
-        return t;
+        duration = origin.env.api.duration;
+        if( isNaN(duration) || typeof Number(duration) !== 'number' )
+        {
+            duration = 0;
+        }
+
+        if( isNaN(percent) || typeof Number(percent) !== 'number' )
+        {
+            percent = 0;
+        }
+
+        return ( duration / 100 ) * percent;
     },
 
 
@@ -41,6 +61,11 @@ JuliaPlayer.prototype._Timecode = function(origin)
 
     self.toHuman = function(time)
     {
+        if( isNaN(time) || typeof Number(time) !== 'number' )
+        {
+            time = 0;
+        }
+
         time = time.toString().split('.');
         s = time[0];
         H = Math.floor(s/3600);

@@ -1,0 +1,212 @@
+.julia-toolbar {
+    position: absolute;
+    background-color: $toolbarBg;
+
+    &.julia-toolbar-top {
+        height: 40px;
+        width: 100%;
+        top: -40px;
+        left: 0;
+        right: 0;
+
+        &.julia-toolbar-visible {
+            top: 0;
+        }
+
+        .julia-panel {
+
+            &.julia-title {
+                position: absolute;
+                top: 0;
+                left: 10px;
+                right: 100px;
+                height: 40px;
+                line-height: 40px;
+                font-size: 16px;
+                color: $appColor;
+                overflow: hidden;
+                text-align: left;
+            }
+        }
+    }
+
+    &.julia-toolbar-bottom {
+
+        height: 55px;
+        width: 100%;
+        bottom: -55px;
+        left: 0;
+        right: 0;
+        background: -webkit-linear-gradient($toolbarBgGradient); 
+        background: -o-linear-gradient($toolbarBgGradient);
+        background: -moz-linear-gradient($toolbarBgGradient);
+        background: linear-gradient($toolbarBgGradient);
+
+        &.julia-toolbar-visible {
+            bottom: 0;
+        }
+
+        .julia-progress {
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            top: 0;
+            height: 20px;
+
+            .julia-slider {
+
+                .julia-slider-fill {
+                    background-color: $sliderFillProgressBg;
+                }
+
+                .julia-slider-handle {
+                    background-color: $sliderFillProgressBg;
+                }
+
+                &:hover {
+
+                    .julia-slider-fill {
+                        box-shadow: 0 0 2px 1px $sliderFillProgressBg;
+                    }
+
+                    .julia-slider-handle {
+                        box-shadow: 0 0 4px 2px $sliderFillProgressBg;
+                    }
+                }
+            }
+        }
+
+
+        .julia-volume {
+            position: absolute;
+            right: 90px;
+            top: 25px;
+            width: 100px;
+            height: 20px;
+
+            div {
+                max-width: 100px;
+            }
+        }
+
+        .julia-panel {
+            position: absolute;
+            top: 24px;
+            font-size: 16px;
+
+            &.julia-channel-name {
+                left: 45px;
+            }
+        }
+
+        .julia-btn {
+            position: absolute;
+            top: 23px;
+
+            &.julia-play {
+                left: 5px;
+            }
+
+            &.julia-pause {
+                left: 5px;
+            }
+
+            &.julia-sound {
+                right: 200px;
+            }
+
+            &.julia-settings {
+                right: 45px;
+            }
+
+            &.julia-fullscreen {
+                right: 5px;
+            }
+        }
+
+        .julia-label {
+            display: block;
+            position: absolute;
+            border: 0;
+            outline: 0;
+            height: 22px;
+            line-height: 22px;
+            font-size: 14px;
+            background-color: $toolbarBg;
+
+            &.julia-label-goto {
+                width: 60px;
+                left: 30px;
+                bottom: 60px;
+                text-align: center;
+                display: none;
+
+                &.on {
+                    display: block;
+                }
+            }
+        }
+
+
+
+        .julia-panel {
+            display: block;
+            border: 0;
+            outline: 0;
+            height: 25px;
+            line-height: 25px;
+            font-size: 14px;
+            position: absolute;
+            top: 23px;
+
+            &.julia-currentTime {
+                width: 65px;
+                left: 35px;
+                text-align: right;
+
+                &:after {
+                    content: '/';
+                    margin-left: 3px;
+                    margin-right: 3px;
+                }
+            }
+
+            &.julia-duration {
+                left: 100px;
+            }
+        }
+
+
+        &.live {
+            .julia-progress {
+                display: none;
+            }
+
+            .julia-panel {
+                &.julia-currentTime {
+                    display: none;
+                }
+
+                &.julia-duration {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    &.julia-toolbar-left {
+        width: 80px;
+        height: 100%;
+        top: 0;
+        bottom: 0;
+        left: 0;
+    }
+
+    &.julia-toolbar-right {
+        width: 80px;
+        height: 100%;
+        top: 0;
+        bottom: 0;
+        right: 0;
+    }
+}

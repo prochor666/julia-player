@@ -1,0 +1,85 @@
+.julia-dropdown {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    height: 28px;
+    width: 150px;
+    border: 1px solid;
+    border-color: $dropdownBorderColor;
+    border-radius: 0;
+    background: -webkit-linear-gradient($dropdownBgGradient);
+    background: -o-linear-gradient($dropdownBgGradient);
+    background: -moz-linear-gradient($dropdownBgGradient);
+    background: linear-gradient($dropdownBgGradient);
+    -webkit-box-shadow: $dropdownBoxShadow;
+    -moz-box-shadow: $dropdownBoxShadow;
+    box-shadow: $dropdownBoxShadow;
+
+    &:before {
+        content: '';
+        position: absolute;
+        z-index: 2;
+        top: 9px;
+        right: 10px;
+        width: 0;
+        height: 0;
+        border: 4px dashed;
+        border-color: $dropdownABBorderColor;
+        border-top-color: $dropdownABTopBorderColor;
+        pointer-events: none;
+        border-bottom-style: solid;
+        border-top: none;
+    }
+
+    &:after {
+        content: '';
+        position: absolute;
+        z-index: 2;
+        top: 9px;
+        right: 10px;
+        width: 0;
+        height: 0;
+        border: 4px dashed;
+        border-color: $dropdownABBorderColor;
+        border-top-color: $dropdownABTopBorderColor;
+        pointer-events: none;
+        margin-top: 7px;
+        border-top-style: solid;
+        border-bottom: none;
+    }
+
+
+    .julia-dropdown-select {
+        position: relative;
+        width: 130%;
+        margin: 0;
+        padding: 6px 8px 6px 10px;
+        height: 28px;
+        line-height: 14px;
+        font-size: 12px;
+        color: $dropdownTextColor;
+        text-shadow: 0 1px $dropdownTextShadowColor;
+        background-color: $dropdownSelectBg;
+        border: 0;
+        border-radius: 0;
+        -webkit-appearance: none;
+
+        &:focus {
+            outline: none;
+        }
+
+        option {
+            margin: 3px;
+            padding: 6px 8px;
+            background: $dropdownSelectBg;
+            border-radius: 0;
+            cursor: pointer;
+        }
+    }
+}
+
+@-moz-document url-prefix() {
+  .julia-dropdown-select {
+    padding-left: 6px;
+  }
+}

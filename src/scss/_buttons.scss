@@ -1,0 +1,37 @@
+.julia-btn {
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font-size: 20px;
+    width: 30px;
+    height: 25px;
+    line-height: 25px;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+
+
+    .julia-icon {
+        background-color: $iconBg;
+        color: $iconColor;
+        -webkit-transition: color $transitionLength ease-in-out 0s, text-shadow $transitionLength ease-in-out 0s;
+        -moz-transition: color $transitionLength ease-in-out 0s, text-shadow $transitionLength ease-in-out 0s;
+        -o-transition: color $transitionLength ease-in-out 0s, text-shadow $transitionLength ease-in-out 0s;
+        -ms-transition: color $transitionLength ease-in-out 0s, text-shadow $transitionLength ease-in-out 0s;
+        transition: color $transitionLength ease-in-out 0s, text-shadow $transitionLength ease-in-out 0s;
+    }
+
+    &.julia-big-play {
+
+        .julia-icon {
+            text-shadow: 0 0 10px $appBg;
+        }
+    }
+
+    &:hover {
+        .julia-icon {
+            color: $iconHoverColor;
+            text-shadow: 0 0 10px $iconHoverColor;
+        }
+    }
+}
