@@ -23,7 +23,6 @@
                 height: 40px;
                 line-height: 40px;
                 font-size: 16px;
-                color: $appColor;
                 overflow: hidden;
                 text-align: left;
             }
@@ -37,7 +36,7 @@
         bottom: -55px;
         left: 0;
         right: 0;
-        background: -webkit-linear-gradient($toolbarBgGradient); 
+        background: -webkit-linear-gradient($toolbarBgGradient);
         background: -o-linear-gradient($toolbarBgGradient);
         background: -moz-linear-gradient($toolbarBgGradient);
         background: linear-gradient($toolbarBgGradient);

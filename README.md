@@ -1,4 +1,4 @@
-Warp media center
+Julia player
 =================
 Responsive, mobile ready media player
 
@@ -14,13 +14,14 @@ How to establish devel environment.
     - Replace package [gulp-replace](https://www.npmjs.com/package/gulp-replace)
     - Del package [del](https://www.npmjs.com/package/del)
     - Fs package [fs](https://www.npmjs.com/package/fs)
+    - Util package [gulp-util](https://www.npmjs.com/package/fs)
 
 How to start.
 
 Run:
 
 ```bash
-user@host:/your/devel/directory/warp-media-center# gulp watch
+user@host:/your/devel/directory/julia-player# gulp watch
 ```
 
 Now you can start typing in scss and js files. All needle files are generated on the fly.

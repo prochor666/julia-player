@@ -37,6 +37,12 @@ JuliaPlayer.prototype._Support = function(origin)
     };
 
 
+    self.isCallable = function(v)
+    {
+        return (!v || (typeof v !== 'object' && typeof v !== 'function')) ? false: true;
+    };
+
+
     self.isMobile = function()
     {
         if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile/i.test(navigator.userAgent) )

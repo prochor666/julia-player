@@ -2,56 +2,38 @@
 * JuliaPlayer HTML5 player
 * jQuery plugin & extension
 ****************************************** */
-
 // Extension for non DOM context
-(function($)
-{
+(function ($) {
     $.extend({
-        juliaPlayer: function ( options )
-        {
-            return new JuliaPlayer( options );
+        juliaPlayer: function (options) {
+            return new JuliaPlayer(options);
         }
     });
-})($);
-
+}($));
 // Build jQuery plugin
-jQuery.fn.juliaPlayer = function(options)
-{
+jQuery.fn.juliaPlayer = function (options) {
     var collection = [];
-
-    this.each( function()
-    {
-        // Return if this element already has a plugin instance
-        if( $(this).data('juliaplayer') )
-        {
+    this.each(function () {
+        // Return if this element already has an instance
+        if ($(this).data('juliaplayer')) {
             return;
         }
-
-        options = typeof options === 'object' ? options: {};
-
+        options = typeof options === 'object' ? options : {};
         options.source = {
-            file: $(this).prop('src') ? $(this).prop('src'): $(this).find('source').prop('src'),
-            poster: $(this).prop('poster') ? $(this).prop('poster'): '',
-            title: $(this).data('title') ? $(this).data('title'): '',
-            mode: $(this).data('mode') ? $(this).data('mode'): 'legacy',
-            live: $(this).data('live') && $(this).data('live').toString().toLowerCase() == 'true' ? true: false,
+            file: $(this).prop('src') ? $(this).prop('src') : $(this).find('source').prop('src'),
+            poster: $(this).prop('poster') ? $(this).prop('poster') : '',
+            title: $(this).data('title') ? $(this).data('title') : '',
+            mode: $(this).data('mode') ? $(this).data('mode') : 'legacy',
+            live: $(this).data('live') && $(this).data('live').toString().toLowerCase() == 'true' ? true : false
         };
-
         options.element = $(this).parent();
         options.pluginMode = true;
-
-        $(this).css({
-            display: 'none'
-        })
-
+        $(this).css({ display: 'none' });
         // Pass options to constructor
         var julia = new JuliaPlayer(options);
-
         // Store plugin object in element's data
         $(this).data('juliaplayer', julia);
-
-        collection.push( julia );
+        collection.push(julia);
     });
-
     return collection;
 };

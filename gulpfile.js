@@ -13,6 +13,7 @@ var minify = require('gulp-minify');
 var replace = require('gulp-replace');
 var del = require('del');
 var fs = require('fs');
+var gutil = require('gulp-util');
 
 // Sources
 var appSrc = [
@@ -75,9 +76,10 @@ gulp.task('finalbuild', function()
     {
         var pluginContent = fs.readFileSync('plugin/julia-plugin-build.js', 'utf8');
 
-        return gulp.src(appUMD)
+        var stream = gulp.src(appUMD)
             .pipe(replace('//--JULIA-PLAYER-SOURCE--', pluginContent))
             .pipe(concat('julia-player.js'))
+            .pipe(gulp.dest('dist/js'))
             .pipe(minify({
                 ext:{
                     src:'.js',
@@ -86,7 +88,9 @@ gulp.task('finalbuild', function()
                 compress: {
                     properties: false
                 }
-            })).pipe(gulp.dest('dist/js'));
+            }).on('error', gutil.log))
+            .pipe(gulp.dest('dist/js'));
+
     }, 1000);
 });
 

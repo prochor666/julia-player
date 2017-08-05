@@ -8,72 +8,75 @@
     transform: rotate(360deg); } }
 
 @font-face {
-  font-family: "WMC";
-  src: url("../fonts/julia-icons.eot");
-  src: url("../fonts/julia-icons.eot?#iefix") format("embedded-opentype"), url("../fonts/julia-icons.woff") format("woff"), url("../fonts/julia-icons.ttf") format("truetype"), url("../fonts/julia-icons.svg#WMC") format("svg");
+  font-family: "julia-wmcf";
+  src: url("../fonts/wmcf.eot");
+  src: url("../fonts/wmcf.eot?#iefix") format("embedded-opentype"), url("../fonts/wmcf.woff") format("woff"), url("../fonts/wmcf.ttf") format("truetype"), url("../fonts/wmcf.svg#wmcf") format("svg");
   font-weight: normal;
   font-style: normal; }
 
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   @font-face {
-    font-family: "WMC";
-    src: url("../fonts/julia-icons.svg#WMC") format("svg"); } }
+    font-family: "julia-wmcf";
+    src: url("../fonts/wmcf.svg#wmcf") format("svg"); } }
 
 .julia-icon {
-  font-family: "WMC";
+  font-family: "julia-wmcf";
   font-style: normal;
   display: inline; }
-  .julia-icon.julia-download:before {
-    content: "\f100"; }
-  .julia-icon.julia-refresh:before {
-    content: "\f101"; }
-  .julia-icon.julia-forward:before {
-    content: "\f102"; }
-  .julia-icon.julia-backward:before {
-    content: "\f103"; }
-  .julia-icon.julia-close:before {
-    content: "\f104"; }
   .julia-icon.julia-fullscreen-exit:before {
-    content: "\f105"; }
-  .julia-icon.julia-target:before {
-    content: "\f106"; }
-  .julia-icon.julia-subtitles:before {
-    content: "\f107"; }
-  .julia-icon.julia-fullscreen:before {
-    content: "\f108"; }
+    content: "\f100"; }
+  .julia-icon.julia-close:before {
+    content: "\f101"; }
   .julia-icon.julia-menu:before {
-    content: "\f109"; }
-  .julia-icon.julia-dot-menu:before {
-    content: "\f10a"; }
-  .julia-icon.julia-mark:before {
-    content: "\f10b"; }
-  .julia-icon.julia-play-circle-inverse:before {
-    content: "\f10c"; }
-  .julia-icon.julia-play-circle:before {
-    content: "\f10d"; }
-  .julia-icon.julia-next:before {
-    content: "\f10e"; }
-  .julia-icon.julia-play:before {
-    content: "\f10f"; }
-  .julia-icon.julia-play-outline:before {
-    content: "\f110"; }
-  .julia-icon.julia-pause:before {
-    content: "\f111"; }
-  .julia-icon.julia-sound-off:before {
-    content: "\f112"; }
+    content: "\f102"; }
   .julia-icon.julia-sound-on:before {
-    content: "\f113"; }
+    content: "\f103"; }
+  .julia-icon.julia-play-circle-inverse:before {
+    content: "\f104"; }
+  .julia-icon.julia-gear:before {
+    content: "\f105"; }
+  .julia-icon.julia-dot-menu-v:before {
+    content: "\f106"; }
+  .julia-icon.julia-backward:before {
+    content: "\f107"; }
+  .julia-icon.julia-next:before {
+    content: "\f108"; }
+  .julia-icon.julia-pause:before {
+    content: "\f109"; }
+  .julia-icon.julia-broadcast:before {
+    content: "\f10a"; }
   .julia-icon.julia-sound-min:before {
-    content: "\f114"; }
+    content: "\f10b"; }
+  .julia-icon.julia-mark:before {
+    content: "\f10c"; }
+  .julia-icon.julia-forward:before {
+    content: "\f10d"; }
   .julia-icon.julia-list:before {
+    content: "\f10e"; }
+  .julia-icon.julia-fullscreen:before {
+    content: "\f10f"; }
+  .julia-icon.julia-subtitles:before {
+    content: "\f110"; }
+  .julia-icon.julia-download:before {
+    content: "\f111"; }
+  .julia-icon.julia-play-circle:before {
+    content: "\f112"; }
+  .julia-icon.julia-sound-off:before {
+    content: "\f113"; }
+  .julia-icon.julia-play:before {
+    content: "\f114"; }
+  .julia-icon.julia-dot-menu-h:before {
     content: "\f115"; }
-  .julia-icon.julia-prev:before {
+  .julia-icon.julia-previous:before {
     content: "\f116"; }
+  .julia-icon.julia-refresh:before {
+    content: "\f117"; }
 
 div.julia-player {
   padding: 0;
   margin: 0 auto;
   overflow: hidden;
+  color: #f9f9f9;
   background-color: black;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -256,6 +259,20 @@ div.julia-player {
       bottom: 0;
       left: 0;
       background: transparent; }
+    div.julia-player .julia-wrapper .julia-notifier {
+      display: none;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      text-align: center;
+      font-size: 20px;
+      padding-top: 80px;
+      color: #f9f9f9;
+      background-color: #111111; }
+      div.julia-player .julia-wrapper .julia-notifier.on {
+        display: block; }
     div.julia-player .julia-wrapper .julia-btn.julia-big-play {
       width: 72px;
       height: 72px;
@@ -328,7 +345,6 @@ div.julia-player {
           height: 40px;
           line-height: 40px;
           font-size: 16px;
-          color: #f9f9f9;
           overflow: hidden;
           text-align: left; }
       div.julia-player .julia-wrapper .julia-toolbar.julia-toolbar-bottom {
