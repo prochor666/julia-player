@@ -169,9 +169,8 @@ JuliaPlayer = function (options) {
         menus: { settings: '' },
         suggest: $(),
         preloader: $(),
-        progressStep: 0.01,
-        // Full sense: 100, so .01 is enough accurate
-        version: '2.0.1'
+        progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
+        version: '2.0.2'
     };
     // Console debug
     origin.debug = function (data, warn) {
@@ -249,10 +248,10 @@ JuliaPlayer = function (options) {
         origin.Support.resize();
         origin.Ui.state(origin.env.instance, 'off', '');
         var _load = [];
-        if (typeof origin.env.context.dashjs === 'undefined') {
+        if (origin.options.source.hasOwnProperty('mode') && origin.options.source.mode === 'dash' && typeof origin.env.context.dashjs === 'undefined') {
             _load.push(origin.options.plugins + '/dash.all.min.js');
         }
-        if (typeof origin.env.context.Hls === 'undefined') {
+        if (origin.options.source.hasOwnProperty('mode') && origin.options.source.mode === 'hls' && typeof origin.env.context.Hls === 'undefined') {
             _load.push(origin.options.plugins + '/hls.min.js');
         }
         $(document).on('julia.scripts-loaded julia.no-scripts', '#julia-' + origin.env.ID, function (e) {
@@ -1309,7 +1308,7 @@ JuliaPlayer.prototype._Source = function (origin) {
         source.live = Object.keys(_source).indexOf('live') > -1 ? _source.live : source.live;
         source.live = typeof source.live === 'undefined' ? false : source.live;
         source.mode = typeof source.mode === 'undefined' ? 'legacy' : source.mode;
-        if (origin.env.context.Hls.isSupported() !== true) {
+        if (source.mode === 'hls' && self.modeTest() && origin.env.context.Hls.isSupported() !== true) {
             source.mode = 'hlsnative';
         }
         origin.env.mode = source.mode;
@@ -2098,6 +2097,9 @@ JuliaPlayer.prototype._Ui = function (origin) {
             origin.env.toolbarBottom,
             origin.env.menus.settings
         ]);
+        if (origin.options.autoplay === true && origin.Support.isMobile() === false) {
+            origin.env.buttons.bigPlay.hide();
+        }
         // Compose final object
         origin.env.instance.append([origin.env.wrapper]);
         origin.env.element.append(origin.env.instance);
@@ -2164,9 +2166,9 @@ JuliaPlayer.prototype._Ui = function (origin) {
             origin.env.toolbarTop,
             origin.env.toolbarBottom,
             origin.env.suggest,
-            origin.env.notifier,
             origin.env.menus.settings,
-            origin.env.buttons.bigPlay
+            origin.env.buttons.bigPlay,
+            origin.env.notifier,
         ];
         layers.map(function (x, i) {
             layers[i].css({ 'z-index': indexHighest + i });

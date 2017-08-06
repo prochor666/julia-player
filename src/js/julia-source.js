@@ -30,7 +30,7 @@ JuliaPlayer.prototype._Source = function (origin) {
         source.live = Object.keys(_source).indexOf('live') > -1 ? _source.live : source.live;
         source.live = typeof source.live === 'undefined' ? false : source.live;
         source.mode = typeof source.mode === 'undefined' ? 'legacy' : source.mode;
-        if (origin.env.context.Hls.isSupported() !== true) {
+        if (source.mode === 'hls' && self.modeTest() && origin.env.context.Hls.isSupported() !== true) {
             source.mode = 'hlsnative';
         }
         origin.env.mode = source.mode;

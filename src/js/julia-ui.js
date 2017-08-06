@@ -84,6 +84,9 @@ JuliaPlayer.prototype._Ui = function (origin) {
             origin.env.toolbarBottom,
             origin.env.menus.settings
         ]);
+        if (origin.options.autoplay === true && origin.Support.isMobile() === false) {
+            origin.env.buttons.bigPlay.hide();
+        }
         // Compose final object
         origin.env.instance.append([origin.env.wrapper]);
         origin.env.element.append(origin.env.instance);
@@ -150,9 +153,9 @@ JuliaPlayer.prototype._Ui = function (origin) {
             origin.env.toolbarTop,
             origin.env.toolbarBottom,
             origin.env.suggest,
-            origin.env.notifier,
             origin.env.menus.settings,
-            origin.env.buttons.bigPlay
+            origin.env.buttons.bigPlay,
+            origin.env.notifier,
         ];
         layers.map(function (x, i) {
             layers[i].css({ 'z-index': indexHighest + i });

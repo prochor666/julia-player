@@ -169,9 +169,8 @@ JuliaPlayer = function (options) {
         menus: { settings: '' },
         suggest: $(),
         preloader: $(),
-        progressStep: 0.01,
-        // Full sense: 100, so .01 is enough accurate
-        version: '2.0.1'
+        progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
+        version: '2.0.2'
     };
     // Console debug
     origin.debug = function (data, warn) {
@@ -249,10 +248,10 @@ JuliaPlayer = function (options) {
         origin.Support.resize();
         origin.Ui.state(origin.env.instance, 'off', '');
         var _load = [];
-        if (typeof origin.env.context.dashjs === 'undefined') {
+        if (origin.options.source.hasOwnProperty('mode') && origin.options.source.mode === 'dash' && typeof origin.env.context.dashjs === 'undefined') {
             _load.push(origin.options.plugins + '/dash.all.min.js');
         }
-        if (typeof origin.env.context.Hls === 'undefined') {
+        if (origin.options.source.hasOwnProperty('mode') && origin.options.source.mode === 'hls' && typeof origin.env.context.Hls === 'undefined') {
             _load.push(origin.options.plugins + '/hls.min.js');
         }
         $(document).on('julia.scripts-loaded julia.no-scripts', '#julia-' + origin.env.ID, function (e) {
