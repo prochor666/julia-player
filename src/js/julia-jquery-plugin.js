@@ -23,6 +23,7 @@ jQuery.fn.juliaPlayer = function (options) {
             file: $(this).prop('src') ? $(this).prop('src') : $(this).find('source').prop('src'),
             poster: $(this).prop('poster') ? $(this).prop('poster') : '',
             title: $(this).data('title') ? $(this).data('title') : '',
+            link: $(this).data('link') ? $(this).data('link') : '',
             mode: $(this).data('mode') ? $(this).data('mode') : 'legacy',
             live: $(this).data('live') && $(this).data('live').toString().toLowerCase() == 'true' ? true : false
         };

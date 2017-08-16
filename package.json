@@ -1,18 +1,18 @@
 {
   "name": "julia-player",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Julia player, responsive, mobile first, HTML5 player with HTTP Live Streaming (HLS) and Dynamic Adaptive Streaming over HTTP (MPEG-DASH) support",
   "main": "gulpfile.js",
   "dependencies": {
     "gulp": "^3.9.1",
-    "gulp-clean-css": "^2.0.12",
-    "gulp-concat": "^2.6.0",
-    "gulp-minify": "^0.0.14",
-    "gulp-sass": "^2.3.2",
-    "gulp-sourcemaps": "^1.6.0"
-  },
-  "devDependencies": {
-    "gulp-clean-css": "^2.4.0"
+    "gulp-clean-css": "^3.7.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-minify": "^1.0.0",
+    "gulp-sass": "^3.1.0",
+    "gulp-replace": "^0.6.1",
+    "gulp-util": "^3.0.8",
+    "del": "^3.0.0",
+    "fs": "^0.0.1-security"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

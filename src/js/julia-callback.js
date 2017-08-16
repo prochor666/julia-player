@@ -25,7 +25,7 @@ JuliaPlayer.prototype._Callback = function (origin) {
     };
     // Time update event callbacks
     self.onTime = function (time, timeNum) {
-        if (origin.options.onTime && typeof origin.options.onTime === 'object' && time in origin.options.onTime && origin.env.onTimeRised.indexOf(time) == -1) {
+        if (origin.options.onTime && typeof origin.options.onTime === 'object' && Object.keys(origin.options.onTime).indexOf(time) > -1 && origin.env.onTimeRised.indexOf(time) == -1) {
             f = origin.options.onTime[time];
             origin.env.onTimeRised.push(time);
             if ($.inArray(typeof f, [

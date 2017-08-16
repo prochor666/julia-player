@@ -296,7 +296,8 @@ div.julia-player {
       border: 0;
       min-width: 200px;
       padding: 0;
-      text-align: left; }
+      text-align: left;
+      cursor: default; }
       div.julia-player .julia-wrapper .julia-menu.on {
         height: auto;
         overflow-y: auto;
@@ -309,14 +310,12 @@ div.julia-player {
         display: none; }
         div.julia-player .julia-wrapper .julia-menu .julia-menu-item td {
           font-size: 12px;
-          cursor: pointer;
+          cursor: default;
           padding: 5px 0 0 10px;
           vertical-align: middle; }
           div.julia-player .julia-wrapper .julia-menu .julia-menu-item td.julia-menu-item-title {
             font-weight: 400;
             padding: 0 5px; }
-        div.julia-player .julia-wrapper .julia-menu .julia-menu-item:hover td {
-          color: deepskyblue; }
         div.julia-player .julia-wrapper .julia-menu .julia-menu-item.on {
           display: table-row; }
       div.julia-player .julia-wrapper .julia-menu.julia-menu-settings {
@@ -346,7 +345,14 @@ div.julia-player {
           line-height: 40px;
           font-size: 16px;
           overflow: hidden;
-          text-align: left; }
+          text-align: left;
+          cursor: default; }
+          div.julia-player .julia-wrapper .julia-toolbar.julia-toolbar-top .julia-panel.julia-title a {
+            color: #f9f9f9;
+            text-decoration: none; }
+            div.julia-player .julia-wrapper .julia-toolbar.julia-toolbar-top .julia-panel.julia-title a:hover {
+              color: deepskyblue;
+              text-decoration: none; }
       div.julia-player .julia-wrapper .julia-toolbar.julia-toolbar-bottom {
         height: 55px;
         width: 100%;
@@ -425,6 +431,7 @@ div.julia-player {
           line-height: 25px;
           font-size: 14px;
           position: absolute;
+          cursor: default;
           top: 23px; }
           div.julia-player .julia-wrapper .julia-toolbar.julia-toolbar-bottom .julia-panel.julia-currentTime {
             width: 65px;

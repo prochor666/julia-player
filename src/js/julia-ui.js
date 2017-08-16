@@ -95,12 +95,15 @@ JuliaPlayer.prototype._Ui = function (origin) {
             'Julia instance appended to': origin.env.element
         });
         // Video api
-        origin.env.api = document.getElementById('julia-api-' + origin.env.ID);
-        origin.env.api.controls = false;
-        origin.debug({ 'Api object': 'julia-api-' + origin.env.ID });
-        self.zIndexize();
-        origin.Ui.state(origin.env.instance, '', 'on');
-        origin.event('julia.ui-created', origin.env.instance);    //--odn-handle-stop--
+        setTimeout( function() {
+            origin.env.api = document.getElementById('julia-api-' + origin.env.ID);
+            origin.env.api.controls = false;
+            origin.debug({ 'Api object': 'julia-api-' + origin.env.ID });
+            self.zIndexize();
+            origin.Ui.state(origin.env.instance, '', 'on');
+            origin.event('julia.ui-created', origin.env.instance);
+        }, 250);
+        //--odn-handle-stop--
     };
     self.icon = function (element, remove, add) {
         element.find('i').removeClass(remove).addClass(add);
@@ -109,7 +112,7 @@ JuliaPlayer.prototype._Ui = function (origin) {
         element.removeClass(remove).addClass(add);
     };
     self.panel = function (element, value) {
-        element.find('span').text(value);
+        element.find('span').html(value);
     };
     self.notify = function (message) {
         origin.env.notifier.html(message);

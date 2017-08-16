@@ -107,6 +107,7 @@ JuliaPlayer = function (options) {
         source: {
             file: '',
             poster: '',
+            link: '',
             mode: 'legacy',
             live: false
         },
@@ -114,7 +115,8 @@ JuliaPlayer = function (options) {
         suggestLimit: 4,
         suggestTimeout: 10000,
         thumbs: false,
-        zIndexStart: 1
+        zIndexStart: 1,
+        errorRecoveryAttemptLimit: 3,
     };
     // Extend default origin.options with external options
     $.extend(true, origin.options, options);
@@ -132,7 +134,7 @@ JuliaPlayer = function (options) {
             height: 0
         },
         errorRecoveryAttempts: 0,
-        errorRecoveryAttemptLimit: 10,
+        errorRecoveryAttemptLimit: origin.options.errorRecoveryAttemptLimit,
         fullscreenFrame: false,
         i18n: origin.options.i18n,
         ID: __JULIA_INSTANCE__ID__,
@@ -170,7 +172,7 @@ JuliaPlayer = function (options) {
         suggest: $(),
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.0.2'
+        version: '2.0.3'
     };
     // Console debug
     origin.debug = function (data, warn) {

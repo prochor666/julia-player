@@ -1,7 +1,6 @@
 @import "_vars.scss";
 @import "_icons.scss";
 
-
 div.julia-player {
     padding: 0;
     margin: 0 auto;
@@ -85,6 +84,7 @@ div.julia-player {
             min-width: 200px;
             padding: 0;
             text-align: left;
+            cursor: default;
 
             &.on {
                 height: auto;
@@ -103,19 +103,13 @@ div.julia-player {
 
                 td {
                     font-size: 12px;
-                    cursor: pointer;
+                    cursor: default;
                     padding: 5px 0 0 10px;
                     vertical-align: middle;
 
                     &.julia-menu-item-title {
                         font-weight: 400;
                         padding: 0 5px;
-                    }
-                }
-
-                &:hover {
-                    td {
-                        color: $iconHoverColor;
                     }
                 }
 

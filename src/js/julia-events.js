@@ -319,10 +319,8 @@ JuliaPlayer.prototype._Events = function (origin) {
                 origin.debug({
                     'Stream is initialized and ready': event,
                     'Video bitrate list': bitratesVideo,
-                    //'Audio bitrate list': origin.Switcher.getBitrateList('audio'),
                     'Audio track list': tracksAudio,
                     'ABR video bitrate': origin.Switcher.getAutoBitrate('video'),
-                    //'ABR audio bitrate': origin.Switcher.getAutoBitrate('audio'),
                     'Video bitrate': origin.Switcher.getBitrate('video')
                 });
                 if (typeof bitratesVideo === 'object' && bitratesVideo && bitratesVideo.length > 1) {
@@ -460,6 +458,19 @@ JuliaPlayer.prototype._Events = function (origin) {
                             'Video bitrate': origin.Switcher.getBitrate('video'),
                             'Audio bitrate': origin.Switcher.getBitrate('audio')
                         });
+                        // Optional buffer tunnning
+                        if (Object.keys(origin.options.dashConfig).indexOf('setRichBufferThreshold') > -1) {
+                             origin.env.dash.setRichBufferThreshold(origin.options.dashConfig.setRichBufferThreshold);
+                        }
+                        if (Object.keys(origin.options.dashConfig).indexOf('setBufferToKeep') > -1) {
+                             origin.env.dash.setBufferToKeep(origin.options.dashConfig.setBufferToKeep);
+                        }
+                        if (Object.keys(origin.options.dashConfig).indexOf('setBufferPruningInterval') > -1) {
+                             origin.env.dash.setBufferPruningInterval(origin.options.dashConfig.setBufferPruningInterval);
+                        }
+                        if (Object.keys(origin.options.dashConfig).indexOf('setBufferTimeAtTopQuality') > -1) {
+                             origin.env.dash.setBufferTimeAtTopQuality(origin.options.dashConfig.setBufferTimeAtTopQuality);
+                        }
                         // Video bitrates
                         origin.env.dash.setFastSwitchEnabled(true);
                         if (typeof bitratesVideo === 'object' && bitratesVideo && bitratesVideo.length > 1) {
@@ -515,6 +526,13 @@ JuliaPlayer.prototype._Events = function (origin) {
                         }
                         break;
                     default:
+                        origin.debug({
+                            'Dash Event': eventName,
+                            'EventType': event.type,
+                            'Data': event,
+                            'Attempts': origin.env.errorRecoveryAttempts,
+                            'Attempt limit': origin.env.errorRecoveryAttemptLimit
+                        });
                     }
                 });
             });

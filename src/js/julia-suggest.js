@@ -16,9 +16,10 @@ JuliaPlayer.prototype._Suggest = function (origin) {
                     file = !!origin.options.suggest[i].file ? origin.options.suggest[i].file : '';
                     poster = !!origin.options.suggest[i].poster ? origin.options.suggest[i].poster : '';
                     title = !!origin.options.suggest[i].title ? origin.options.suggest[i].title : '';
+                    link = !!origin.options.suggest[i].link ? origin.options.suggest[i].link : '';
                     mode = !!origin.options.suggest[i].mode ? origin.options.suggest[i].mode : 'legacy';
                     posterImage = poster.length > 0 ? '<img src="' + poster + '" width="100%" height="100%">' : '';
-                    suggestItemWidget = $('<div class="julia-suggest-item" data-item-poster="' + poster + '" data-item-file="' + origin.options.suggest[i].file + '" data-mode="' + mode + '" data-item-title="' + origin.options.suggest[i].title + '" data-index="' + i + '" data-item-mode="' + origin.options.suggest[i].mode + '" data-item-live="' + origin.options.suggest[i].live + '">' + posterImage + '<div class="julia-suggest-item-title">' + origin.options.suggest[i].title + '</div>' + '</div>');
+                    suggestItemWidget = $('<div class="julia-suggest-item" data-item-poster="' + poster + '" data-item-file="' + origin.options.suggest[i].file + '" data-item-link="' + origin.options.suggest[i].link + '" data-mode="' + mode + '" data-item-title="' + origin.options.suggest[i].title + '" data-index="' + i + '" data-item-mode="' + origin.options.suggest[i].mode + '" data-item-live="' + origin.options.suggest[i].live + '">' + posterImage + '<div class="julia-suggest-item-title">' + origin.options.suggest[i].title + '</div>' + '</div>');
                     suggestItemWidget.on('click', function (e) {
                         origin.Ui.state(origin.env.preloader, '', 'on');
                         if (origin.options.onSuggest !== false) {
@@ -31,6 +32,7 @@ JuliaPlayer.prototype._Suggest = function (origin) {
                             file: $(this).data('item-file'),
                             poster: $(this).data('item-poster'),
                             title: $(this).data('item-title'),
+                            link: $(this).data('item-link'),
                             mode: $(this).data('item-mode'),
                             live: $(this).data('item-live')
                         };

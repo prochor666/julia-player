@@ -127,6 +127,7 @@ JuliaPlayer = function (options) {
         source: {
             file: '',
             poster: '',
+            link: '',
             mode: 'legacy',
             live: false
         },
@@ -134,7 +135,8 @@ JuliaPlayer = function (options) {
         suggestLimit: 4,
         suggestTimeout: 10000,
         thumbs: false,
-        zIndexStart: 1
+        zIndexStart: 1,
+        errorRecoveryAttemptLimit: 3,
     };
     // Extend default origin.options with external options
     $.extend(true, origin.options, options);
@@ -152,7 +154,7 @@ JuliaPlayer = function (options) {
             height: 0
         },
         errorRecoveryAttempts: 0,
-        errorRecoveryAttemptLimit: 10,
+        errorRecoveryAttemptLimit: origin.options.errorRecoveryAttemptLimit,
         fullscreenFrame: false,
         i18n: origin.options.i18n,
         ID: __JULIA_INSTANCE__ID__,
@@ -190,7 +192,7 @@ JuliaPlayer = function (options) {
         suggest: $(),
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.0.2'
+        version: '2.0.3'
     };
     // Console debug
     origin.debug = function (data, warn) {
@@ -395,7 +397,7 @@ JuliaPlayer.prototype._Callback = function (origin) {
     };
     // Time update event callbacks
     self.onTime = function (time, timeNum) {
-        if (origin.options.onTime && typeof origin.options.onTime === 'object' && time in origin.options.onTime && origin.env.onTimeRised.indexOf(time) == -1) {
+        if (origin.options.onTime && typeof origin.options.onTime === 'object' && Object.keys(origin.options.onTime).indexOf(time) > -1 && origin.env.onTimeRised.indexOf(time) == -1) {
             f = origin.options.onTime[time];
             origin.env.onTimeRised.push(time);
             if ($.inArray(typeof f, [
@@ -828,10 +830,8 @@ JuliaPlayer.prototype._Events = function (origin) {
                 origin.debug({
                     'Stream is initialized and ready': event,
                     'Video bitrate list': bitratesVideo,
-                    //'Audio bitrate list': origin.Switcher.getBitrateList('audio'),
                     'Audio track list': tracksAudio,
                     'ABR video bitrate': origin.Switcher.getAutoBitrate('video'),
-                    //'ABR audio bitrate': origin.Switcher.getAutoBitrate('audio'),
                     'Video bitrate': origin.Switcher.getBitrate('video')
                 });
                 if (typeof bitratesVideo === 'object' && bitratesVideo && bitratesVideo.length > 1) {
@@ -969,6 +969,19 @@ JuliaPlayer.prototype._Events = function (origin) {
                             'Video bitrate': origin.Switcher.getBitrate('video'),
                             'Audio bitrate': origin.Switcher.getBitrate('audio')
                         });
+                        // Optional buffer tunnning
+                        if (Object.keys(origin.options.dashConfig).indexOf('setRichBufferThreshold') > -1) {
+                             origin.env.dash.setRichBufferThreshold(origin.options.dashConfig.setRichBufferThreshold);
+                        }
+                        if (Object.keys(origin.options.dashConfig).indexOf('setBufferToKeep') > -1) {
+                             origin.env.dash.setBufferToKeep(origin.options.dashConfig.setBufferToKeep);
+                        }
+                        if (Object.keys(origin.options.dashConfig).indexOf('setBufferPruningInterval') > -1) {
+                             origin.env.dash.setBufferPruningInterval(origin.options.dashConfig.setBufferPruningInterval);
+                        }
+                        if (Object.keys(origin.options.dashConfig).indexOf('setBufferTimeAtTopQuality') > -1) {
+                             origin.env.dash.setBufferTimeAtTopQuality(origin.options.dashConfig.setBufferTimeAtTopQuality);
+                        }
                         // Video bitrates
                         origin.env.dash.setFastSwitchEnabled(true);
                         if (typeof bitratesVideo === 'object' && bitratesVideo && bitratesVideo.length > 1) {
@@ -1024,6 +1037,13 @@ JuliaPlayer.prototype._Events = function (origin) {
                         }
                         break;
                     default:
+                        origin.debug({
+                            'Dash Event': eventName,
+                            'EventType': event.type,
+                            'Data': event,
+                            'Attempts': origin.env.errorRecoveryAttempts,
+                            'Attempt limit': origin.env.errorRecoveryAttemptLimit
+                        });
                     }
                 });
             });
@@ -1317,14 +1337,14 @@ JuliaPlayer.prototype._Source = function (origin) {
             origin.env.api.pause();
             origin.env.continuePlayback = true;
         }
-        ;
         origin.env.started = false;
         source = typeof origin.options.source === 'object' ? origin.options.source : {};
         _source = typeof _source === 'object' ? _source : {};
-        source.file = Object.keys(_source).indexOf('file') > -1 ? _source.file : source.file;
-        source.poster = Object.keys(_source).indexOf('poster') > -1 ? _source.poster : source.poster;
-        source.mode = Object.keys(_source).indexOf('mode') > -1 ? _source.mode : source.mode;
-        source.title = Object.keys(_source).indexOf('title') > -1 ? _source.title : source.title;
+        source.file = Object.keys(_source).indexOf('file') > -1 ? _source.file.toString() : source.file.toString();
+        source.poster = Object.keys(_source).indexOf('poster') > -1 ? _source.poster.toString() : source.poster.toString();
+        source.mode = Object.keys(_source).indexOf('mode') > -1 ? _source.mode.toString() : source.mode.toString();
+        source.title = Object.keys(_source).indexOf('title') > -1 ? _source.title.toString() : source.title.toString();
+        source.link = Object.keys(_source).indexOf('link') > -1 ? _source.link.toString() : source.link.toString();
         source.live = Object.keys(_source).indexOf('live') > -1 ? _source.live : source.live;
         source.live = typeof source.live === 'undefined' ? false : source.live;
         source.mode = typeof source.mode === 'undefined' ? 'legacy' : source.mode;
@@ -1332,7 +1352,11 @@ JuliaPlayer.prototype._Source = function (origin) {
             source.mode = 'hlsnative';
         }
         origin.env.mode = source.mode;
-        origin.Ui.panel(origin.env.panels.title, source.title);
+        if (source.link.toString().length > 0) {
+            origin.Ui.panel(origin.env.panels.title, '<a href="'+source.link+'" target="_blank">'+source.title+' &raquo;</a>');
+        }else{
+            origin.Ui.panel(origin.env.panels.title, source.title);
+        }
         origin.debug({
             'Api file': source.file,
             'Api poster': source.poster,
@@ -1447,7 +1471,23 @@ JuliaPlayer.prototype._Source = function (origin) {
         }
     };
     self.recover = function (force) {
-        if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || typeof force !== 'undefined' && force === true) {
+        force = typeof force !== 'undefined' && force === true ? force: false;
+
+        origin.debug({
+            'Playback recovery force': force,
+            'Attempts': origin.env.errorRecoveryAttempts,
+            'Attempt Limit': origin.env.errorRecoveryAttemptLimit
+        });
+
+        if (origin.env.errorRecoveryAttempts > 0) {
+            origin.Ui.state(origin.env.preloader, '', 'on');
+            origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
+        }else{
+            origin.Ui.state(origin.env.preloader, 'on', '');
+            origin.env.toolbarBottom.addClass('julia-toolbar-visible');
+        }
+
+        if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || force === true) {
             origin.Controls.press('stop');
             origin.Source.set();
         } else {
@@ -1470,7 +1510,7 @@ JuliaPlayer.prototype._Source = function (origin) {
                     if (origin.env.api.readyState < 2 && origin.env.api.paused === true) {
                         origin.Ui.state(origin.env.buttons.play, 'pause', 'play');
                         origin.Ui.icon(origin.env.buttons.play, 'julia-pause', 'julia-play');
-                        origin.env.buttons.bigPlay.show();
+                        //origin.env.buttons.bigPlay.show();
                     }
                 }, 300);
             }, 300);
@@ -1496,9 +1536,10 @@ JuliaPlayer.prototype._Suggest = function (origin) {
                     file = !!origin.options.suggest[i].file ? origin.options.suggest[i].file : '';
                     poster = !!origin.options.suggest[i].poster ? origin.options.suggest[i].poster : '';
                     title = !!origin.options.suggest[i].title ? origin.options.suggest[i].title : '';
+                    link = !!origin.options.suggest[i].link ? origin.options.suggest[i].link : '';
                     mode = !!origin.options.suggest[i].mode ? origin.options.suggest[i].mode : 'legacy';
                     posterImage = poster.length > 0 ? '<img src="' + poster + '" width="100%" height="100%">' : '';
-                    suggestItemWidget = $('<div class="julia-suggest-item" data-item-poster="' + poster + '" data-item-file="' + origin.options.suggest[i].file + '" data-mode="' + mode + '" data-item-title="' + origin.options.suggest[i].title + '" data-index="' + i + '" data-item-mode="' + origin.options.suggest[i].mode + '" data-item-live="' + origin.options.suggest[i].live + '">' + posterImage + '<div class="julia-suggest-item-title">' + origin.options.suggest[i].title + '</div>' + '</div>');
+                    suggestItemWidget = $('<div class="julia-suggest-item" data-item-poster="' + poster + '" data-item-file="' + origin.options.suggest[i].file + '" data-item-link="' + origin.options.suggest[i].link + '" data-mode="' + mode + '" data-item-title="' + origin.options.suggest[i].title + '" data-index="' + i + '" data-item-mode="' + origin.options.suggest[i].mode + '" data-item-live="' + origin.options.suggest[i].live + '">' + posterImage + '<div class="julia-suggest-item-title">' + origin.options.suggest[i].title + '</div>' + '</div>');
                     suggestItemWidget.on('click', function (e) {
                         origin.Ui.state(origin.env.preloader, '', 'on');
                         if (origin.options.onSuggest !== false) {
@@ -1511,6 +1552,7 @@ JuliaPlayer.prototype._Suggest = function (origin) {
                             file: $(this).data('item-file'),
                             poster: $(this).data('item-poster'),
                             title: $(this).data('item-title'),
+                            link: $(this).data('item-link'),
                             mode: $(this).data('item-mode'),
                             live: $(this).data('item-live')
                         };
@@ -2128,12 +2170,15 @@ JuliaPlayer.prototype._Ui = function (origin) {
             'Julia instance appended to': origin.env.element
         });
         // Video api
-        origin.env.api = document.getElementById('julia-api-' + origin.env.ID);
-        origin.env.api.controls = false;
-        origin.debug({ 'Api object': 'julia-api-' + origin.env.ID });
-        self.zIndexize();
-        origin.Ui.state(origin.env.instance, '', 'on');
-        origin.event('julia.ui-created', origin.env.instance);    //--odn-handle-stop--
+        setTimeout( function() {
+            origin.env.api = document.getElementById('julia-api-' + origin.env.ID);
+            origin.env.api.controls = false;
+            origin.debug({ 'Api object': 'julia-api-' + origin.env.ID });
+            self.zIndexize();
+            origin.Ui.state(origin.env.instance, '', 'on');
+            origin.event('julia.ui-created', origin.env.instance);
+        }, 250);
+        //--odn-handle-stop--
     };
     self.icon = function (element, remove, add) {
         element.find('i').removeClass(remove).addClass(add);
@@ -2142,7 +2187,7 @@ JuliaPlayer.prototype._Ui = function (origin) {
         element.removeClass(remove).addClass(add);
     };
     self.panel = function (element, value) {
-        element.find('span').text(value);
+        element.find('span').html(value);
     };
     self.notify = function (message) {
         origin.env.notifier.html(message);
@@ -2222,6 +2267,7 @@ jQuery.fn.juliaPlayer = function (options) {
             file: $(this).prop('src') ? $(this).prop('src') : $(this).find('source').prop('src'),
             poster: $(this).prop('poster') ? $(this).prop('poster') : '',
             title: $(this).data('title') ? $(this).data('title') : '',
+            link: $(this).data('link') ? $(this).data('link') : '',
             mode: $(this).data('mode') ? $(this).data('mode') : 'legacy',
             live: $(this).data('live') && $(this).data('live').toString().toLowerCase() == 'true' ? true : false
         };

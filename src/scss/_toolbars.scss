@@ -25,6 +25,16 @@
                 font-size: 16px;
                 overflow: hidden;
                 text-align: left;
+                cursor: default;
+
+                a {
+                    color: $appColor;
+                    text-decoration: none;
+                    &:hover {
+                        color: $iconHoverColor;
+                        text-decoration: none;
+                    }
+                }
             }
         }
     }
@@ -156,6 +166,7 @@
             line-height: 25px;
             font-size: 14px;
             position: absolute;
+            cursor: default;
             top: 23px;
 
             &.julia-currentTime {

@@ -19,14 +19,14 @@ JuliaPlayer.prototype._Source = function (origin) {
             origin.env.api.pause();
             origin.env.continuePlayback = true;
         }
-        ;
         origin.env.started = false;
         source = typeof origin.options.source === 'object' ? origin.options.source : {};
         _source = typeof _source === 'object' ? _source : {};
-        source.file = Object.keys(_source).indexOf('file') > -1 ? _source.file : source.file;
-        source.poster = Object.keys(_source).indexOf('poster') > -1 ? _source.poster : source.poster;
-        source.mode = Object.keys(_source).indexOf('mode') > -1 ? _source.mode : source.mode;
-        source.title = Object.keys(_source).indexOf('title') > -1 ? _source.title : source.title;
+        source.file = Object.keys(_source).indexOf('file') > -1 ? _source.file.toString() : source.file.toString();
+        source.poster = Object.keys(_source).indexOf('poster') > -1 ? _source.poster.toString() : source.poster.toString();
+        source.mode = Object.keys(_source).indexOf('mode') > -1 ? _source.mode.toString() : source.mode.toString();
+        source.title = Object.keys(_source).indexOf('title') > -1 ? _source.title.toString() : source.title.toString();
+        source.link = Object.keys(_source).indexOf('link') > -1 ? _source.link.toString() : source.link.toString();
         source.live = Object.keys(_source).indexOf('live') > -1 ? _source.live : source.live;
         source.live = typeof source.live === 'undefined' ? false : source.live;
         source.mode = typeof source.mode === 'undefined' ? 'legacy' : source.mode;
@@ -34,7 +34,11 @@ JuliaPlayer.prototype._Source = function (origin) {
             source.mode = 'hlsnative';
         }
         origin.env.mode = source.mode;
-        origin.Ui.panel(origin.env.panels.title, source.title);
+        if (source.link.toString().length > 0) {
+            origin.Ui.panel(origin.env.panels.title, '<a href="'+source.link+'" target="_blank">'+source.title+' &raquo;</a>');
+        }else{
+            origin.Ui.panel(origin.env.panels.title, source.title);
+        }
         origin.debug({
             'Api file': source.file,
             'Api poster': source.poster,
@@ -149,7 +153,23 @@ JuliaPlayer.prototype._Source = function (origin) {
         }
     };
     self.recover = function (force) {
-        if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || typeof force !== 'undefined' && force === true) {
+        force = typeof force !== 'undefined' && force === true ? force: false;
+
+        origin.debug({
+            'Playback recovery force': force,
+            'Attempts': origin.env.errorRecoveryAttempts,
+            'Attempt Limit': origin.env.errorRecoveryAttemptLimit
+        });
+
+        if (origin.env.errorRecoveryAttempts > 0) {
+            origin.Ui.state(origin.env.preloader, '', 'on');
+            origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
+        }else{
+            origin.Ui.state(origin.env.preloader, 'on', '');
+            origin.env.toolbarBottom.addClass('julia-toolbar-visible');
+        }
+
+        if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || force === true) {
             origin.Controls.press('stop');
             origin.Source.set();
         } else {
@@ -172,7 +192,7 @@ JuliaPlayer.prototype._Source = function (origin) {
                     if (origin.env.api.readyState < 2 && origin.env.api.paused === true) {
                         origin.Ui.state(origin.env.buttons.play, 'pause', 'play');
                         origin.Ui.icon(origin.env.buttons.play, 'julia-pause', 'julia-play');
-                        origin.env.buttons.bigPlay.show();
+                        //origin.env.buttons.bigPlay.show();
                     }
                 }, 300);
             }, 300);
