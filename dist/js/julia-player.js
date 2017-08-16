@@ -1539,7 +1539,7 @@ JuliaPlayer.prototype._Suggest = function (origin) {
                     link = !!origin.options.suggest[i].link ? origin.options.suggest[i].link : '';
                     mode = !!origin.options.suggest[i].mode ? origin.options.suggest[i].mode : 'legacy';
                     posterImage = poster.length > 0 ? '<img src="' + poster + '" width="100%" height="100%">' : '';
-                    suggestItemWidget = $('<div class="julia-suggest-item" data-item-poster="' + poster + '" data-item-file="' + origin.options.suggest[i].file + '" data-item-link="' + origin.options.suggest[i].link + '" data-mode="' + mode + '" data-item-title="' + origin.options.suggest[i].title + '" data-index="' + i + '" data-item-mode="' + origin.options.suggest[i].mode + '" data-item-live="' + origin.options.suggest[i].live + '">' + posterImage + '<div class="julia-suggest-item-title">' + origin.options.suggest[i].title + '</div>' + '</div>');
+                    suggestItemWidget = $('<div class="julia-suggest-item" data-item-poster="' + poster + '" data-item-file="' + file + '" data-item-link="' + link + '" data-mode="' + mode + '" data-item-title="' + title + '" data-index="' + i + '" data-item-mode="' + mode + '" data-item-live="' + live + '">' + posterImage + '<div class="julia-suggest-item-title">' + title + '</div>' + '</div>');
                     suggestItemWidget.on('click', function (e) {
                         origin.Ui.state(origin.env.preloader, '', 'on');
                         if (origin.options.onSuggest !== false) {
@@ -1548,15 +1548,14 @@ JuliaPlayer.prototype._Suggest = function (origin) {
                         origin.Thumbs.shadowApi = false;
                         origin.env.suggestClicked = true;
                         origin.options.autoplay = true;
-                        origin.options.source = {
+                        origin.Source.set({
                             file: $(this).data('item-file'),
                             poster: $(this).data('item-poster'),
                             title: $(this).data('item-title'),
                             link: $(this).data('item-link'),
                             mode: $(this).data('item-mode'),
                             live: $(this).data('item-live')
-                        };
-                        origin.Source.set();
+                        });
                         origin.debug({
                             suggestRemoveIndex: $(this).data('index'),
                             suggestRemove: $(this).data('item-file')
