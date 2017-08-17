@@ -172,7 +172,7 @@ JuliaPlayer = function (options) {
         suggest: $(),
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.0.3'
+        version: '2.0.4'
     };
     // Console debug
     origin.debug = function (data, warn) {
@@ -1464,7 +1464,6 @@ JuliaPlayer.prototype._Source = function (origin) {
             origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
         }else{
             origin.Ui.state(origin.env.preloader, 'on', '');
-            origin.env.toolbarBottom.addClass('julia-toolbar-visible');
         }
 
         if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || force === true) {

@@ -166,7 +166,6 @@ JuliaPlayer.prototype._Source = function (origin) {
             origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
         }else{
             origin.Ui.state(origin.env.preloader, 'on', '');
-            origin.env.toolbarBottom.addClass('julia-toolbar-visible');
         }
 
         if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || force === true) {
