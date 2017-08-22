@@ -215,7 +215,6 @@ JuliaPlayer.prototype._Events = function (origin) {
             }, 400);
         };
         window.onerror = function (e) {
-            window.__juliaPlayerForceStopAfterFatalError = true;
         };
         // Errors
         origin.env.api.onerror = function (e) {

@@ -726,7 +726,6 @@ JuliaPlayer.prototype._Events = function (origin) {
             }, 400);
         };
         window.onerror = function (e) {
-            window.__juliaPlayerForceStopAfterFatalError = true;
         };
         // Errors
         origin.env.api.onerror = function (e) {
@@ -1336,10 +1335,6 @@ JuliaPlayer.prototype._Source = function (origin) {
         origin.Ui.reset();
         origin.Ui.state(origin.env.preloader, '', 'on');
         origin.env.continuePlayback = false;
-        if (typeof window.__juliaPlayerForceStopAfterFatalError === 'boolean' && window.__juliaPlayerForceStopAfterFatalError === true) {
-            origin.Controls.press('stop');
-            window.__juliaPlayerForceStopAfterFatalError = false;
-        }
         if (origin.env.api.paused === false) {
             origin.env.api.pause();
             origin.env.continuePlayback = true;
