@@ -471,6 +471,13 @@ JuliaPlayer.prototype._Events = function (origin) {
                         if (Object.keys(origin.options.dashConfig).indexOf('setBufferTimeAtTopQuality') > -1) {
                              origin.env.dash.setBufferTimeAtTopQuality(origin.options.dashConfig.setBufferTimeAtTopQuality);
                         }
+                        if (Object.keys(origin.options.dashConfig).indexOf('setScheduleWhilePaused') > -1) {
+                             origin.env.dash.setScheduleWhilePaused(origin.options.dashConfig.setScheduleWhilePaused);
+                        }
+                        if (Object.keys(origin.options.dashConfig).indexOf('setStableBufferTime') > -1) {
+                             origin.env.dash.setStableBufferTime(origin.options.dashConfig.setStableBufferTime);
+                        }
+
                         // Video bitrates
                         origin.env.dash.setFastSwitchEnabled(true);
                         if (typeof bitratesVideo === 'object' && bitratesVideo && bitratesVideo.length > 1) {

@@ -192,7 +192,7 @@ JuliaPlayer = function (options) {
         suggest: $(),
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.0.4'
+        version: '2.0.5'
     };
     // Console debug
     origin.debug = function (data, warn) {
@@ -982,6 +982,13 @@ JuliaPlayer.prototype._Events = function (origin) {
                         if (Object.keys(origin.options.dashConfig).indexOf('setBufferTimeAtTopQuality') > -1) {
                              origin.env.dash.setBufferTimeAtTopQuality(origin.options.dashConfig.setBufferTimeAtTopQuality);
                         }
+                        if (Object.keys(origin.options.dashConfig).indexOf('setScheduleWhilePaused') > -1) {
+                             origin.env.dash.setScheduleWhilePaused(origin.options.dashConfig.setScheduleWhilePaused);
+                        }
+                        if (Object.keys(origin.options.dashConfig).indexOf('setStableBufferTime') > -1) {
+                             origin.env.dash.setStableBufferTime(origin.options.dashConfig.setStableBufferTime);
+                        }
+
                         // Video bitrates
                         origin.env.dash.setFastSwitchEnabled(true);
                         if (typeof bitratesVideo === 'object' && bitratesVideo && bitratesVideo.length > 1) {
@@ -1487,7 +1494,7 @@ JuliaPlayer.prototype._Source = function (origin) {
         }
 
         if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || force === true) {
-            origin.Controls.press('stop');
+            //origin.Controls.press('stop');
             origin.Source.set();
         } else {
             origin.env.errorRecoveryAttempts++;

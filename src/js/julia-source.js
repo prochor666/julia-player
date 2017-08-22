@@ -169,7 +169,7 @@ JuliaPlayer.prototype._Source = function (origin) {
         }
 
         if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || force === true) {
-            origin.Controls.press('stop');
+            //origin.Controls.press('stop');
             origin.Source.set();
         } else {
             origin.env.errorRecoveryAttempts++;
