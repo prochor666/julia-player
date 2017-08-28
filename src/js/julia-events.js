@@ -267,6 +267,9 @@ JuliaPlayer.prototype._Events = function (origin) {
                 }
             }
         };
+        origin.env.api.onloadedmetadata = function (e) {
+            origin.Support.resize();
+        };
         // Video position
         origin.env.api.ontimeupdate = function (e) {
             currentTimeReadable = origin.Timecode.toHuman(origin.env.api.currentTime);
