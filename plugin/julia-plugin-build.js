@@ -109,7 +109,8 @@ JuliaPlayer = function (options) {
             poster: '',
             link: '',
             mode: 'legacy',
-            live: false
+            live: false,
+            fixVideoAspect: false,
         },
         suggest: [],
         suggestLimit: 4,
@@ -751,6 +752,7 @@ JuliaPlayer.prototype._Events = function (origin) {
         origin.env.api.onloadeddata = function (e) {
         };
         origin.env.api.oncanplaythrough = function (e) {
+            origin.Support.resize(e.type);
             origin.Controls.press('setDuration', { 'duration': origin.env.api.duration });
             if (origin.env.mode != 'hls' && origin.env.mode != 'dash') {
                 if ((origin.env.continuePlayback === true || origin.options.autoplay === true) && (origin.env.api.paused === true || origin.env.api.ended === true) && origin.Support.isMobile() === false && origin.env.started === false) {
@@ -759,7 +761,10 @@ JuliaPlayer.prototype._Events = function (origin) {
             }
         };
         origin.env.api.onloadedmetadata = function (e) {
-            origin.Support.resize();
+            origin.Support.resize(e.type);
+        };
+        origin.env.api.onloadstart = function (e) {
+            origin.Support.resize(e.type);
         };
         // Video position
         origin.env.api.ontimeupdate = function (e) {
@@ -1332,6 +1337,7 @@ JuliaPlayer.prototype._Source = function (origin) {
         source.link = Object.keys(_source).indexOf('link') > -1 ? _source.link.toString() : source.link.toString();
         source.live = Object.keys(_source).indexOf('live') > -1 ? _source.live : source.live;
         source.live = typeof source.live === 'undefined' ? false : source.live;
+        source.fixVideoAspect = Object.keys(_source).indexOf('fixVideoAspect') > -1 ? _source.fixVideoAspect : source.fixVideoAspect;
         source.mode = typeof source.mode === 'undefined' ? 'legacy' : source.mode;
         if (source.mode === 'hls' && self.modeTest() && origin.env.context.Hls.isSupported() !== true) {
             source.mode = 'hlsnative';
@@ -1639,27 +1645,44 @@ JuliaPlayer.prototype._Support = function(origin) {
     };
 
 
-    self.resize = function() {
+    self.resize = function(m) {
+
+        if (typeof(m) !== 'undefined') {
+            origin.debug({'Resize event message': m});
+        }
 
         self.fixParentSize();
+        vmargin = 0;
 
         if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
             // no fullscreen
             dimensions = origin.options.responsive === true ? self.getSize(): [origin.env.element.width(), origin.env.element.height()];
         }else{
+            a = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
 
-            if(self.aspect(dimensions[0], dimensions[1])<1) {
+            if (a === 0 || origin.options.source.fixVideoAspect === true) {
+                a = self.aspect(dimensions[0], dimensions[1]);
+            }
+
+            if (a > 1) {
                 // portrait
-                dimensions = [screen.width,screen.height];
+                dimensions = [screen.width,a*screen.width];
             }else{
                 // landscape
-                dimensions = [screen.width,screen.height];
+                dimensions = [screen.width,a*screen.width];
             }
+            vmargin = (screen.height - dimensions[1])/2;
         }
 
-        origin.env.api.setAttribute('width', dimensions[0]);
-        origin.env.api.setAttribute('height', dimensions[1]);
-        dimensions = [origin.env.api.getAttribute('width'), origin.env.api.getAttribute('height')];
+        if (origin.options.source.fixVideoAspect === true) {
+            origin.env.api.setAttribute('style', 'object-fit: fill;margin-top: '+vmargin+'px;');
+            origin.env.api.setAttribute('width', dimensions[0]);
+            origin.env.api.setAttribute('height', dimensions[1]);
+        }else{
+            origin.env.api.setAttribute('style', 'margin-top: '+vmargin+'px;');
+            origin.env.api.setAttribute('width', dimensions[0]);
+            origin.env.api.setAttribute('height', dimensions[1]);
+        }
 
         origin.env.instance.width(dimensions[0]);
         origin.env.instance.height(dimensions[1]);
@@ -1690,6 +1713,7 @@ JuliaPlayer.prototype._Support = function(origin) {
     self.getSize = function()
     {
         var parentWidth = origin.env.element.parent().width();
+        var dim = [Number(parentWidth),Number(parentWidth)*0.5625];
 
         for( i in origin.options.dimensions )
         {
@@ -2254,7 +2278,8 @@ jQuery.fn.juliaPlayer = function (options) {
             title: $(this).data('title') ? $(this).data('title') : '',
             link: $(this).data('link') ? $(this).data('link') : '',
             mode: $(this).data('mode') ? $(this).data('mode') : 'legacy',
-            live: $(this).data('live') && $(this).data('live').toString().toLowerCase() == 'true' ? true : false
+            live: $(this).data('live') && $(this).data('live').toString().toLowerCase() == 'true' ? true : false,
+            fixVideoAspect: $(this).data('fix-video-aspect') && $(this).data('fix-video-aspect').toString().toLowerCase() == 'true' ? true : false,
         };
         options.element = $(this).parent();
         options.pluginMode = true;

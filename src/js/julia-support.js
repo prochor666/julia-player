@@ -68,27 +68,44 @@ JuliaPlayer.prototype._Support = function(origin) {
     };
 
 
-    self.resize = function() {
+    self.resize = function(m) {
+
+        if (typeof(m) !== 'undefined') {
+            origin.debug({'Resize event message': m});
+        }
 
         self.fixParentSize();
+        vmargin = 0;
 
         if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
             // no fullscreen
             dimensions = origin.options.responsive === true ? self.getSize(): [origin.env.element.width(), origin.env.element.height()];
         }else{
+            a = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
 
-            if(self.aspect(dimensions[0], dimensions[1])<1) {
+            if (a === 0 || origin.options.source.fixVideoAspect === true) {
+                a = self.aspect(dimensions[0], dimensions[1]);
+            }
+
+            if (a > 1) {
                 // portrait
-                dimensions = [screen.width,screen.height];
+                dimensions = [screen.width,a*screen.width];
             }else{
                 // landscape
-                dimensions = [screen.width,screen.height];
+                dimensions = [screen.width,a*screen.width];
             }
+            vmargin = (screen.height - dimensions[1])/2;
         }
 
-        origin.env.api.setAttribute('width', dimensions[0]);
-        origin.env.api.setAttribute('height', dimensions[1]);
-        dimensions = [origin.env.api.getAttribute('width'), origin.env.api.getAttribute('height')];
+        if (origin.options.source.fixVideoAspect === true) {
+            origin.env.api.setAttribute('style', 'object-fit: fill;margin-top: '+vmargin+'px;');
+            origin.env.api.setAttribute('width', dimensions[0]);
+            origin.env.api.setAttribute('height', dimensions[1]);
+        }else{
+            origin.env.api.setAttribute('style', 'margin-top: '+vmargin+'px;');
+            origin.env.api.setAttribute('width', dimensions[0]);
+            origin.env.api.setAttribute('height', dimensions[1]);
+        }
 
         origin.env.instance.width(dimensions[0]);
         origin.env.instance.height(dimensions[1]);
@@ -119,6 +136,7 @@ JuliaPlayer.prototype._Support = function(origin) {
     self.getSize = function()
     {
         var parentWidth = origin.env.element.parent().width();
+        var dim = [Number(parentWidth),Number(parentWidth)*0.5625];
 
         for( i in origin.options.dimensions )
         {

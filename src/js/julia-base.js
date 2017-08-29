@@ -109,7 +109,8 @@ JuliaPlayer = function (options) {
             poster: '',
             link: '',
             mode: 'legacy',
-            live: false
+            live: false,
+            fixVideoAspect: false,
         },
         suggest: [],
         suggestLimit: 4,

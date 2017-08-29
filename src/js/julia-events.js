@@ -260,6 +260,7 @@ JuliaPlayer.prototype._Events = function (origin) {
         origin.env.api.onloadeddata = function (e) {
         };
         origin.env.api.oncanplaythrough = function (e) {
+            origin.Support.resize(e.type);
             origin.Controls.press('setDuration', { 'duration': origin.env.api.duration });
             if (origin.env.mode != 'hls' && origin.env.mode != 'dash') {
                 if ((origin.env.continuePlayback === true || origin.options.autoplay === true) && (origin.env.api.paused === true || origin.env.api.ended === true) && origin.Support.isMobile() === false && origin.env.started === false) {
@@ -268,7 +269,10 @@ JuliaPlayer.prototype._Events = function (origin) {
             }
         };
         origin.env.api.onloadedmetadata = function (e) {
-            origin.Support.resize();
+            origin.Support.resize(e.type);
+        };
+        origin.env.api.onloadstart = function (e) {
+            origin.Support.resize(e.type);
         };
         // Video position
         origin.env.api.ontimeupdate = function (e) {

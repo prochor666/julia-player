@@ -25,7 +25,8 @@ jQuery.fn.juliaPlayer = function (options) {
             title: $(this).data('title') ? $(this).data('title') : '',
             link: $(this).data('link') ? $(this).data('link') : '',
             mode: $(this).data('mode') ? $(this).data('mode') : 'legacy',
-            live: $(this).data('live') && $(this).data('live').toString().toLowerCase() == 'true' ? true : false
+            live: $(this).data('live') && $(this).data('live').toString().toLowerCase() == 'true' ? true : false,
+            fixVideoAspect: $(this).data('fix-video-aspect') && $(this).data('fix-video-aspect').toString().toLowerCase() == 'true' ? true : false,
         };
         options.element = $(this).parent();
         options.pluginMode = true;
