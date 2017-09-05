@@ -152,24 +152,26 @@ JuliaPlayer.prototype._Source = function (origin) {
     self.recover = function (force) {
         force = typeof force !== 'undefined' && force === true ? force: false;
 
-        origin.debug({
-            'Playback recovery force': force,
-            'Attempts': origin.env.errorRecoveryAttempts,
-            'Attempt Limit': origin.env.errorRecoveryAttemptLimit
-        });
+        if (origin.env.api.paused === false) {
+            origin.debug({
+                'Playback recovery force': force,
+                'Attempts': origin.env.errorRecoveryAttempts,
+                'Attempt Limit': origin.env.errorRecoveryAttemptLimit
+            });
 
-        if (origin.env.errorRecoveryAttempts > 0) {
-            origin.Ui.state(origin.env.preloader, '', 'on');
-            origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
-        }else{
-            origin.Ui.state(origin.env.preloader, 'on', '');
-        }
+            if (origin.env.errorRecoveryAttempts > 0) {
+                origin.Ui.state(origin.env.preloader, '', 'on');
+                origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
+            }else{
+                origin.Ui.state(origin.env.preloader, 'on', '');
+            }
 
-        if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || force === true) {
-            //origin.Controls.press('stop');
-            origin.Source.set();
-        } else {
-            origin.env.errorRecoveryAttempts++;
+            if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || force === true) {
+                //origin.Controls.press('stop');
+                origin.Source.set();
+            } else {
+                origin.env.errorRecoveryAttempts++;
+            }
         }
     };
     self.firstPlay = function () {

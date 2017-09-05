@@ -94,6 +94,8 @@ JuliaPlayer = function (options) {
                 }]
         },
         onInit: false,
+        onFullscreen: false,
+        onFullscreenExit: false,
         onPlay: false,
         onPause: false,
         onStop: false,
@@ -173,7 +175,7 @@ JuliaPlayer = function (options) {
         suggest: $(),
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.0.7'
+        version: '2.0.8'
     };
     // Console debug
     origin.debug = function (data, warn) {

@@ -10,9 +10,6 @@ JuliaPlayer.prototype._Controls = function (origin) {
         case 'play':
             origin.Ui.state(origin.env.preloader, '', 'on');
             origin.env.buttons.bigPlay.hide();
-            if (origin.options.onPlay !== false) {
-                origin.Callback.fn(origin.options.onPlay, data);
-            }
             if (origin.env.started === false) {
                 origin.Source.load();
             } else {
@@ -20,9 +17,6 @@ JuliaPlayer.prototype._Controls = function (origin) {
             }
             break;
         case 'pause':
-            if (origin.options.onPause !== false) {
-                origin.Callback.fn(origin.options.onPause, data);
-            }
             origin.env.api.pause();
             break;
         case 'stop':
@@ -40,9 +34,6 @@ JuliaPlayer.prototype._Controls = function (origin) {
             origin.Ui.state(origin.env.preloader, '', 'on');
             data.currentTime = isNaN(Number(parseFloat(data.currentTime))) ? 0 : Number(parseFloat(data.currentTime));
             origin.env.api.currentTime = data.currentTime;
-            if (origin.options.onPosition !== false) {
-                origin.Callback.fn(origin.options.onPosition, data);
-            }
             break;
         case 'setDuration':
             data.duration = isNaN(Number(parseFloat(data.duration))) ? 0 : Number(parseFloat(data.duration));

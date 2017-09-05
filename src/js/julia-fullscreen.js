@@ -17,6 +17,10 @@ JuliaPlayer.prototype._Fullscreen = function (origin) {
         } else {
             origin.debug({ 'Fullscreen': 'not supported' });
         }
+
+        if (origin.options.onFullscreen !== false) {
+            origin.Callback.fn(origin.options.onFullscreen, {});
+        }
     };
     self.off = function () {
         if (document.exitFullscreen) {
@@ -27,6 +31,10 @@ JuliaPlayer.prototype._Fullscreen = function (origin) {
             document.mozCancelFullScreen();
         } else if (document.webkitExitFullscreen) {
             document.webkitExitFullscreen();
+        }
+
+        if (origin.options.onFullscreenExit !== false) {
+            origin.Callback.fn(origin.options.onFullscreenExit, {});
         }
     };
     self.landscapeLock = function (lock) {

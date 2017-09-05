@@ -26,9 +26,11 @@ JuliaPlayer.prototype._Events = function (origin) {
         }).on('click', '.julia-fullscreen.on', function (e) {
             e.preventDefault();
             origin.Controls.press('fullscreen-on');
+            $(this).blur();
         }).on('click', '.julia-fullscreen.off', function (e) {
             e.preventDefault();
             origin.Controls.press('fullscreen-off');
+            $(this).blur();
         }).on('click', '.julia-settings', function (e) {
             e.preventDefault();
             if (origin.env.menus.settings.hasClass('on')) {
@@ -118,25 +120,41 @@ JuliaPlayer.prototype._Events = function (origin) {
         });
         // Fullscreen toolbar behavior bindings
         var mouseMoveCleaner;
-        origin.env.instance.off('mousemove touchmove', '.julia-shield, .julia-suggest').off('mouseover mousemove touchmove mouseout', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on').on('mousemove touchmove', '.julia-shield, .julia-suggest', function (e) {
-            e.preventDefault();
-            if (origin.env.started === true) {
-                origin.env.toolbarBottom.addClass('julia-toolbar-visible');
-                if (origin.options.source.title.length>0) {
-                    origin.env.toolbarTop.addClass('julia-toolbar-visible');
-                }
-            }
-            clearTimeout(mouseMoveCleaner);
-            mouseMoveCleaner = setTimeout(function () {
-                if (origin.env.started === true) {
-                    origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
-                    if (origin.options.source.title.length>0) {
-                        origin.env.toolbarTop.removeClass('julia-toolbar-visible');
+        origin.env.instance.off('mousemove touchmove', '.julia-shield, .julia-suggest').off('mouseover mousemove  touchend touchmove mouseout mouseleave touchstart', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on').on('mousemove touchmove touchend touchstart', '.julia-shield, .julia-suggest', function (e) {
+            if ([
+                    'touchend'
+                ].lastIndexOf(e.type.toLowerCase()) > -1) {
+                mouseMoveCleaner = setTimeout(function () {
+                    if (origin.env.started === true) {
+                        origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
+                        if (origin.options.source.title.length>0) {
+                            origin.env.toolbarTop.removeClass('julia-toolbar-visible');
+                        }
+                        origin.Ui.state(origin.env.menus.settings, 'on', '');
                     }
-                    origin.Ui.state(origin.env.menus.settings, 'on', '');
+                }, 1750);
+            }else{
+
+                e.preventDefault();
+                if (origin.env.started === true) {
+                    origin.env.toolbarBottom.addClass('julia-toolbar-visible');
+                    if (origin.options.source.title.length>0) {
+                        origin.env.toolbarTop.addClass('julia-toolbar-visible');
+                    }
                 }
-            }, 1750);
-        }).on('mouseover mousemove touchmove mouseout', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on', function (e) {
+
+                clearTimeout(mouseMoveCleaner);
+                mouseMoveCleaner = setTimeout(function () {
+                    if (origin.env.started === true) {
+                        origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
+                        if (origin.options.source.title.length>0) {
+                            origin.env.toolbarTop.removeClass('julia-toolbar-visible');
+                        }
+                        origin.Ui.state(origin.env.menus.settings, 'on', '');
+                    }
+                }, 1750);
+            }
+        }).on('mouseover mousemove touchmove mouseout mouseleave', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on', function (e) {
             e.preventDefault();
             if (origin.env.started === true) {
                 origin.env.toolbarBottom.addClass('julia-toolbar-visible');
@@ -192,6 +210,9 @@ JuliaPlayer.prototype._Events = function (origin) {
                 origin.env.startupGoto = 0;
                 origin.Controls.press('goto', { currentTime: seekTo });
             }
+            if (origin.options.onPlay !== false) {
+                origin.Callback.fn(origin.options.onPlay, {});
+            }
         };
         origin.env.api.onplaying = function (e) {
             origin.Ui.state(origin.env.buttons.play, 'play', 'pause');
@@ -204,6 +225,10 @@ JuliaPlayer.prototype._Events = function (origin) {
             origin.env.errorRecoveryAttempts = 0;
             origin.Controls.press('setDuration', { 'duration': origin.env.api.duration });
         };
+        origin.env.api.onwaiting = function (e) {
+            origin.env.sliders.progress.buffered();
+            origin.Ui.state(origin.env.preloader, '', 'on');
+        };
         // Video pause
         origin.env.api.onpause = function (e) {
             origin.Ui.state(origin.env.buttons.play, 'pause', 'play');
@@ -211,6 +236,10 @@ JuliaPlayer.prototype._Events = function (origin) {
             setTimeout(function () {
                 if (origin.env.api.paused === true || origin.env.api.ended === true) {
                     origin.env.buttons.bigPlay.show();
+                }
+
+                if (origin.options.onPause !== false) {
+                    origin.Callback.fn(origin.options.onPause, {});
                 }
             }, 400);
         };
@@ -287,6 +316,9 @@ JuliaPlayer.prototype._Events = function (origin) {
         };
         // Video position
         origin.env.api.onseeked = function (e) {
+            if (origin.options.onPosition !== false) {
+                origin.Callback.fn(origin.options.onPosition, origin.env.api.currentTime);
+            }
         };
         // Video position
         origin.env.api.onseeking = function (e) {
