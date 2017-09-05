@@ -239,6 +239,8 @@ div.julia-player {
       -webkit-appearance: none; }
       div.julia-player .julia-dropdown .julia-dropdown-select:focus {
         outline: none; }
+      div.julia-player .julia-dropdown .julia-dropdown-select:disabled {
+        color: #707070; }
       div.julia-player .julia-dropdown .julia-dropdown-select option {
         margin: 3px;
         padding: 6px 8px;

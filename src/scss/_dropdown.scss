@@ -68,6 +68,10 @@
             outline: none;
         }
 
+        &:disabled {
+            color: $preloaderColor;
+        }
+
         option {
             margin: 3px;
             padding: 6px 8px;
@@ -79,7 +83,7 @@
 }
 
 @-moz-document url-prefix() {
-  .julia-dropdown-select {
-    padding-left: 6px;
-  }
+    .julia-dropdown-select {
+        padding-left: 6px;
+    }
 }

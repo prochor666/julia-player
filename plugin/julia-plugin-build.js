@@ -1376,6 +1376,7 @@ JuliaPlayer.prototype._Source = function (origin) {
             source.mode = 'hlsnative';
         }
         origin.env.mode = source.mode;
+        origin.Ui.menuDisabled(origin.env.menus.speed, source.live);
         if (source.link.toString().length > 0) {
             origin.Ui.panel(origin.env.panels.title, '<a href="'+source.link+'" target="_blank">'+source.title+' &raquo;</a>');
         }else{
