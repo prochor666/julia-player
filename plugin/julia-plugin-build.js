@@ -437,7 +437,7 @@ JuliaPlayer.prototype._Controls = function (origin) {
         case 'goto':
             origin.Ui.state(origin.env.preloader, '', 'on');
             data.currentTime = isNaN(Number(parseFloat(data.currentTime))) ? 0 : Number(parseFloat(data.currentTime));
-            origin.Support.seekVideo(data.currentTime)
+            origin.Support.seekVideo(data.currentTime);
             break;
         case 'setDuration':
             data.duration = isNaN(Number(parseFloat(data.duration))) ? 0 : Number(parseFloat(data.duration));
