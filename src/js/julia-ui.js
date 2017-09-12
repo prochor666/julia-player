@@ -145,6 +145,29 @@ JuliaPlayer.prototype._Ui = function (origin) {
     self.menuDisabled = function (element, state) {
         element.find('select').prop('disabled', state);
     };
+    self.cursor = function (on) {
+        if (typeof on === 'undefined' || on === false) {
+            origin.env.instance.css({
+                'cursor': 'none'
+            });
+            origin.env.shield.css({
+                'cursor': 'none'
+            });
+            origin.env.wrapper.css({
+                'cursor': 'none'
+            });
+        }else{
+            origin.env.instance.css({
+                'cursor': 'default'
+            });
+            origin.env.shield.css({
+                'cursor': 'default'
+            });
+            origin.env.wrapper.css({
+                'cursor': 'default'
+            });
+        }
+    };
     self.zIndexize = function () {
         var indexHighest = origin.options.zIndexStart;
         var layers = [

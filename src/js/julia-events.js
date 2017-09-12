@@ -123,7 +123,7 @@ JuliaPlayer.prototype._Events = function (origin) {
         origin.env.instance.off('mousemove touchmove', '.julia-shield, .julia-suggest').off('mouseover mousemove touchmove mouseout', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on').on('mousemove touchmove', '.julia-shield, .julia-suggest', function (e) {
             e.preventDefault();
             if (origin.env.started === true) {
-                origin.env.instance.removeClass('no-cursor');
+                origin.Ui.cursor(true);
                 origin.env.toolbarBottom.addClass('julia-toolbar-visible');
                 if (origin.options.source.title.length>0) {
                     origin.env.toolbarTop.addClass('julia-toolbar-visible');
@@ -132,7 +132,7 @@ JuliaPlayer.prototype._Events = function (origin) {
             clearTimeout(mouseMoveCleaner);
             mouseMoveCleaner = setTimeout(function () {
                 if (origin.env.started === true) {
-                    origin.env.instance.addClass('no-cursor');
+                    origin.Ui.cursor(false);
                     origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
                     if (origin.options.source.title.length>0) {
                         origin.env.toolbarTop.removeClass('julia-toolbar-visible');
@@ -155,8 +155,7 @@ JuliaPlayer.prototype._Events = function (origin) {
                 ].lastIndexOf(e.type.toLowerCase()) > -1) {
                 mouseMoveCleaner = setTimeout(function (e) {
                     if (origin.env.started === true) {
-                        origin.env.instance.addClass('no-cursor');
-                        console.log('Cursor NOT visible');
+                        origin.Ui.cursor(false);
                         origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
                         if (origin.options.source.title.length>0) {
                             origin.env.toolbarTop.removeClass('julia-toolbar-visible');

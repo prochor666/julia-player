@@ -503,11 +503,6 @@ div.julia-player {
       min-height: 100%;
       width: 100vw;
       height: 100vh; }
-      div.julia-player.julia-fullscreen-on .julia-wrapper video.julia-video {
-        /*
-                width: 100%;
-                height: auto;
-*/ }
   div.julia-player .julia-suggest {
     position: absolute;
     top: 25%;
@@ -558,10 +553,6 @@ div.julia-player {
         background-color: rgba(0, 0, 0, 0.7); }
       div.julia-player .julia-suggest .julia-suggest-item:hover .julia-suggest-item-title {
         color: deepskyblue; }
-  div.julia-player.no-cursor {
-    cursor: none !important; }
-    div.julia-player.no-cursor .julia-shield {
-      cursor: none !important; }
 
 div.julia-player,
 div.julia-player button.julia-btn,

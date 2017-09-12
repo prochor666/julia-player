@@ -167,25 +167,12 @@ div.julia-player {
             width: 100vw;
             height: 100vh;
 
-
             video.julia-video {
-/*
-                width: 100%;
-                height: auto;
-*/
             }
         }
     }
 
     @import "_suggest.scss";
-
-    &.no-cursor {
-        cursor: none !important;
-
-        .julia-shield {
-            cursor: none !important;
-        }
-    }
 }
 
 div.julia-player,
