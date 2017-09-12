@@ -1176,25 +1176,38 @@ JuliaPlayer.prototype._Persist = function (origin) {
 * Progress and volume widget library
 ****************************************** */
 JuliaPlayer.prototype._Slider = function (origin, options) {
-    var self = this, leftButtonDown = false, ua = navigator.userAgent, isChrome = /chrome/i.exec(ua), isAndroid = /android/i.exec(ua), hasTouch = 'ontouchstart' in window && !(isChrome && !isAndroid), _normalize = function (percent) {
-            if (percent > 100) {
-                return 100;
-            }
-            if (percent < 0) {
-                return 0;
-            }
-            return Math.round(percent * 100) / 100;
-        }, _posToPercent = function (pos) {
-            return _normalize(pos / (self.track.innerWidth() / 100));
-        }, _position = function (e) {
-            var pos = hasTouch === true && e.originalEvent.touches ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
-            percent = _posToPercent(pos);
-            return percent;
-        }, _pixels = function (e) {
-            var pos = hasTouch === true && e.originalEvent.touches ? e.originalEvent.touches[0].pageX - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
-            return pos;
-        }, model = $('<div class="julia-slider">' + '<div class="julia-slider-track" data-julia-slider-component="track"></div>' + '<div class="julia-slider-track-visible" data-julia-slider-component="track-visible"></div>' + '<div class="julia-slider-handle" data-julia-slider-component="handle"></div>' + '<div class="julia-slider-fill" data-julia-slider-component="fill"></div>' + '</div>');
+    var self = this,
+        leftButtonDown = false,
+        ua = navigator.userAgent,
+        isChrome = /chrome/i.exec(ua),
+        isAndroid = /android/i.exec(ua),
+        hasTouch = 'ontouchstart' in window && !(isChrome && !isAndroid),
+        _normalize = function (percent) {
+                if (percent > 100) {
+                    return 100;
+                }
+                if (percent < 0) {
+                    return 0;
+                }
+                return Math.round(percent * 100) / 100;
+            }, _posToPercent = function (pos) {
+                return _normalize(pos / (self.track.innerWidth() / 100));
+            }, _position = function (e) {
+                if (hasTouch === true && e.originalEvent.touches && e.originalEvent.touches.length > 0 && e.originalEvent.touches[0].pageX) {
+                    self.lastTouchVal = e.originalEvent.touches[0].pageX;
+                }
+                var pos = hasTouch === true && e.originalEvent.touches ? self.lastTouchVal - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
+                percent = _posToPercent(pos);
+                return percent;
+            }, _pixels = function (e) {
+                if (hasTouch === true && e.originalEvent.touches && e.originalEvent.touches.length > 0 && e.originalEvent.touches[0].pageX) {
+                    self.lastTouchVal = e.originalEvent.touches[0].pageX;
+                }
+                var pos = hasTouch === true && e.originalEvent.touches ? self.lastTouchVal - self.model.offset().left : e.originalEvent.pageX - self.model.offset().left;
+                return pos;
+            }, model = $('<div class="julia-slider">' + '<div class="julia-slider-track" data-julia-slider-component="track"></div>' + '<div class="julia-slider-track-visible" data-julia-slider-component="track-visible"></div>' + '<div class="julia-slider-handle" data-julia-slider-component="handle"></div>' + '<div class="julia-slider-fill" data-julia-slider-component="fill"></div>' + '</div>');
     self.model = model.clone();
+    self.lastTouchVal = 0;
     self.track = self.model.find('[data-julia-slider-component="track"]');
     self.trackVisible = self.model.find('[data-julia-slider-component="track-visible"]');
     self.handle = self.model.find('[data-julia-slider-component="handle"]');
@@ -1315,16 +1328,16 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
     self.model.on('mousedown touchstart touch', function (e) {
         // Left mouse button activate
         if (e.type == 'touchstart' || e.type == 'touch') {
-            self.slide(_position(e), false);
+            self.slide(_position(e));
         }
         leftButtonDown = true;
     });
-    self.instance.on('mouseup touchend', function (e) {
+    self.model.on('mouseup touchend', function (e) {
         // Left mouse button deactivate
         leftButtonDown = false;
-        self.slide(_position(e));
+        self.slide(_position(e), false);
     });
-    self.instance.on('mousemove touchmove', function (e) {
+    self.model.on('mousemove touchmove', function (e) {
         if (leftButtonDown === true) {
             if (self.options.event != 'progress-change') {
                 self.slide(_position(e), false);
