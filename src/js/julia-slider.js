@@ -74,7 +74,7 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
     };
     self.slide = function (percent, eventPrevent) {
         if (typeof eventPrevent === 'undefined') {
-            eventPrevent = false;
+            eventPrevent = true;
         }
         self.value = _normalize(percent);
         var pos = self.track.innerWidth() / 100 * self.value;
@@ -111,11 +111,11 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
     self.trackVisible.on('click', function (e) {
         self.slide(_position(e), false);
     });
-    self.model.on('click mouseover mousemove mouseout', function (e) {
+    self.model.on('click mouseover mousemove mouseout touchmove', function (e) {
         if (e.type == 'click') {
             self.slide(_position(e), false);
         }
-        if ((e.type == 'mouseover' || e.type == 'mousemove') && self.options.event == 'progress-change' && origin.env.started === true) {
+        if ((e.type == 'mouseover' || e.type == 'mousemove' || e.type == 'touchmove') && self.options.event == 'progress-change' && origin.env.started === true) {
             pos = _position(e);
             pix = _pixels(e);
             if (origin.Support.isMobile() === false && origin.options.source.live === false && origin.options.thumbs === true) {
@@ -140,20 +140,25 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
             origin.Ui.state(origin.env.labels.goto, 'on', '');
         }
     });
-    self.model.on('mousedown touchstart', function (e) {
+    self.model.on('mousedown touchstart touch', function (e) {
         // Left mouse button activate
-        if (e.type == 'touchstart') {
+        if (e.type == 'touchstart' || e.type == 'touch') {
             self.slide(_position(e), false);
         }
         leftButtonDown = true;
     });
-    $(document).on('mouseup touchend', function (e) {
+    self.instance.on('mouseup touchend', function (e) {
         // Left mouse button deactivate
         leftButtonDown = false;
+        self.slide(_position(e));
     });
-    $(document).on('mousemove touchmove', function (e) {
+    self.instance.on('mousemove touchmove', function (e) {
         if (leftButtonDown === true) {
-            self.slide(_position(e));
+            if (self.options.event != 'progress-change') {
+                self.slide(_position(e), false);
+            }else{
+                self.slide(_position(e));
+            }
         }
     });
     return self;

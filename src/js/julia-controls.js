@@ -13,18 +13,17 @@ JuliaPlayer.prototype._Controls = function (origin) {
             if (origin.env.started === false) {
                 origin.Source.load();
             } else {
-                origin.env.api.play();
+                origin.Support.playVideo();
             }
             break;
         case 'pause':
-            origin.env.api.pause();
+            origin.Support.pauseVideo();
             break;
         case 'stop':
             if (origin.options.onStop !== false) {
                 origin.Callback.fn(origin.options.onStop, data);
             }
-            origin.env.api.pause();
-            origin.env.api.currentTime = 0;
+            origin.Support.stopVideo();
             origin.Ui.state(origin.env.buttons.play, 'pause', 'play');
             origin.Ui.icon(origin.env.buttons.play, 'julia-pause', 'julia-play');
             origin.env.buttons.bigPlay.show();
@@ -33,7 +32,7 @@ JuliaPlayer.prototype._Controls = function (origin) {
         case 'goto':
             origin.Ui.state(origin.env.preloader, '', 'on');
             data.currentTime = isNaN(Number(parseFloat(data.currentTime))) ? 0 : Number(parseFloat(data.currentTime));
-            origin.env.api.currentTime = data.currentTime;
+            origin.Support.seekVideo(data.currentTime)
             break;
         case 'setDuration':
             data.duration = isNaN(Number(parseFloat(data.duration))) ? 0 : Number(parseFloat(data.duration));

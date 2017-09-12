@@ -5,7 +5,7 @@
 JuliaPlayer = function (options) {
     var origin = this;
     // Import options
-    options = typeof options === 'undefined' ? {} : options;
+    var options = typeof options === 'undefined' ? {} : options;
     // Unique instance ID
     var __JULIA_INSTANCE__ID__ = Math.floor(Math.random() * 10000000 + 1);
     // Default origin.options
@@ -175,15 +175,15 @@ JuliaPlayer = function (options) {
         suggest: $(),
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.0.8'
+        version: '2.0.9'
     };
     // Console debug
     origin.debug = function (data, warn) {
         //--odn-handle-start--
         if (origin.options.debug === true) {
-            warn = typeof warn === 'undefined' || warn === false ? false : true;
+            var warn = typeof warn === 'undefined' || warn === false ? false : true;
             if (window.console) {
-                for (key in data) {
+                for (var key in data) {
                     if (warn === true && typeof console.warn === 'function') {
                         console.warn(' - JuliaPlayer ' + origin.env.ID + ' warning - [' + typeof data[key] + '], ' + key + ': ', data[key]);
                     } else {
@@ -191,7 +191,8 @@ JuliaPlayer = function (options) {
                     }
                 }
             }
-        }    //--odn-handle-stop--
+        }
+        //--odn-handle-stop--
     };
     origin.event = function (eventName, elem, data) {
         var e = typeof elem === 'undefined' ? $(document) : elem;
@@ -234,7 +235,7 @@ JuliaPlayer = function (options) {
             'live': origin.options.source.live,
             'isMobile': origin.Support.isMobile(),
             'readyState': origin.env.api.readyState,
-            'duration': origin.Timecode.toHuman(origin.env.api.duration),
+            'duration': origin.Timecode.toHuman(origin.Support.getDuration()),
             'position': origin.Timecode.toHuman(origin.env.api.currentTime),
             'canPlayMediaString': origin.env.canPlayMediaString,
             'canPlayMedia': origin.env.canPlayMedia.toString(),
@@ -302,8 +303,8 @@ JuliaPlayer = function (options) {
                 }
             });
             // Persistent data
-            volume = origin.Persist.get('julia-player-volume');
-            muted = origin.Persist.get('julia-player-muted');
+            var volume = origin.Persist.get('julia-player-volume');
+            var muted = origin.Persist.get('julia-player-muted');
             if (!isNaN(Number(volume)) && typeof volume !== 'undefined') {
                 origin.options.volume = parseInt(Number(volume));
                 if (origin.options.volume > 100 || origin.options.volume < 0) {

@@ -68,6 +68,48 @@ JuliaPlayer.prototype._Support = function(origin) {
     };
 
 
+    self.getDuration = function () {
+        var duration = origin.env.api.duration;
+        if (origin.env.started === true && origin.env.mode == 'dash') {
+            duration = origin.env.dash.duration();
+        }
+        return duration;
+    };
+
+
+    self.playVideo = function() {
+        if (origin.env.mode == 'dash') {
+            origin.env.dash.play();
+        }else{
+            origin.env.api.play();
+        }
+    };
+
+
+    self.pauseVideo = function() {
+        if (origin.env.mode == 'dash') {
+            origin.env.dash.pause();
+        }else{
+            origin.env.api.pause();
+        }
+    };
+
+
+    self.stopVideo = function() {
+        self.pauseVideo();
+        self.seekVideo(0);
+    };
+
+
+    self.seekVideo = function(currentTime) {
+        if (origin.env.mode == 'dash') {
+            origin.env.dash.seek(currentTime);
+        }else{
+            origin.env.api.currentTime = currentTime;
+        }
+    };
+
+
     self.resize = function(m) {
 
         if (typeof(m) !== 'undefined') {

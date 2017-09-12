@@ -9,7 +9,6 @@ JuliaPlayer.prototype._Source = function (origin) {
         origin.env.errorRecoveryAttempts = 0;
         origin.Subtitles.textTracksCleaner();
         origin.Ui.reset();
-        origin.Ui.state(origin.env.preloader, '', 'on');
         origin.env.continuePlayback = false;
         if (origin.env.api.paused === false) {
             origin.env.api.pause();
@@ -162,7 +161,7 @@ JuliaPlayer.prototype._Source = function (origin) {
 
             if (origin.env.errorRecoveryAttempts > 0) {
                 origin.Ui.state(origin.env.preloader, '', 'on');
-                origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
+                //origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
             }else{
                 origin.Ui.state(origin.env.preloader, 'on', '');
             }
@@ -179,14 +178,14 @@ JuliaPlayer.prototype._Source = function (origin) {
         if (origin.Support.isMobile() === false) {
             setTimeout(function () {
                 if (origin.env.api.readyState > 2) {
-                    origin.env.api.play();
+                    origin.Support.playVideo();
                 } else {
                     self.firstPlay();
                 }
             }, 300);
         } else {
             setTimeout(function () {
-                origin.env.api.play();
+                origin.Support.playVideo();
                 setTimeout(function () {
                     if (origin.env.api.readyState < 2 && origin.env.api.paused === true) {
                         origin.Ui.state(origin.env.buttons.play, 'pause', 'play');

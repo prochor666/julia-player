@@ -178,6 +178,14 @@ div.julia-player {
     }
 
     @import "_suggest.scss";
+
+    &.no-cursor {
+        cursor: none !important;
+
+        .julia-shield {
+            cursor: none !important;
+        }
+    }
 }
 
 div.julia-player,

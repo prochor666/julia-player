@@ -558,6 +558,10 @@ div.julia-player {
         background-color: rgba(0, 0, 0, 0.7); }
       div.julia-player .julia-suggest .julia-suggest-item:hover .julia-suggest-item-title {
         color: deepskyblue; }
+  div.julia-player.no-cursor {
+    cursor: none !important; }
+    div.julia-player.no-cursor .julia-shield {
+      cursor: none !important; }
 
 div.julia-player,
 div.julia-player button.julia-btn,

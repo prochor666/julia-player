@@ -120,41 +120,27 @@ JuliaPlayer.prototype._Events = function (origin) {
         });
         // Fullscreen toolbar behavior bindings
         var mouseMoveCleaner;
-        origin.env.instance.off('mousemove touchmove', '.julia-shield, .julia-suggest').off('mouseover mousemove  touchend touchmove mouseout mouseleave touchstart', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on').on('mousemove touchmove touchend touchstart', '.julia-shield, .julia-suggest', function (e) {
-            if ([
-                    'touchend'
-                ].lastIndexOf(e.type.toLowerCase()) > -1) {
-                mouseMoveCleaner = setTimeout(function () {
-                    if (origin.env.started === true) {
-                        origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
-                        if (origin.options.source.title.length>0) {
-                            origin.env.toolbarTop.removeClass('julia-toolbar-visible');
-                        }
-                        origin.Ui.state(origin.env.menus.settings, 'on', '');
-                    }
-                }, 1750);
-            }else{
-
-                e.preventDefault();
-                if (origin.env.started === true) {
-                    origin.env.toolbarBottom.addClass('julia-toolbar-visible');
-                    if (origin.options.source.title.length>0) {
-                        origin.env.toolbarTop.addClass('julia-toolbar-visible');
-                    }
+        origin.env.instance.off('mousemove touchmove', '.julia-shield, .julia-suggest').off('mouseover mousemove touchmove mouseout', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on').on('mousemove touchmove', '.julia-shield, .julia-suggest', function (e) {
+            e.preventDefault();
+            if (origin.env.started === true) {
+                origin.env.instance.removeClass('no-cursor');
+                origin.env.toolbarBottom.addClass('julia-toolbar-visible');
+                if (origin.options.source.title.length>0) {
+                    origin.env.toolbarTop.addClass('julia-toolbar-visible');
                 }
-
-                clearTimeout(mouseMoveCleaner);
-                mouseMoveCleaner = setTimeout(function () {
-                    if (origin.env.started === true) {
-                        origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
-                        if (origin.options.source.title.length>0) {
-                            origin.env.toolbarTop.removeClass('julia-toolbar-visible');
-                        }
-                        origin.Ui.state(origin.env.menus.settings, 'on', '');
-                    }
-                }, 1750);
             }
-        }).on('mouseover mousemove touchmove mouseout mouseleave', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on', function (e) {
+            clearTimeout(mouseMoveCleaner);
+            mouseMoveCleaner = setTimeout(function () {
+                if (origin.env.started === true) {
+                    origin.env.instance.addClass('no-cursor');
+                    origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
+                    if (origin.options.source.title.length>0) {
+                        origin.env.toolbarTop.removeClass('julia-toolbar-visible');
+                    }
+                    origin.Ui.state(origin.env.menus.settings, 'on', '');
+                }
+            }, 1750);
+        }).on('mouseover mousemove touchmove mouseout', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on', function (e) {
             e.preventDefault();
             if (origin.env.started === true) {
                 origin.env.toolbarBottom.addClass('julia-toolbar-visible');
@@ -169,6 +155,8 @@ JuliaPlayer.prototype._Events = function (origin) {
                 ].lastIndexOf(e.type.toLowerCase()) > -1) {
                 mouseMoveCleaner = setTimeout(function (e) {
                     if (origin.env.started === true) {
+                        origin.env.instance.addClass('no-cursor');
+                        console.log('Cursor NOT visible');
                         origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
                         if (origin.options.source.title.length>0) {
                             origin.env.toolbarTop.removeClass('julia-toolbar-visible');
@@ -182,7 +170,7 @@ JuliaPlayer.prototype._Events = function (origin) {
         $('body').off('julia.progress-change', '#julia-' + origin.env.ID).on('julia.progress-change', '#julia-' + origin.env.ID, function (e, data) {
             if (origin.env.started === true) {
                 seekTo = origin.Timecode.toSeconds(data.percent);
-                seekTo = seekTo >= origin.env.api.duration ? origin.env.api.duration : seekTo;
+                seekTo = seekTo >= origin.Support.getDuration() ? origin.Support.getDuration(): seekTo;
                 origin.Controls.press('goto', { currentTime: seekTo });
             }
         });
@@ -206,7 +194,7 @@ JuliaPlayer.prototype._Events = function (origin) {
             clearTimeout(origin.env.suggestTimer);
             if (origin.env.startupGoto > 0) {
                 seekTo = origin.Timecode.toSeconds(origin.env.startupGoto);
-                seekTo = seekTo >= origin.env.api.duration ? origin.env.api.duration : seekTo;
+                seekTo = seekTo >= origin.Support.getDuration() ? origin.Support.getDuration(): seekTo;
                 origin.env.startupGoto = 0;
                 origin.Controls.press('goto', { currentTime: seekTo });
             }
@@ -223,10 +211,10 @@ JuliaPlayer.prototype._Events = function (origin) {
             origin.env.started = true;
             clearTimeout(origin.env.suggestTimer);
             origin.env.errorRecoveryAttempts = 0;
-            origin.Controls.press('setDuration', { 'duration': origin.env.api.duration });
+            origin.Controls.press('setDuration', { 'duration': origin.Support.getDuration() });
         };
         origin.env.api.onwaiting = function (e) {
-            origin.env.sliders.progress.buffered();
+            //origin.env.sliders.progress.buffered();
             origin.Ui.state(origin.env.preloader, '', 'on');
         };
         // Video pause
@@ -290,10 +278,10 @@ JuliaPlayer.prototype._Events = function (origin) {
         };
         origin.env.api.oncanplaythrough = function (e) {
             origin.Support.resize(e.type);
-            origin.Controls.press('setDuration', { 'duration': origin.env.api.duration });
+            origin.Controls.press('setDuration', { 'duration': origin.Support.getDuration() });
             if (origin.env.mode != 'hls' && origin.env.mode != 'dash') {
                 if ((origin.env.continuePlayback === true || origin.options.autoplay === true) && (origin.env.api.paused === true || origin.env.api.ended === true) && origin.Support.isMobile() === false && origin.env.started === false) {
-                    origin.env.api.play();
+                    origin.Support.playVideo();
                 }
             }
         };
@@ -334,7 +322,7 @@ JuliaPlayer.prototype._Events = function (origin) {
         };
         // Set video duration
         origin.env.api.ondurationchange = function (e) {
-            origin.Controls.press('setDuration', { 'duration': origin.env.api.duration });
+            origin.Controls.press('setDuration', { 'duration': origin.Support.getDuration() });
         };
         origin.env.api.onended = function (e) {
             origin.Controls.press('stop');
@@ -387,7 +375,7 @@ JuliaPlayer.prototype._Events = function (origin) {
                     origin.Ui.menuDisabled(origin.env.menus.audioTracks, true);
                 }
                 if (origin.env.continuePlayback === true && origin.env.started === true) {
-                    origin.env.api.play();
+                    origin.Support.playVideo();
                 }
             });
             origin.env.hls.on(origin.env.context.Hls.Events.LEVEL_LOADED, function (event, data) {
@@ -479,7 +467,7 @@ JuliaPlayer.prototype._Events = function (origin) {
                         origin.debug({ 'Dash Manifest loaded': event });
                         origin.env.dashInitialized = true;
                         if (origin.env.continuePlayback === true && origin.env.started === true) {
-                            origin.env.api.play();
+                            origin.Support.playVideo();
                         }
                         break;
                     case origin.env.context.dashjs.MediaPlayer.events.STREAM_INITIALIZED:
