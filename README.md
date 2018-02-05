@@ -12,9 +12,11 @@ How to establish devel environment.
     - JavaScript minify package [gulp-minify](https://www.npmjs.com/package/gulp-minify)
     - Concat package [gulp-concat](https://www.npmjs.com/package/gulp-concat)
     - Replace package [gulp-replace](https://www.npmjs.com/package/gulp-replace)
+    - Filter package [gulp-filter](https://www.npmjs.com/package/gulp-filter)
+    - Chown package [gulp-chown](https://www.npmjs.com/package/gulp-chown)
     - Del package [del](https://www.npmjs.com/package/del)
     - Fs package [fs](https://www.npmjs.com/package/fs)
-    - Util package [gulp-util](https://www.npmjs.com/package/fs)
+    - Fancy log package [fancy-log](https://www.npmjs.com/package/fancy-log)
 
 How to start.
 
