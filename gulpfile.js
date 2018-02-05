@@ -5,18 +5,20 @@ Warp/Julia app builder
 */
 
 // Gulp && plugins
-var gulp = require('gulp');
-var sass = require('gulp-sass');
-var cleanCSS = require('gulp-clean-css');
-var concat = require('gulp-concat');
-var minify = require('gulp-minify');
-var replace = require('gulp-replace');
-var del = require('del');
-var fs = require('fs');
-var gutil = require('gulp-util');
+const gulp = require('gulp');
+const sass = require('gulp-sass');
+const cleanCSS = require('gulp-clean-css');
+const concat = require('gulp-concat');
+const minify = require('gulp-minify');
+const replace = require('gulp-replace');
+const del = require('del');
+const fs = require('fs');
+const log = require('fancy-log');
+const gFilter = require('gulp-filter');
+const chown = require('gulp-chown');
 
 // Sources
-var appSrc = [
+const appSrc = [
     'src/js/julia-base.js',
     'src/js/julia-callback.js',
     'src/js/julia-controls.js',
@@ -35,9 +37,15 @@ var appSrc = [
     'src/js/julia-jquery-plugin.js',
 ];
 
-var appUMD = [
+const appUMD = [
     'src/js/julia-umd.js',
 ];
+
+var stat = {};
+fs.stat('src/js/julia-base.js', function(e, s) {
+    stat.uid = s.uid;
+    stat.gid = s.gid;
+});
 
 // App styles
 gulp.task('sass', function()
@@ -54,6 +62,7 @@ gulp.task('sass', function()
                 specialComments: 0
             }))
             .pipe(concat('julia-player.min.css'))
+            .pipe(chown(stat.uid, stat.gid))
             .pipe(gulp.dest('dist/css'));
     }, 1000);
 });
@@ -88,7 +97,8 @@ gulp.task('finalbuild', function()
                 compress: {
                     properties: false
                 }
-            }).on('error', gutil.log))
+            }).on('error', log))
+            .pipe(chown(stat.uid, stat.gid))
             .pipe(gulp.dest('dist/js'));
 
     }, 1000);

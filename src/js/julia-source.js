@@ -113,6 +113,25 @@ JuliaPlayer.prototype._Source = function (origin) {
         switch (source.mode) {
         case 'dash':
             try {
+                origin.env.dash.extend("RequestModifier", function () {
+                    return {
+                        modifyRequestHeader: function modifyRequestHeader(xhr) {
+                            for(var h in origin.options.dashConfig.headers) {
+                                xhr.setRequestHeader(h, origin.options.dashConfig.headers[h]);
+                            }
+                            return xhr;
+                        },
+                        modifyRequestURL: function modifyRequestURL(url) {
+                            var s = url.indexOf('?') > -1 ? '&': '?';
+                            for(var q in origin.options.dashConfig.queryString) {
+                                url = url+s+q+'='+origin.options.dashConfig.queryString[q];
+                                s = '&';
+                            }
+                            return url;
+                        }
+                    };
+                }, true);
+
                 origin.env.dash.initialize(origin.env.api, source.file, origin.options.autoplay);
                 origin.env.dash.getDebug().setLogToBrowserConsole(origin.options.playbackDebug);
                 origin.Events.dashLibEvents();

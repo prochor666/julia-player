@@ -14,7 +14,10 @@ JuliaPlayer = function (options) {
         element: $('body'),
         autoplay: false,
         debug: false,
-        dashConfig: {},
+        dashConfig: {
+            headers: {},
+            queryString: {},
+        },
         dimensions: [
             [
                 1920,
@@ -175,7 +178,7 @@ JuliaPlayer = function (options) {
         suggest: $(),
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.0.9'
+        version: '2.0.10'
     };
     // Console debug
     origin.debug = function (data, warn) {
@@ -969,23 +972,20 @@ JuliaPlayer.prototype._Events = function (origin) {
                             'Audio bitrate': origin.Switcher.getBitrate('audio')
                         });
                         // Optional buffer tunnning
-                        if (Object.keys(origin.options.dashConfig).indexOf('setRichBufferThreshold') > -1) {
-                             origin.env.dash.setRichBufferThreshold(origin.options.dashConfig.setRichBufferThreshold);
-                        }
                         if (Object.keys(origin.options.dashConfig).indexOf('setBufferToKeep') > -1) {
-                             origin.env.dash.setBufferToKeep(origin.options.dashConfig.setBufferToKeep);
+                            origin.env.dash.setBufferToKeep(origin.options.dashConfig.setBufferToKeep);
                         }
                         if (Object.keys(origin.options.dashConfig).indexOf('setBufferPruningInterval') > -1) {
-                             origin.env.dash.setBufferPruningInterval(origin.options.dashConfig.setBufferPruningInterval);
+                            origin.env.dash.setBufferPruningInterval(origin.options.dashConfig.setBufferPruningInterval);
                         }
                         if (Object.keys(origin.options.dashConfig).indexOf('setBufferTimeAtTopQuality') > -1) {
-                             origin.env.dash.setBufferTimeAtTopQuality(origin.options.dashConfig.setBufferTimeAtTopQuality);
+                            origin.env.dash.setBufferTimeAtTopQuality(origin.options.dashConfig.setBufferTimeAtTopQuality);
                         }
                         if (Object.keys(origin.options.dashConfig).indexOf('setScheduleWhilePaused') > -1) {
-                             origin.env.dash.setScheduleWhilePaused(origin.options.dashConfig.setScheduleWhilePaused);
+                            origin.env.dash.setScheduleWhilePaused(origin.options.dashConfig.setScheduleWhilePaused);
                         }
                         if (Object.keys(origin.options.dashConfig).indexOf('setStableBufferTime') > -1) {
-                             origin.env.dash.setStableBufferTime(origin.options.dashConfig.setStableBufferTime);
+                            origin.env.dash.setStableBufferTime(origin.options.dashConfig.setStableBufferTime);
                         }
 
                         // Video bitrates
@@ -1463,6 +1463,25 @@ JuliaPlayer.prototype._Source = function (origin) {
         switch (source.mode) {
         case 'dash':
             try {
+                origin.env.dash.extend("RequestModifier", function () {
+                    return {
+                        modifyRequestHeader: function modifyRequestHeader(xhr) {
+                            for(var h in origin.options.dashConfig.headers) {
+                                xhr.setRequestHeader(h, origin.options.dashConfig.headers[h]);
+                            }
+                            return xhr;
+                        },
+                        modifyRequestURL: function modifyRequestURL(url) {
+                            var s = url.indexOf('?') > -1 ? '&': '?';
+                            for(var q in origin.options.dashConfig.queryString) {
+                                url = url+s+q+'='+origin.options.dashConfig.queryString[q];
+                                s = '&';
+                            }
+                            return url;
+                        }
+                    };
+                }, true);
+
                 origin.env.dash.initialize(origin.env.api, source.file, origin.options.autoplay);
                 origin.env.dash.getDebug().setLogToBrowserConsole(origin.options.playbackDebug);
                 origin.Events.dashLibEvents();

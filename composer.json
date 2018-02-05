@@ -1,9 +1,9 @@
 {
-    "name": "prochor666/wmc",
+    "name": "prochor666/julia-player",
     "type": "library",
     "description": "Responsive, mobile ready player",
     "keywords": ["html5","player"],
-    "homepage": "https://github.com/prochor666/wmc",
+    "homepage": "https://github.com/prochor666/julia-player",
     "license": "MIT",
     "authors": [
         {

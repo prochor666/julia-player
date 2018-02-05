@@ -484,23 +484,20 @@ JuliaPlayer.prototype._Events = function (origin) {
                             'Audio bitrate': origin.Switcher.getBitrate('audio')
                         });
                         // Optional buffer tunnning
-                        if (Object.keys(origin.options.dashConfig).indexOf('setRichBufferThreshold') > -1) {
-                             origin.env.dash.setRichBufferThreshold(origin.options.dashConfig.setRichBufferThreshold);
-                        }
                         if (Object.keys(origin.options.dashConfig).indexOf('setBufferToKeep') > -1) {
-                             origin.env.dash.setBufferToKeep(origin.options.dashConfig.setBufferToKeep);
+                            origin.env.dash.setBufferToKeep(origin.options.dashConfig.setBufferToKeep);
                         }
                         if (Object.keys(origin.options.dashConfig).indexOf('setBufferPruningInterval') > -1) {
-                             origin.env.dash.setBufferPruningInterval(origin.options.dashConfig.setBufferPruningInterval);
+                            origin.env.dash.setBufferPruningInterval(origin.options.dashConfig.setBufferPruningInterval);
                         }
                         if (Object.keys(origin.options.dashConfig).indexOf('setBufferTimeAtTopQuality') > -1) {
-                             origin.env.dash.setBufferTimeAtTopQuality(origin.options.dashConfig.setBufferTimeAtTopQuality);
+                            origin.env.dash.setBufferTimeAtTopQuality(origin.options.dashConfig.setBufferTimeAtTopQuality);
                         }
                         if (Object.keys(origin.options.dashConfig).indexOf('setScheduleWhilePaused') > -1) {
-                             origin.env.dash.setScheduleWhilePaused(origin.options.dashConfig.setScheduleWhilePaused);
+                            origin.env.dash.setScheduleWhilePaused(origin.options.dashConfig.setScheduleWhilePaused);
                         }
                         if (Object.keys(origin.options.dashConfig).indexOf('setStableBufferTime') > -1) {
-                             origin.env.dash.setStableBufferTime(origin.options.dashConfig.setStableBufferTime);
+                            origin.env.dash.setStableBufferTime(origin.options.dashConfig.setStableBufferTime);
                         }
 
                         // Video bitrates

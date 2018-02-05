@@ -14,7 +14,10 @@ JuliaPlayer = function (options) {
         element: $('body'),
         autoplay: false,
         debug: false,
-        dashConfig: {},
+        dashConfig: {
+            headers: {},
+            queryString: {},
+        },
         dimensions: [
             [
                 1920,
@@ -175,7 +178,7 @@ JuliaPlayer = function (options) {
         suggest: $(),
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.0.9'
+        version: '2.0.10'
     };
     // Console debug
     origin.debug = function (data, warn) {
