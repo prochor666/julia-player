@@ -8,11 +8,12 @@ JuliaPlayer.prototype._Ui = function (origin) {
         if (origin.env.instance.length > 0) {
             origin.env.instance.remove();
         }
-        platformClass = origin.Support.isMobile() === false ? 'julia-desktop' : 'julia-mobile';
+        var autoPlay = origin.options.autoplay === true ? 'autoplay': '';
+        var platformClass = origin.Support.isMobile() === false ? 'julia-desktop' : 'julia-mobile';
         // Main container
         origin.env.instance = $('<div class="julia-player off julia-fullscreen-off julia-' + origin.env.ID + ' ' + platformClass + '" id="julia-' + origin.env.ID + '"></div>');
         // Wrapper
-        origin.env.wrapper = $('<div class="julia-wrapper"><video class="julia-video" id="julia-api-' + origin.env.ID + '" preload="auto" webkit-playsinline playsinline></video></div>');
+        origin.env.wrapper = $('<div class="julia-wrapper"><video class="julia-video" id="julia-api-' + origin.env.ID + '" preload="auto" '+ autoPlay +' webkit-playsinline playsinline></video></div>');
         // Shield
         origin.env.shield = $('<div class="julia-shield" id="julia-shield-' + origin.env.ID + '"></div>');
         // Preloader
