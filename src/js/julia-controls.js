@@ -6,6 +6,8 @@ JuliaPlayer.prototype._Controls = function (origin) {
     var self = this;
     self.press = function (action, data) {
         data = data || {};
+        $('.julia-player').removeClass('julia-focused');
+        $('#julia-'+origin.env.ID+'').addClass('julia-focused');
         switch (action) {
         case 'play':
             origin.Ui.state(origin.env.preloader, '', 'on');
@@ -20,8 +22,9 @@ JuliaPlayer.prototype._Controls = function (origin) {
             origin.Support.pauseVideo();
             break;
         case 'stop':
+            origin.event('stop.julia', origin.env.instance, origin);
             if (origin.options.onStop !== false) {
-                origin.Callback.fn(origin.options.onStop, data);
+                origin.Callback.fn(origin.options.onStop, 'onStop', data);
             }
             origin.Support.stopVideo();
             origin.Ui.state(origin.env.buttons.play, 'pause', 'play');

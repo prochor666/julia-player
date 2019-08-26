@@ -19,8 +19,9 @@ JuliaPlayer.prototype._Fullscreen = function (origin) {
         }
 
         if (origin.options.onFullscreen !== false) {
-            origin.Callback.fn(origin.options.onFullscreen, {});
+            origin.event('fullscreen.julia');
         }
+        origin.env.buttons.fullscreen.mouseout();
     };
     self.off = function () {
         if (document.exitFullscreen) {
@@ -34,8 +35,9 @@ JuliaPlayer.prototype._Fullscreen = function (origin) {
         }
 
         if (origin.options.onFullscreenExit !== false) {
-            origin.Callback.fn(origin.options.onFullscreenExit, {});
+            origin.event('fullscreenExit.julia');
         }
+        origin.env.buttons.fullscreen.mouseout();
     };
     self.landscapeLock = function (lock) {
         if (origin.Support.isMobile()) {

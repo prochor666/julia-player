@@ -21,13 +21,16 @@ JuliaPlayer.prototype._Support = function(origin) {
         return Math.max(bites, 0.1).toFixed(1) + biteUnits[i];
     };
 
-
     self.forceReadyState = function() {
         if (/Firefox/i.test(navigator.userAgent) ) {
             return true;
         }
 
         return false;
+    };
+
+    self.hasAttr = function (obj, attr) {
+        return Object.keys(obj).indexOf(attr) > -1;
     };
 
 
@@ -117,13 +120,19 @@ JuliaPlayer.prototype._Support = function(origin) {
         }
 
         self.fixParentSize();
-        vmargin = 0;
+        var vmargin = 0;
+        var dimensions = [512,288];
 
         if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
             // no fullscreen
-            dimensions = origin.options.responsive === true ? self.getSize(): [origin.env.element.width(), origin.env.element.height()];
+            if (origin.options.responsive === true) {
+                dimensions = self.getSize();
+            } else {
+                var l = origin.options.dimensions.length > 0 ? origin.options.dimensions.length - 1: 0;
+                dimensions = [origin.options.dimensions[l][0], origin.options.dimensions[l][1]];
+            }
         }else{
-            a = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
+            var a = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
 
             if (a === 0 || origin.options.source.fixVideoAspect === true) {
                 a = self.aspect(dimensions[0], dimensions[1]);
@@ -131,12 +140,12 @@ JuliaPlayer.prototype._Support = function(origin) {
 
             if (a > 1) {
                 // portrait
-                dimensions = [screen.width,a*screen.width];
+                dimensions = [$(window).width(),a*$(window).width()];
             }else{
                 // landscape
-                dimensions = [screen.width,a*screen.width];
+                dimensions = [$(window).width(),a*$(window).width()];
             }
-            vmargin = (screen.height - dimensions[1])/2;
+            vmargin = ($(window).height() - dimensions[1])/2;
         }
 
         if (origin.options.source.fixVideoAspect === true) {
@@ -158,16 +167,20 @@ JuliaPlayer.prototype._Support = function(origin) {
         origin.env.dimensions.width = dimensions[0];
         origin.env.dimensions.height = dimensions[1];
 
+        origin.debug({'UI resize': [dimensions[0], dimensions[1]]});
+        
         // Small size fix, hide time info, BAD BOY!
         $('.julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-currentTime, .julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-duration')
         .css({
             'display': dimensions[0] < 360 ? 'none': 'block'
         });
+
+        origin.event('resize.julia');
     };
 
 
     self.fixParentSize = function() {
-        // Fix video wrapped in inline block, can not get size properlym if inline element detected
+        // Fix video wrapped in inline block, can not get size properly if inline element detected
         var parentBlock = origin.env.element.parent().css('display').toLowerCase();
         if( parentBlock == 'inline' ) {
             origin.env.element.parent().css({'display': 'block'});
@@ -175,24 +188,20 @@ JuliaPlayer.prototype._Support = function(origin) {
     };
 
 
-    self.getSize = function()
-    {
+    self.getSize = function() {
         var parentWidth = origin.env.element.parent().width();
         var dim = [Number(parentWidth),Number(parentWidth)*0.5625];
 
-        for( i in origin.options.dimensions )
-        {
-            dim = origin.options.dimensions[i];
-
-            if( parentWidth >= dim[0] )
-            {
-                dimensions = [dim[0],( dim[0]*self.aspect( dim[0], dim[1] ) )];
-                return dimensions;
+        if (origin.options.responsiveBreakpoints === true) {
+            for ( i in origin.options.dimensions ) {
+                dim = origin.options.dimensions[i];
+                if ( parentWidth >= dim[0] ) {
+                    dimensions = [dim[0],(dim[0]*self.aspect(dim[0], dim[1]))];
+                    return dimensions;
+                }
             }
         }
-
-        dimensions = [parentWidth, (parentWidth*self.aspect( dim[0], dim[1] ))];
-
+        dimensions = [parentWidth, (parentWidth*self.aspect(dim[0], dim[1]))];
         return dimensions;
     };
 };

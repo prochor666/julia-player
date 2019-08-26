@@ -13,25 +13,23 @@ JuliaPlayer.prototype._Ui = function (origin) {
         // Main container
         origin.env.instance = $('<div class="julia-player off julia-fullscreen-off julia-' + origin.env.ID + ' ' + platformClass + '" id="julia-' + origin.env.ID + '"></div>');
         // Wrapper
-        origin.env.wrapper = $('<div class="julia-wrapper"><video class="julia-video" id="julia-api-' + origin.env.ID + '" preload="auto" '+ autoPlay +' webkit-playsinline playsinline></video></div>');
+        origin.env.wrapper = $('<div class="julia-wrapper"><video class="julia-video" id="julia-api-' + origin.env.ID + '" preload="auto" '+ autoPlay +' webkit-playsinline playsinline></video><div id="ttml-rendering-div-' + origin.env.ID + '"></div></div>');
         // Shield
         origin.env.shield = $('<div class="julia-shield" id="julia-shield-' + origin.env.ID + '"></div>');
         // Preloader
         origin.env.preloader = $('<div class="julia-preloader"></div>');
-        // Suggest
-        origin.env.suggest = $('<div class="julia-suggest" id="julia-suggest-' + origin.env.ID + '"></div>');
         // Toolbars
         origin.env.toolbarTop = $('<div class="julia-toolbar julia-toolbar-top" id="julia-toolbar-top-' + origin.env.ID + '"></div>');
         origin.env.toolbarBottom = $('<div class="julia-toolbar julia-toolbar-bottom" id="julia-toolbar-bottom-' + origin.env.ID + '"></div>');
         // Messaging layer
         origin.env.notifier = $('<div class="julia-notifier" id="julia-notifier-' + origin.env.ID + '"></div>');
         // Buttons
-        origin.env.buttons.bigPlay = $('<button class="julia-btn julia-big-play"><i class="julia-icon julia-play-circle"></i></button>');
+        origin.env.buttons.bigPlay = $('<button class="julia-btn julia-big-play"><i class="julia-icon julia-play"></i></button>');
         origin.env.buttons.play = $('<button class="julia-btn julia-play play">' + '    <i class="julia-icon julia-play"></i>' + '</button>');
         origin.env.buttons.next = $('<button class="julia-btn julia-next" title="' + origin.env.i18n.next + '">' + '    <i class="julia-icon julia-chevron-right"></i>' + '</button>');
         origin.env.buttons.previous = $('<button class="julia-btn julia-previous" title="' + origin.env.i18n.previous + '">' + '    <i class="julia-icon julia-chevron-left"></i>' + '</button>');
         origin.env.buttons.close = $('<button class="julia-btn julia-close" title="' + origin.env.i18n.close + '">' + '    <i class="julia-icon julia-close"></i>' + '</button>');
-        origin.env.buttons.fullscreen = $('<button class="julia-btn julia-fullscreen on">' + '    <i class="julia-icon julia-fullscreen"></i>' + '</button>');
+        origin.env.buttons.fullscreen = $('<div class="julia-btn julia-fullscreen on">' + '    <i class="julia-icon julia-fullscreen"></i>' + '</div>');
         origin.env.buttons.sound = $('<button class="julia-btn julia-sound on">' + '    <i class="julia-icon julia-sound-on"></i>' + '</button>');
         origin.env.buttons.settings = $('<button class="julia-btn julia-settings off">' + '    <i class="julia-icon julia-gear"></i>' + '</button>');
         // Range bars
@@ -77,7 +75,6 @@ JuliaPlayer.prototype._Ui = function (origin) {
         // Compose content DOM object
         origin.env.wrapper.append([
             origin.env.shield,
-            origin.env.suggest,
             origin.env.notifier,
             origin.env.buttons.bigPlay,
             origin.env.preloader,
@@ -102,7 +99,7 @@ JuliaPlayer.prototype._Ui = function (origin) {
             origin.debug({ 'Api object': 'julia-api-' + origin.env.ID });
             self.zIndexize();
             origin.Ui.state(origin.env.instance, '', 'on');
-            origin.event('julia.ui-created', origin.env.instance);
+            origin.event('uiCreated.julia');
         }, 250);
         //--odn-handle-stop--
     };
@@ -179,7 +176,6 @@ JuliaPlayer.prototype._Ui = function (origin) {
             origin.env.shield,
             origin.env.toolbarTop,
             origin.env.toolbarBottom,
-            origin.env.suggest,
             origin.env.menus.settings,
             origin.env.buttons.bigPlay,
             origin.env.notifier,

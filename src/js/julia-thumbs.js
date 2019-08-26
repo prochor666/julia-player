@@ -49,55 +49,55 @@ JuliaPlayer.prototype._Thumbs = function (origin) {
             self.shadowApi.width = width;
             self.shadowApi.height = height;
             self.shadowApi.preload = 'auto';
-            // ************************
-            // HLS library supported
-            // and HLS requested
-            // ************************
+            self.shadowApi.muted = true;
+            
             if (origin.env.mode === 'hls') {
-                self.hls = new Hls(origin.options.hlsConfig);    // ************************
-                                                                 // Dash
-                                                                 // ************************
-            } else if (origin.env.mode === 'dash') {
-            } else {
-                self.shadowApi.src = origin.options.source.file;
-            }
-            // ************************
-            // HLS library supported
-            // and HLS requested
-            // ************************
-            if (origin.env.mode === 'hls') {
+                // ************************
+                // HLS mode
+                // ************************
+                self.hls = new Hls(origin.options.hlsConfig);
                 self.hls.autoLevelCapping = -1;
                 self.hls.attachMedia(self.shadowApi);
-                self.hls.loadSource(origin.options.source.file);    // ************************
-                                                                    // Usig DASH library
-                                                                    // ************************
+                self.hls.loadSource(origin.options.source.file);
+                self.shadowApi.pause();
             } else if (origin.env.mode === 'dash') {
+                // ************************
+                // DASH mode
+                // ************************
                 self.dash = dashjs.MediaPlayer().create();
                 self.dash.initialize();
                 self.dash.attachView(self.shadowApi);
                 self.dash.attachSource(origin.options.source.file);
                 self.dash.setAutoPlay(false);
-                self.dash.getDebug().setLogToBrowserConsole(false);    // ************************
-                                                                       // Classic VOD file
-                                                                       // ************************
+                self.dash.pause();
+               
             } else {
+                // ************************
+                // Classic VOD file
+                // ************************
+                self.shadowApi.src = origin.options.source.file;
                 self.shadowApi.load();
+                self.shadowApi.pause();
             }
         }
         origin.env.thumbsOk = false;
         index = Math.floor(t);
-        if (index in self.imageCache) {
-            self.image(width, height, index);
-        } else {
-            self.shadowApi.currentTime = index;
-            self.image(width, height, index);
-        }
+        self.image(width, height, index);
     };
     self.image = function (width, height, index) {
         if (index in self.imageCache) {
+            origin.debug({
+                'Thumb from cache': index
+            });
+            
             self.imageThumb.src = self.imageCache[index];
             origin.env.thumbsOk = true;
         } else if (parseInt(self.shadowApi.readyState) == 4) {
+            origin.debug({
+                'Thumb create': index
+            });
+            
+            self.shadowApi.currentTime = index;
             self.context.drawImage(self.shadowApi, 0, 0, width, height);
             dataURL = self.canvas.toDataURL();
             if (dataURL != null && dataURL != undefined) {
@@ -105,10 +105,6 @@ JuliaPlayer.prototype._Thumbs = function (origin) {
                 self.imageThumb.src = dataURL;
             }
             origin.env.thumbsOk = true;
-        } else {
-            setTimeout(function () {
-                self.image(width, height, index);
-            }, 70);
         }
     };
     self.cache = function (index, data) {
@@ -118,5 +114,12 @@ JuliaPlayer.prototype._Thumbs = function (origin) {
             self.imageCache[index] = data;
         }
         return data;
+    };
+    self.reset = function() {
+        self.shadowApi = false;
+        self.canvas = false;
+        self.context = false;
+        self.imageThumb = false;
+        self.imageCache = {};
     };
 };

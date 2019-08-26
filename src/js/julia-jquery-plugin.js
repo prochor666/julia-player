@@ -11,7 +11,7 @@
     });
 }($));
 // Build jQuery plugin
-jQuery.fn.juliaPlayer = function (options) {
+jQuery.fn.JuliaPlayer = function (options) {
     var collection = [];
     this.each(function () {
         // Return if this element already has an instance

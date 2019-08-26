@@ -10,7 +10,12 @@ JuliaPlayer.prototype._Subtitles = function (origin) {
         case 'dash':
             return origin.env.dash.setTextTrack(track);
             break;
-        default:    //---------
+        case 'hls':
+            origin.env.hls.subtitleTrack = track;
+            origin.env.hls.subtitleDisplay = true;
+            break;
+        default:
+            //---------
         };
     };
     self.textTracksCleaner = function () {

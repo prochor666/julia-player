@@ -1,33 +1,8 @@
 Julia player
 =================
-Responsive, mobile ready media player
 
-How to establish devel environment.
+Responsive, mobile ready, video player.
 
-- Install Node.js. See [Node.js](https://nodejs.org/en/) for more.
-- Install Gulp.js. See [Gulp.js](http://gulpjs.com/) for more.
-- Install dependecies from gulpfile.js
-    - SASS package [gulp-sass](https://www.npmjs.com/package/gulp-sass)
-    - CSS minify package [gulp-clean-css](https://www.npmjs.com/package/gulp-clean-css)
-    - JavaScript minify package [gulp-minify](https://www.npmjs.com/package/gulp-minify)
-    - Concat package [gulp-concat](https://www.npmjs.com/package/gulp-concat)
-    - Replace package [gulp-replace](https://www.npmjs.com/package/gulp-replace)
-    - Filter package [gulp-filter](https://www.npmjs.com/package/gulp-filter)
-    - Chown package [gulp-chown](https://www.npmjs.com/package/gulp-chown)
-    - Del package [del](https://www.npmjs.com/package/del)
-    - Fs package [fs](https://www.npmjs.com/package/fs)
-    - Fancy log package [fancy-log](https://www.npmjs.com/package/fancy-log)
+Website & demos [juliaplayer.org](https://juliaplayer.org).
 
-How to start.
 
-Run:
-
-```bash
-user@host:/your/devel/directory/julia-player# gulp watch
-```
-
-Now you can start typing in scss and js files. All needle files are generated on the fly.
-
-See the _gulp watch_ command console output for more info (error crashes, operation log, etc...).
-
-> Note that dist/css/ css files are generated automaticaly from src/scss, so do not edit.

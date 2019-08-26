@@ -1,3 +1,7 @@
+/* *************
+* Julia player 
+* main style 
+************** */
 @import "_vars.scss";
 @import "_icons.scss";
 
@@ -121,7 +125,8 @@ div.julia-player {
             &.julia-menu-settings {
                 bottom: 55px;
                 right: 0;
-
+                overflow-y: auto;
+                
                 &.on {
                     max-height: -webkit-calc( 100% - 100px );
                     max-height: -moz-calc( 100% - 100px );
@@ -171,20 +176,14 @@ div.julia-player {
             }
         }
     }
-
-    @import "_suggest.scss";
 }
+
 
 div.julia-player,
 div.julia-player button.julia-btn,
 div.julia-player>.julia-wrapper>.julia-toolbar,
 div.julia-player>.julia-wrapper>.julia-toolbar.julia-toolbar-visible,
-div.julia-player .julia-menu,
-div.julia-player .julia-suggest,
-div.julia-player .julia-suggest.on,
-div.julia-player .julia-suggest.on .julia-suggest-item,
-div.julia-player .julia-suggest.on .julia-suggest-item-title,
-{
+div.julia-player .julia-menu {
     -webkit-transition: all $transitionLength;
     -moz-transition: all $transitionLength;
     transition: all $transitionLength;

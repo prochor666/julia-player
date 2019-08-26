@@ -18,6 +18,8 @@ JuliaPlayer = function (options) {
             headers: {},
             queryString: {},
         },
+        volume: -1,
+        muted: -1,
         dimensions: [
             [
                 1920,
@@ -88,38 +90,40 @@ JuliaPlayer = function (options) {
                     title: '3x'
                 }
             ],
-            videoItems: [],
-            audioItems: [],
-            textItems: [{
-                    active: -1,
-                    value: -1,
-                    title: 'Off'
-                }]
+            videoBitrateList: [],
+            audioBitrateList: [],
+            audioTracksList: [],
+            textTracksList: [],
         },
-        onInit: false,
+        onDurationChange: false,
         onFullscreen: false,
         onFullscreenExit: false,
-        onPlay: false,
+        onInit: false,
+        onModeSet: false,
         onPause: false,
+        onPlay: false,
+        onResize: false,
+        onSeek: false,
+        onSourceSet: false,
         onStop: false,
-        onSuggest: false,
+        onTimeUpdate: false,
+        onVolumeChange: false,
         onTime: false,
         pauseOnClick: true,
         playbackDebug: false,
         pluginMode: false,
         responsive: true,
+        responsiveBreakpoints: false,
         plugins: 'julia-player/dist/js/lib',
+        skip: 5,
         source: {
-            file: '',
+            /* file: '',
             poster: '',
             link: '',
             mode: 'legacy',
             live: false,
-            fixVideoAspect: false,
+            fixVideoAspect: false, */
         },
-        suggest: [],
-        suggestLimit: 4,
-        suggestTimeout: 10000,
         thumbs: false,
         zIndexStart: 1,
         errorRecoveryAttemptLimit: 3,
@@ -130,6 +134,7 @@ JuliaPlayer = function (options) {
     origin.env = {
         element: origin.options.element,
         autoplay: origin.options.autoplay,
+        event: '',
         canPlayMediaString: '',
         canPlayMedia: false,
         collection: origin.options.collection,
@@ -151,14 +156,18 @@ JuliaPlayer = function (options) {
         dashInitialized: false,
         hlsInitialized: false,
         audioTrackActive: 0,
-        textTrackActive: 0,
+        textTrackActive: -1,
         shield: $(),
         toolbars: $(),
         buttons: $(),
         started: false,
         mode: 'legacy',
-        suggestTimer: false,
         startupGoto: 0,
+        lastEventRised: '',
+        eventBridge: {
+            progressSliderChange: 0,
+            volumeSliderChange: 0,
+        },
         onTimeRised: [],
         ranges: {
             volume: '',
@@ -175,10 +184,9 @@ JuliaPlayer = function (options) {
         },
         labels: { goto: '' },
         menus: { settings: '' },
-        suggest: $(),
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.0.11'
+        version: '2.1.0'
     };
     // Console debug
     origin.debug = function (data, warn) {
@@ -188,23 +196,25 @@ JuliaPlayer = function (options) {
             if (window.console) {
                 for (var key in data) {
                     if (warn === true && typeof console.warn === 'function') {
-                        console.warn(' - JuliaPlayer ' + origin.env.ID + ' warning - [' + typeof data[key] + '], ' + key + ': ', data[key]);
+                        console.warn(' - JuliaPlayer instance: ' + origin.env.ID + ' warning - ' + key + ' [' + typeof data[key] + ']: ', data[key]);
                     } else {
-                        console.log(' - JuliaPlayer ' + origin.env.ID + ' debug - [' + typeof data[key] + '], ' + key + ': ', data[key]);
+                        console.log(' - JuliaPlayer instance: ' + origin.env.ID + ' debug - ' + key + ' [' + typeof data[key] + ']: ', data[key]);
                     }
                 }
             }
         }
         //--odn-handle-stop--
     };
-    origin.event = function (eventName, elem, data) {
-        var e = typeof elem === 'undefined' ? $(document) : elem;
-        var d = typeof data === 'undefined' ? {} : data;
+    origin.event = function (eventName, element) {
+        var e = typeof element === 'undefined' ? origin.env.instance: element;
         if (typeof e === 'string') {
             e = $(e);
         }
-        origin.debug({ 'Julia event fired': eventName + ' > ' + elem.prop('tagName') + '.' + elem.prop('className') });
-        e.trigger({ type: eventName }, d);
+        origin.debug({ 
+            'Julia event fired': eventName, 
+            ' - Event element': element 
+        });
+        e.trigger({ type: eventName }, origin);
     };
     /* *****************************************
     * Require js/css files
@@ -214,7 +224,7 @@ JuliaPlayer = function (options) {
             scripts = [scripts];
         }
         if (scripts.length == 0) {
-            origin.event('julia.no-scripts', origin.env.instance);
+            origin.event('noScripts.julia');
         } else {
             var last = scripts[scripts.length - 1];
             origin.jsLoad(scripts, 0, last);
@@ -225,7 +235,7 @@ JuliaPlayer = function (options) {
         $.getScript(script).done(function () {
             origin.debug({ 'Js file loaded': script });
             if (last == script) {
-                origin.event('julia.scripts-loaded', origin.env.instance);
+                origin.event('scriptsLoaded.julia');
             } else {
                 origin.jsLoad(scripts, i + 1, last);
             }
@@ -253,7 +263,7 @@ JuliaPlayer = function (options) {
     }
     //--odn-handle-stop--
     // Second step, UI event starts player
-    $(document).on('julia.ui-created', '#julia-' + origin.env.ID, function (e) {
+    $(document).on('uiCreated.julia', '#julia-' + origin.env.ID, function (e) {
         origin.Support.resize();
         origin.Ui.state(origin.env.instance, 'off', '');
         var _load = [];
@@ -263,71 +273,91 @@ JuliaPlayer = function (options) {
         if (origin.options.source.hasOwnProperty('mode') && origin.options.source.mode === 'hls' && typeof origin.env.context.Hls === 'undefined') {
             _load.push(origin.options.plugins + '/hls.min.js');
         }
-        $(document).on('julia.scripts-loaded julia.no-scripts', '#julia-' + origin.env.ID, function (e) {
+        $(document).on('scriptsLoaded noScripts.julia', '#julia-' + origin.env.ID, function (e) {
             if (!origin.options.source.hasOwnProperty('file')) {
                 origin.options.source.file = '';
+                if (origin.options.element.prop("tagName") === 'VIDEO') {
+                    origin.options.source.file = origin.options.element.prop('src') ? origin.options.element.prop('src'): origin.options.element.find('source').prop('src');
+                } else {
+                    origin.options.source.file = origin.options.element.data('file') ? origin.options.element.data('file'): '';
+                }
             }
             if (!origin.options.source.hasOwnProperty('poster')) {
                 origin.options.source.poster = '';
+                if (origin.options.element.prop("tagName") === 'VIDEO') {
+                    origin.options.source.poster = origin.options.element.prop('poster') ? origin.options.element.prop('poster'): '';
+                } else {
+                    origin.options.source.poster = origin.options.element.data('poster') ? origin.options.element.data('poster'): '';
+                }
             }
             if (!origin.options.source.hasOwnProperty('title')) {
-                origin.options.source.title = '';
+                origin.options.source.title = origin.options.element.data('title') ? origin.options.element.data('title') : '';
+            }
+            if (!origin.options.source.hasOwnProperty('link')) {
+                origin.options.source.link = origin.options.element.data('link') ? origin.options.element.data('link') : '';
             }
             if (!origin.options.source.hasOwnProperty('mode')) {
-                origin.options.source.mode = 'legacy';
+                origin.options.source.mode = origin.options.element.data('mode') ? origin.options.element.data('mode') : 'legacy';
             }
             if (!origin.options.source.hasOwnProperty('live')) {
-                origin.options.source.live = false;
+                origin.options.source.live = origin.options.element.data('live') && origin.options.element.data('live').toString().toLowerCase() == 'true' ? true : false;
             }
             origin.env.fullscreenFrame = document.querySelector('#julia-' + origin.env.ID);
             origin.env.api = document.getElementById('julia-api-' + origin.env.ID);
             origin.env.sliders.progress = new origin._Slider(origin, {
                 element: $('#julia-' + origin.env.ID + ' .julia-toolbar.julia-toolbar-bottom>div.julia-progress>input.julia-range'),
-                event: 'progress-change'
+                event: 'progressSliderChange'
             });
             origin.env.sliders.progress.init();
             origin.env.sliders.volume = new origin._Slider(origin, {
                 element: $('#julia-' + origin.env.ID + ' .julia-toolbar.julia-toolbar-bottom>div.julia-volume>input.julia-range'),
-                event: 'volume-change'
+                event: 'volumeSliderChange'
             });
             origin.env.sliders.volume.init();
             origin.Events.ui();
             // Size Fix
             origin.Support.resize();
-            // Suggest completition
-            origin.options.suggest.map(function (x, i) {
-                origin.options.suggest[i].played = false;
-            });
             // Startup fixes, default behavior before media init
-            $('body').on('julia.progress-change', '#julia-' + origin.env.ID, function (e, data) {
+            $('body').on('julia.progressSliderChange', '#julia-' + origin.env.ID, function (e, data) {
                 if (origin.env.started === false) {
                     origin.env.startupGoto = data.percent;
                     origin.Controls.press('play');
                 }
             });
             // Persistent data
-            var volume = origin.Persist.get('julia-player-volume');
-            var muted = origin.Persist.get('julia-player-muted');
-            if (!isNaN(Number(volume)) && typeof volume !== 'undefined') {
-                origin.options.volume = parseInt(Number(volume));
-                if (origin.options.volume > 100 || origin.options.volume < 0) {
+            var persistVolume = origin.Persist.get('julia-player-volume');
+            var persistMuted = origin.Persist.get('julia-player-muted');
+            origin.options.volume = parseInt(Number(origin.options.volume));
+            origin.options.muted = origin.options.muted;
+
+            if (origin.options.volume > 100 || origin.options.volume < 0) {
+                if (origin.options.volume == -1 && !isNaN(Number(persistVolume)) && typeof persistVolume !== 'undefined') {
+                    origin.options.volume = parseInt(Number(persistVolume));
+                    if (origin.options.volume > 100 || origin.options.volume < 0) {
+                        origin.options.volume = 25;
+                    }
+                } else {
                     origin.options.volume = 25;
                 }
-            } else {
-                origin.options.volume = 25;
             }
             // Set volume for mobile
             if (origin.Support.isMobile() === true) {
                 origin.options.volume = 100;
                 origin.options.muted = false;
             }
-            if (!isNaN(Number(muted)) && typeof muted !== 'undefined' && origin.Support.isMobile() === false) {
-                origin.options.muted = Number(muted) === 0 ? false : true;
-            } else {
-                origin.options.muted = false;
+            
+            if (typeof origin.options.muted !== 'boolean') {
+                if (!isNaN(Number(persistMuted)) && typeof persistMuted !== 'undefined' && origin.Support.isMobile() === false) {
+                    origin.options.muted = Number(persistMuted) === 0 ? false : true;
+                } else {
+                    origin.options.muted = false;
+                }    
             }
+
+            origin.Events.init();
+
             if (origin.options.onInit !== false) {
-                origin.Callback.fn(origin.options.onInit);
+                origin.event('init.julia');
             }
             origin.env.api.volume = parseFloat(origin.options.volume / 100);
             origin.env.api.muted = origin.options.muted;
@@ -345,17 +375,16 @@ JuliaPlayer = function (options) {
     origin.Controls = new origin._Controls(origin);
     origin.Fullscreen = new origin._Fullscreen(origin);
     origin.Support = new origin._Support(origin);
-    origin.Suggest = new origin._Suggest(origin);
     origin.Source = new origin._Source(origin);
     origin.Persist = new origin._Persist(origin);
     origin.Timecode = new origin._Timecode(origin);
     origin.Thumbs = new origin._Thumbs(origin);
     //--odn-handle-start--
     origin.Ui.create();
-    origin.Events.init();
     //--odn-handle-stop--
     return origin.options.pluginMode === true ? origin : [origin];
 };
+
 
 /* *****************************************
 * JuliaPlayer HTML5 player
@@ -364,29 +393,31 @@ JuliaPlayer = function (options) {
 ****************************************** */
 JuliaPlayer.prototype._Callback = function (origin) {
     var self = this;
-    self.fn = function (f, data) {
-        data = data || {};
+    self.fn = function (f) {
+        var tmpName = f.toString();
         if ($.inArray(typeof f, [
                 'string',
                 'function'
             ]) > -1) {
             // Callback defined as function name or function
             // !!! Remember !!!
-            // If you are using typeof string, function must be callable globally (window context)
+            // If you are using typeof string, function must be callable globally (window context) 
             if (typeof f === 'string') {
                 f = window[f];
             }
-            f(origin, data);
-            origin.debug({ 'Callback': typeof f + ' raised' });
+            f(origin);
+            origin.debug({ 'Callback': tmpName + ' raised' });
         } else {
-            origin.debug({ 'Callback': typeof f + ' is not a function, but: ' + typeof f });
+            origin.debug({ 'Callback': tmpName + ' is not a function, but: ' + typeof f });
         }
     };
+
     // Time update event callbacks
-    self.onTime = function (time, timeNum) {
-        if (origin.options.onTime && typeof origin.options.onTime === 'object' && Object.keys(origin.options.onTime).indexOf(time) > -1 && origin.env.onTimeRised.indexOf(time) == -1) {
-            f = origin.options.onTime[time];
-            origin.env.onTimeRised.push(time);
+    self.onTime = function () {
+        var currentTimeReadable = origin.Timecode.toHuman(origin.env.api.currentTime);
+        if (origin.options.onTime && typeof origin.options.onTime === 'object' && Object.keys(origin.options.onTime).indexOf(currentTimeReadable) > -1 && origin.env.onTimeRised.indexOf(currentTimeReadable) == -1) {
+            f = origin.options.onTime[currentTimeReadable];
+            origin.env.onTimeRised.push(currentTimeReadable);
             if ($.inArray(typeof f, [
                     'string',
                     'function'
@@ -397,10 +428,10 @@ JuliaPlayer.prototype._Callback = function (origin) {
                 if (typeof f === 'string') {
                     f = window[f];
                 }
-                f(origin, time);
-                origin.debug({ 'Callback onTime': time + ' ' + typeof f + ' raised' });
+                f(origin);
+                origin.debug({ 'Callback onTime': currentTimeReadable + ' ' + typeof f + ' raised' });
             } else {
-                origin.debug({ 'Callback onTime': time + ' ' + typeof f + ' is not a function, but: ' + typeof f });
+                origin.debug({ 'Callback onTime': currentTimeReadable + ' ' + typeof f + ' is not a function, but: ' + typeof f });
             }
         }
     };
@@ -414,6 +445,8 @@ JuliaPlayer.prototype._Controls = function (origin) {
     var self = this;
     self.press = function (action, data) {
         data = data || {};
+        $('.julia-player').removeClass('julia-focused');
+        $('#julia-'+origin.env.ID+'').addClass('julia-focused');
         switch (action) {
         case 'play':
             origin.Ui.state(origin.env.preloader, '', 'on');
@@ -428,8 +461,9 @@ JuliaPlayer.prototype._Controls = function (origin) {
             origin.Support.pauseVideo();
             break;
         case 'stop':
+            origin.event('stop.julia', origin.env.instance, origin);
             if (origin.options.onStop !== false) {
-                origin.Callback.fn(origin.options.onStop, data);
+                origin.Callback.fn(origin.options.onStop, 'onStop', data);
             }
             origin.Support.stopVideo();
             origin.Ui.state(origin.env.buttons.play, 'pause', 'play');
@@ -493,6 +527,37 @@ JuliaPlayer.prototype._Controls = function (origin) {
 JuliaPlayer.prototype._Events = function (origin) {
     var self = this;
     self.init = function () {
+        origin.env.instance.on('init.julia play.julia pause.julia stop.julia timeUpdate.julia seek.julia volumeChange.julia durationChange.julia fullscreen.julia fullscreenExit.julia sourceSet.julia modeSet.julia resize.julia', function(event){
+            origin.env.lastEventRised = event.type;
+            switch (event.type) {
+                case 'durationChange':
+                    origin.Callback.fn(origin.options.onDurationChange);
+                break; case 'fullscreen':
+                    origin.Callback.fn(origin.options.onFullscreen);
+                break; case 'fullscreenExit':
+                    origin.Callback.fn(origin.options.onFullscreenExit);
+                break; case 'modeSet':
+                    origin.Callback.fn(origin.options.onModeSet); 
+                break; case 'pause':
+                    origin.Callback.fn(origin.options.onPause);
+                break; case 'play':
+                    origin.Callback.fn(origin.options.onPlay);
+                break; case 'resize':
+                    origin.Callback.fn(origin.options.onResize); 
+                break; case 'seek':
+                    origin.Callback.fn(origin.options.onSeek); 
+                break; case 'sourceSet':
+                    origin.Callback.fn(origin.options.onSourceSet); 
+                break; case 'stop':
+                    origin.Callback.fn(origin.options.onStop);
+                break; case 'timeUpdate':
+                    origin.Callback.fn(origin.options.onTimeUpdate);
+                break; case 'volumeChange':
+                    origin.Callback.fn(origin.options.onVolumeChange);
+                break; default:
+                    origin.Callback.fn(origin.options.onInit);
+            }
+        });
     };
     self.ui = function () {
         // Bottom bar
@@ -540,7 +605,7 @@ JuliaPlayer.prototype._Events = function (origin) {
         });
         origin.env.menus.video.off().on('change', '.julia-dropdown-select', function (e) {
             e.preventDefault();
-            origin.debug({ 'Video bitrate: ': Number($(this).val()) });
+            origin.debug({ 'Video bitrate: ': Number($(this).val())});
             if (Number($(this).val()) == '-1') {
                 origin.Switcher.setAutoBitrate('video', true);
             } else {
@@ -608,7 +673,10 @@ JuliaPlayer.prototype._Events = function (origin) {
         });
         // Fullscreen toolbar behavior bindings
         var mouseMoveCleaner;
-        origin.env.instance.off('mousemove touchmove', '.julia-shield, .julia-suggest').off('mouseover mousemove touchmove mouseout', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on').on('mousemove touchmove', '.julia-shield, .julia-suggest', function (e) {
+        origin.env.instance
+        .off('mousemove touchmove', '.julia-shield')
+        .off('mouseover mousemove touchmove mouseout', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on')
+        .on('mousemove touchmove', '.julia-shield', function (e) {
             e.preventDefault();
             if (origin.env.started === true) {
                 origin.Ui.cursor(true);
@@ -629,7 +697,7 @@ JuliaPlayer.prototype._Events = function (origin) {
                 }
             }, 1750);
         }).on('mouseover mousemove touchmove mouseout', '.julia-toolbar-top.julia-toolbar-visible, .julia-toolbar-bottom.julia-toolbar-visible, .julia-menu-settings.on', function (e) {
-            e.preventDefault();
+            //e.preventDefault();
             if (origin.env.started === true) {
                 origin.env.toolbarBottom.addClass('julia-toolbar-visible');
                 if (origin.options.source.title.length>0) {
@@ -654,16 +722,65 @@ JuliaPlayer.prototype._Events = function (origin) {
             }
         });
         // Bind progressbar change
-        $('body').off('julia.progress-change', '#julia-' + origin.env.ID).on('julia.progress-change', '#julia-' + origin.env.ID, function (e, data) {
+        $('#julia-' + origin.env.ID).off('progressSliderChange.julia').on('progressSliderChange.julia', function (e) {
             if (origin.env.started === true) {
-                seekTo = origin.Timecode.toSeconds(data.percent);
+                seekTo = origin.Timecode.toSeconds(origin.env.eventBridge.progressSliderChange);
                 seekTo = seekTo >= origin.Support.getDuration() ? origin.Support.getDuration(): seekTo;
                 origin.Controls.press('goto', { currentTime: seekTo });
             }
         });
-        $('body').off('julia.volume-change', '#julia-' + origin.env.ID).on('julia.volume-change', '#julia-' + origin.env.ID, function (e, data) {
-            origin.Controls.press('volume', { volume: data.percent });
+        $('#julia-' + origin.env.ID).off('volumeSliderChange.julia').on('volumeSliderChange.julia', function (e) {
+            origin.Controls.press('volume', { volume: origin.env.eventBridge.volumeSliderChange });
         });
+        // Focus state
+        $(window).on('click', function() {
+            $('.julia-player').removeClass('julia-focused');
+        });
+
+        // Keyboard
+        $(document.activeElement).on('keypress keydown', function(e) {
+
+            if (origin.env.started === true && origin.options.source.live === false && origin.env.instance.hasClass('julia-focused')) {
+
+                if ( e.type == 'keydown' ) {
+
+                    switch (e.keyCode) {
+                        case 37: // left arrow
+                            e.preventDefault();
+                            var t = origin.env.api.currentTime - origin.options.skip;
+                            origin.Controls.press( 'goto', {
+                                currentTime: t >= 0 ? t: 0
+                            } );
+
+                        break; case 39: // right arrow
+                            e.preventDefault();
+                            var t = origin.env.api.currentTime + origin.options.skip;
+                            origin.Controls.press( 'goto', {
+                                currentTime: t <= origin.env.api.duration ? t: origin.env.api.duration
+                            } );
+
+                        break; case 38: // up arrow
+                            e.preventDefault();
+                            var vol = ( origin.env.api.volume + 0.1 ) * 100;
+                            origin.Controls.press( 'volume', {
+                                volume: vol <= 100 ? vol : 100
+                            } );
+
+                        break; case 40: // down arrow
+                            e.preventDefault();
+                            var vol = ( origin.env.api.volume - 0.1 ) * 100;
+                            origin.Controls.press( 'volume', {
+                                volume: vol >= 0 ? vol : 0
+                            } );
+
+                        break; default:
+                            // do nothing
+                    }
+                }
+            }
+        });
+
+
         // Fullscreen event included
         $(window).on('resize', function () {
             origin.Support.resize();
@@ -677,16 +794,12 @@ JuliaPlayer.prototype._Events = function (origin) {
             origin.env.buttons.bigPlay.hide();
             origin.env.sliders.progress.buffered();
             //origin.Ui.state( origin.env.preloader, 'on', '' );
-            origin.Ui.state(origin.env.suggest, 'on', '');
-            clearTimeout(origin.env.suggestTimer);
+            origin.event('play.julia');
             if (origin.env.startupGoto > 0) {
                 seekTo = origin.Timecode.toSeconds(origin.env.startupGoto);
                 seekTo = seekTo >= origin.Support.getDuration() ? origin.Support.getDuration(): seekTo;
                 origin.env.startupGoto = 0;
                 origin.Controls.press('goto', { currentTime: seekTo });
-            }
-            if (origin.options.onPlay !== false) {
-                origin.Callback.fn(origin.options.onPlay, {});
             }
         };
         origin.env.api.onplaying = function (e) {
@@ -694,9 +807,7 @@ JuliaPlayer.prototype._Events = function (origin) {
             origin.Ui.icon(origin.env.buttons.play, 'julia-play', 'julia-pause');
             origin.env.sliders.progress.buffered();
             origin.Ui.state(origin.env.preloader, 'on', '');
-            origin.Ui.state(origin.env.suggest, 'on', '');
             origin.env.started = true;
-            clearTimeout(origin.env.suggestTimer);
             origin.env.errorRecoveryAttempts = 0;
             origin.Controls.press('setDuration', { 'duration': origin.Support.getDuration() });
         };
@@ -708,13 +819,10 @@ JuliaPlayer.prototype._Events = function (origin) {
         origin.env.api.onpause = function (e) {
             origin.Ui.state(origin.env.buttons.play, 'pause', 'play');
             origin.Ui.icon(origin.env.buttons.play, 'julia-pause', 'julia-play');
+            origin.event('pause.julia');
             setTimeout(function () {
                 if (origin.env.api.paused === true || origin.env.api.ended === true) {
                     origin.env.buttons.bigPlay.show();
-                }
-
-                if (origin.options.onPause !== false) {
-                    origin.Callback.fn(origin.options.onPause, {});
                 }
             }, 400);
         };
@@ -787,13 +895,13 @@ JuliaPlayer.prototype._Events = function (origin) {
             }
             origin.env.sliders.progress.buffered();
             origin.env.errorRecoveryAttempts = 0;
-            origin.Callback.onTime(currentTimeReadable, origin.env.api.currentTime);
+            origin.Callback.onTime('onTime');
+            origin.event('timeUpdate.julia');
         };
         // Video position
         origin.env.api.onseeked = function (e) {
-            if (origin.options.onPosition !== false) {
-                origin.Callback.fn(origin.options.onPosition, origin.env.api.currentTime);
-            }
+            origin.Ui.state(origin.env.preloader, 'on', '');
+            origin.event('seek.julia');
         };
         // Video position
         origin.env.api.onseeking = function (e) {
@@ -801,6 +909,7 @@ JuliaPlayer.prototype._Events = function (origin) {
         };
         // Volume
         origin.env.api.onvolumechange = function (e) {
+            origin.event('volumeChange.julia');
             if (origin.env.api.muted === false) {
                 origin.env.sliders.volume.update(origin.env.api.volume * 100);
             } else {
@@ -809,15 +918,12 @@ JuliaPlayer.prototype._Events = function (origin) {
         };
         // Set video duration
         origin.env.api.ondurationchange = function (e) {
+            origin.event('durationChange.julia');
             origin.Controls.press('setDuration', { 'duration': origin.Support.getDuration() });
         };
         origin.env.api.onended = function (e) {
             origin.Controls.press('stop');
-            origin.Suggest.run();
         };
-        $(window).on('resize', function () {
-            origin.Support.resize();
-        });
     };
     // Specific events, error handlers
     self.hlsLibEvents = function () {
@@ -827,8 +933,9 @@ JuliaPlayer.prototype._Events = function (origin) {
                 origin.env.hls.loadSource(origin.options.source.file);
             });
             origin.env.hls.on(origin.env.context.Hls.Events.MANIFEST_PARSED, function (event, data) {
-                bitratesVideo = origin.Switcher.getBitrateList('video');
-                tracksAudio = origin.Switcher.getTracks('audio');
+                var bitratesVideo = origin.Switcher.getBitrateList('video');
+                var tracksAudio = origin.Switcher.getTracks('audio');
+                var menuItems;
                 origin.debug({
                     'Stream is initialized and ready': event,
                     'Video bitrate list': bitratesVideo,
@@ -836,6 +943,8 @@ JuliaPlayer.prototype._Events = function (origin) {
                     'ABR video bitrate': origin.Switcher.getAutoBitrate('video'),
                     'Video bitrate': origin.Switcher.getBitrate('video')
                 });
+                // Video bitrates
+                origin.debug({ 'HLS video bitrates track list': tracksAudio });
                 if (typeof bitratesVideo === 'object' && bitratesVideo && bitratesVideo.length > 1) {
                     origin.Ui.state(origin.env.menus.video, '', 'on');
                     active = origin.Switcher.getAutoBitrate('video') === true ? -1 : origin.Switcher.getBitrate('video');
@@ -844,18 +953,19 @@ JuliaPlayer.prototype._Events = function (origin) {
                             value: -1,
                             title: origin.options.i18n.auto
                         }], active);
-                    origin.Ui.menu(origin.env.menus.video, menuItems);
+                    origin.Ui.menu(origin.env.menus.video, origin.Switcher.translateItems(menuItems, 'title', origin.options.i18n.videoBitrateList));
                     origin.Ui.menuDisabled(origin.env.menus.video, false);
                 } else {
                     origin.Ui.state(origin.env.menus.video, 'on', '');
                     origin.Ui.menuDisabled(origin.env.menus.video, true);
                 }
                 // Audio tracks
+                origin.debug({ 'HLS audio track list': tracksAudio });
                 if (typeof tracksAudio === 'object' && tracksAudio && tracksAudio.length > 0) {
                     origin.Ui.state(origin.env.menus.audioTracks, '', 'on');
                     active = origin.env.audioTrackActive;
                     menuItems = origin.Switcher.prepareTrackMenu(tracksAudio, [], active);
-                    origin.Ui.menu(origin.env.menus.audioTracks, menuItems);
+                    origin.Ui.menu(origin.env.menus.audioTracks, origin.Switcher.translateItems(menuItems, 'title', origin.options.i18n.audioTracksList));
                     origin.Ui.menuDisabled(origin.env.menus.audioTracks, false);
                 } else {
                     origin.Ui.state(origin.env.menus.audioTracks, 'on', '');
@@ -865,18 +975,41 @@ JuliaPlayer.prototype._Events = function (origin) {
                     origin.Support.playVideo();
                 }
             });
+
             origin.env.hls.on(origin.env.context.Hls.Events.LEVEL_LOADED, function (event, data) {
                 tracksAudio = origin.Switcher.getTracks('audio');
+                origin.debug({ 'HLS audio track list': tracksAudio });
                 // Audio tracks
                 if (typeof tracksAudio === 'object' && tracksAudio && tracksAudio.length > 1) {
                     origin.Ui.state(origin.env.menus.audioTracks, '', 'on');
                     active = origin.env.audioTrackActive;
                     menuItems = origin.Switcher.prepareTrackMenu(tracksAudio, [], active);
-                    origin.Ui.menu(origin.env.menus.audioTracks, menuItems);
+                    origin.Ui.menu(origin.env.menus.audioTracks, origin.Switcher.translateItems(menuItems, 'title', origin.options.i18n.audioTracksList));
                     origin.Ui.menuDisabled(origin.env.menus.audioTracks, false);
                 } else {
                     origin.Ui.state(origin.env.menus.audioTracks, 'on', '');
                     origin.Ui.menuDisabled(origin.env.menus.audioTracks, true);
+                }
+            });
+
+            // Txt tracks
+            origin.env.hls.on(origin.env.context.Hls.Events.SUBTITLE_TRACKS_UPDATED, function (event, data) {
+                var tracksText = origin.Switcher.getTracks('text');
+                origin.debug({ 'HLS text track list': tracksText });
+                if (typeof tracksText === 'object' && tracksText && tracksText.length > 0) {
+                    origin.Ui.state(origin.env.menus.subtitles, '', 'on');
+                    active = origin.env.textTrackActive;
+                    menuItems = origin.Switcher.prepareTrackMenu(tracksText, [{
+                                    active: -1,
+                                    value: -1,
+                                    title: 'Off'
+                                }], active);
+                    
+                    origin.Ui.menu(origin.env.menus.subtitles, origin.Switcher.translateItems(menuItems, 'title', origin.options.i18n.textTracksList));
+                    origin.Ui.menuDisabled(origin.env.menus.subtitles, false);
+                } else {
+                    origin.Ui.state(origin.env.menus.subtitles, 'on', '');
+                    origin.Ui.menuDisabled(origin.env.menus.subtitles, true);
                 }
             });
             // Error handling
@@ -885,20 +1018,21 @@ JuliaPlayer.prototype._Events = function (origin) {
                     'Recovering Hls Error': data.details,
                     'ErrorType': data.type,
                     'ErrorFatal': data.fatal,
-                    'Data': data,
-                    'Attempts': origin.env.errorRecoveryAttempts,
-                    'Attempt limit': origin.env.errorRecoveryAttemptLimit
+                    'Attempts': origin.env.errorRecoveryAttempts + ' of ' + origin.env.errorRecoveryAttemptLimit,
                 }, true);
-                if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit) {
+                if (origin.env.errorRecoveryAttempts <= origin.env.errorRecoveryAttemptLimit) {
+
                     if (data.fatal === true) {
                         // Bring to life again
                         switch (data.type) {
                         case origin.env.context.Hls.ErrorTypes.NETWORK_ERROR:
                             // try to recover network error
                             origin.env.hls.startLoad();
+                            origin.Controls.press('stop');
+                            origin.Ui.cursor(true);
                             break;
                         case origin.env.context.Hls.ErrorTypes.MEDIA_ERROR:
-                            if (origin.env.errorRecoveryAttempts > origin.env.errorRecoveryAttemptLimit / 10) {
+                            if (origin.env.errorRecoveryAttempts == origin.env.errorRecoveryAttemptLimit) {
                                 origin.env.hls.swapAudioCodec();
                             }
                             // try to recover media error
@@ -908,6 +1042,7 @@ JuliaPlayer.prototype._Events = function (origin) {
                             // try to recover other errors
                             origin.env.hls.startLoad();
                         }
+                        origin.env.errorRecoveryAttempts++;
                     }
                     origin.env.errorRecoveryAttempts++;
                 } else {
@@ -928,9 +1063,6 @@ JuliaPlayer.prototype._Events = function (origin) {
                             'Recovering Dash Error': eventName,
                             'ErrorType': event.type,
                             'Error': event.error,
-                            'Data': event,
-                            'Attempts': origin.env.errorRecoveryAttempts,
-                            'Attempt limit': origin.env.errorRecoveryAttemptLimit
                         }, true);
                         if (event.error === 'download') {
                             origin.Source.recover(true);
@@ -940,13 +1072,10 @@ JuliaPlayer.prototype._Events = function (origin) {
                         break;
                     case origin.env.context.dashjs.MediaPlayer.events.PLAYBACK_ERROR:
                     case origin.env.context.dashjs.MediaPlayer.events.BUFFER_EMPTY:
-                    case origin.env.context.dashjs.MediaPlayer.events.FRAGMENT_LOADING_ABANDONED:
+                    //case origin.env.context.dashjs.MediaPlayer.events.FRAGMENT_LOADING_ABANDONED:
                         origin.debug({
-                            'Recovering Dash Error': eventName,
+                            'Recovering Dash Buffer Error': eventName,
                             'ErrorType': event.type,
-                            'Data': event,
-                            'Attempts': origin.env.errorRecoveryAttempts,
-                            'Attempt limit': origin.env.errorRecoveryAttemptLimit
                         }, true);
                         origin.Source.recover();
                         break;
@@ -961,35 +1090,33 @@ JuliaPlayer.prototype._Events = function (origin) {
                         bitratesVideo = origin.Switcher.getBitrateList('video');
                         bitratesAudio = origin.Switcher.getBitrateList('audio');
                         tracksAudio = origin.Switcher.getTracks('audio');
+                        tracksText = origin.Switcher.getTracks('text');
                         origin.debug({
                             'Stream is initialized and ready': event,
                             'Video bitrate list': origin.Switcher.getBitrateList('video'),
                             'Audio bitrate list': origin.Switcher.getBitrateList('audio'),
                             'Audio track list': origin.Switcher.getTracks('audio'),
+                            'Text track list': origin.Switcher.getBitrate('audio'),
                             'ABR video bitrate': origin.Switcher.getAutoBitrate('video'),
                             'ABR audio bitrate': origin.Switcher.getAutoBitrate('audio'),
                             'Video bitrate': origin.Switcher.getBitrate('video'),
-                            'Audio bitrate': origin.Switcher.getBitrate('audio')
+                            'Audio bitrate': origin.Switcher.getBitrate('audio'),
                         });
                         // Optional buffer tunnning
-                        if (Object.keys(origin.options.dashConfig).indexOf('setBufferToKeep') > -1) {
-                            origin.env.dash.setBufferToKeep(origin.options.dashConfig.setBufferToKeep);
-                        }
-                        if (Object.keys(origin.options.dashConfig).indexOf('setBufferPruningInterval') > -1) {
-                            origin.env.dash.setBufferPruningInterval(origin.options.dashConfig.setBufferPruningInterval);
-                        }
-                        if (Object.keys(origin.options.dashConfig).indexOf('setBufferTimeAtTopQuality') > -1) {
-                            origin.env.dash.setBufferTimeAtTopQuality(origin.options.dashConfig.setBufferTimeAtTopQuality);
-                        }
-                        if (Object.keys(origin.options.dashConfig).indexOf('setScheduleWhilePaused') > -1) {
-                            origin.env.dash.setScheduleWhilePaused(origin.options.dashConfig.setScheduleWhilePaused);
-                        }
-                        if (Object.keys(origin.options.dashConfig).indexOf('setStableBufferTime') > -1) {
-                            origin.env.dash.setStableBufferTime(origin.options.dashConfig.setStableBufferTime);
+                        if (Object.keys(origin.options.dashConfig).indexOf('streaming') > -1 && Object.keys(origin.options.dashConfig.streaming).length > 0) {
+                            origin.env.dash.updateSettings({
+                                    'streaming': origin.options.dashConfig.streaming,
+                                }
+                            );
                         }
 
                         // Video bitrates
-                        origin.env.dash.setFastSwitchEnabled(true);
+                        origin.env.dash.updateSettings({
+                                'streaming': {
+                                    'fastSwitchEnabled': true
+                                },
+                            }
+                        );
                         if (typeof bitratesVideo === 'object' && bitratesVideo && bitratesVideo.length > 1) {
                             origin.Ui.state(origin.env.menus.video, '', 'on');
                             active = origin.Switcher.getAutoBitrate('video') === true ? -1 : origin.Switcher.getBitrate('video');
@@ -998,7 +1125,7 @@ JuliaPlayer.prototype._Events = function (origin) {
                                     value: -1,
                                     title: origin.options.i18n.auto
                                 }], active);
-                            origin.Ui.menu(origin.env.menus.video, menuItems);
+                            origin.Ui.menu(origin.env.menus.video, origin.Switcher.translateItems(menuItems, 'title', origin.options.i18n.videoBitrateList));
                             origin.Ui.menuDisabled(origin.env.menus.video, false);
                         } else {
                             origin.Ui.state(origin.env.menus.video, 'on', '');
@@ -1009,7 +1136,7 @@ JuliaPlayer.prototype._Events = function (origin) {
                             origin.Ui.state(origin.env.menus.audio, '', 'on');
                             active = origin.Switcher.getAutoBitrate('audio') === true ? -1 : origin.Switcher.getBitrate('audio');
                             menuItems = origin.Switcher.prepareBitrateMenu(bitratesAudio, [], active);
-                            origin.Ui.menu(origin.env.menus.audio, menuItems);
+                            origin.Ui.menu(origin.env.menus.audio, origin.Switcher.translateItems(menuItems, 'title', origin.options.i18n.audioBitrateList));
                             origin.Ui.menuDisabled(origin.env.menus.audio, false);
                         } else {
                             origin.Ui.state(origin.env.menus.audio, 'on', '');
@@ -1020,22 +1147,41 @@ JuliaPlayer.prototype._Events = function (origin) {
                             origin.Ui.state(origin.env.menus.audioTracks, '', 'on');
                             active = origin.env.audioTrackActive;
                             menuItems = origin.Switcher.prepareTrackMenu(tracksAudio, [], active);
-                            origin.Ui.menu(origin.env.menus.audioTracks, menuItems);
+                            origin.Ui.menu(origin.env.menus.audioTracks, origin.Switcher.translateItems(menuItems, 'title', origin.options.i18n.audioTracksList));
                             origin.Ui.menuDisabled(origin.env.menus.audioTracks, false);
                         } else {
                             origin.Ui.state(origin.env.menus.audioTracks, 'on', '');
                             origin.Ui.menuDisabled(origin.env.menus.audioTracks, true);
                         }
-                        break;
-                    case origin.env.context.dashjs.MediaPlayer.events.TEXT_TRACK_ADDED:
-                        // Subtitle tracks
-                        tracksText = origin.Switcher.getTracks('text');
-                        origin.debug({ 'Text track list': origin.Switcher.getTracks('text') });
                         if (typeof tracksText === 'object' && tracksText && tracksText.length > 0) {
                             origin.Ui.state(origin.env.menus.subtitles, '', 'on');
                             active = origin.env.textTrackActive;
-                            menuItems = origin.Switcher.prepareTrackMenu(tracksText, origin.options.i18n.textItems, active);
-                            origin.Ui.menu(origin.env.menus.subtitles, menuItems);
+                            menuItems = origin.Switcher.prepareTrackMenu(tracksText, [{
+                                            active: -1,
+                                            value: -1,
+                                            title: 'Off'
+                                        }], active);
+                            origin.Ui.menu(origin.env.menus.subtitles, origin.Switcher.translateItems(menuItems, 'title', origin.options.i18n.textTracksList));
+                            origin.Ui.menuDisabled(origin.env.menus.subtitles, false);
+                        } else {
+                            origin.Ui.state(origin.env.menus.subtitles, 'on', '');
+                            origin.Ui.menuDisabled(origin.env.menus.subtitles, true);
+                        }
+                        break;
+                    case origin.env.context.dashjs.MediaPlayer.events.TEXT_TRACK_ADDED:
+                    case origin.env.context.dashjs.MediaPlayer.events.TEXT_TRACKS_ADDED:
+                        // Subtitle tracks
+                        tracksText = origin.Switcher.getTracks('text');
+                        origin.debug({ 'DASH text track list': tracksText });
+                        if (typeof tracksText === 'object' && tracksText && tracksText.length > 0) {
+                            origin.Ui.state(origin.env.menus.subtitles, '', 'on');
+                            active = origin.env.textTrackActive;
+                            menuItems = origin.Switcher.prepareTrackMenu(tracksText, [{
+                                            active: -1,
+                                            value: -1,
+                                            title: 'Off'
+                                        }], active);
+                            origin.Ui.menu(origin.env.menus.subtitles, origin.Switcher.translateItems(menuItems, 'title', origin.options.i18n.textTracksList));
                             origin.Ui.menuDisabled(origin.env.menus.subtitles, false);
                         } else {
                             origin.Ui.state(origin.env.menus.subtitles, 'on', '');
@@ -1043,6 +1189,7 @@ JuliaPlayer.prototype._Events = function (origin) {
                         }
                         break;
                     default:
+                        /*
                         origin.debug({
                             'Dash Event': eventName,
                             'EventType': event.type,
@@ -1050,6 +1197,7 @@ JuliaPlayer.prototype._Events = function (origin) {
                             'Attempts': origin.env.errorRecoveryAttempts,
                             'Attempt limit': origin.env.errorRecoveryAttemptLimit
                         });
+                        */
                     }
                 });
             });
@@ -1078,8 +1226,9 @@ JuliaPlayer.prototype._Fullscreen = function (origin) {
         }
 
         if (origin.options.onFullscreen !== false) {
-            origin.Callback.fn(origin.options.onFullscreen, {});
+            origin.event('fullscreen.julia');
         }
+        origin.env.buttons.fullscreen.mouseout();
     };
     self.off = function () {
         if (document.exitFullscreen) {
@@ -1093,8 +1242,9 @@ JuliaPlayer.prototype._Fullscreen = function (origin) {
         }
 
         if (origin.options.onFullscreenExit !== false) {
-            origin.Callback.fn(origin.options.onFullscreenExit, {});
+            origin.event('fullscreenExit.julia');
         }
+        origin.env.buttons.fullscreen.mouseout();
     };
     self.landscapeLock = function (lock) {
         if (origin.Support.isMobile()) {
@@ -1273,7 +1423,8 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
         if (['input'].lastIndexOf(self.elem.prop('tagName').toLowerCase()) > -1) {
             self.elem.val(self.value);
             if (eventPrevent === false) {
-                origin.event('julia.' + self.options.event, origin.env.instance, { 'percent': percent });
+                origin.env.eventBridge[self.options.event] = self.value;
+                origin.event(self.options.event+'.julia');
             }
         }
         // Fix final handle position on track
@@ -1299,7 +1450,7 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
         if (e.type == 'click') {
             self.slide(_position(e), false);
         }
-        if ((e.type == 'mouseover' || e.type == 'mousemove' || e.type == 'touchmove') && self.options.event == 'progress-change' && origin.env.started === true) {
+        if ((e.type == 'mouseover' || e.type == 'mousemove' || e.type == 'touchmove') && self.options.event == 'progressSliderChange' && origin.env.started === true) {
             pos = _position(e);
             pix = _pixels(e);
             if (origin.Support.isMobile() === false && origin.options.source.live === false && origin.options.thumbs === true) {
@@ -1320,7 +1471,7 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
                 'margin-left': -(origin.env.labels.goto.innerWidth() / 2) + 'px'
             });
         }
-        if (e.type == 'mouseout' && self.options.event == 'progress-change') {
+        if (e.type == 'mouseout' && self.options.event == 'progressSliderChange') {
             origin.Ui.state(origin.env.labels.goto, 'on', '');
         }
     });
@@ -1338,7 +1489,7 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
     });
     self.model.on('mousemove touchmove', function (e) {
         if (leftButtonDown === true) {
-            if (self.options.event != 'progress-change') {
+            if (self.options.event != 'progressSliderChange') {
                 self.slide(_position(e), false);
             }else{
                 self.slide(_position(e));
@@ -1359,6 +1510,7 @@ JuliaPlayer.prototype._Source = function (origin) {
         origin.env.errorRecoveryAttempts = 0;
         origin.Subtitles.textTracksCleaner();
         origin.Ui.reset();
+        origin.Thumbs.reset();
         origin.env.continuePlayback = false;
         if (origin.env.api.paused === false) {
             origin.env.api.pause();
@@ -1405,7 +1557,7 @@ JuliaPlayer.prototype._Source = function (origin) {
         }
         ;
         origin.Events.native();
-        $(document).off('julia.api-mode', '#julia-' + origin.env.ID).on('julia.api-mode', '#julia-' + origin.env.ID, function (e) {
+        $(document).off('modeSet.julia', '#julia-' + origin.env.ID).on('modeSet.julia', '#julia-' + origin.env.ID, function (e) {
             if ((origin.env.continuePlayback === true || origin.options.autoplay === true) && (origin.env.api.paused === true || origin.env.api.ended === true) && origin.env.started === false) {
                 origin.debug({ 'Trying to load source': origin.env.api.src });
                 origin.Source.load();
@@ -1415,7 +1567,7 @@ JuliaPlayer.prototype._Source = function (origin) {
             origin.Ui.notify('');
             origin.Source.mode();
         } else {
-            origin.Ui.notify(origin.options.i18n.messages.pluginError + ' - ' + source.mode);
+            origin.Ui.notify(origin.options.i18n.messages.pluginError + ' - ' + source.mode);  
         }
     };
     self.modeTest = function () {
@@ -1450,12 +1602,12 @@ JuliaPlayer.prototype._Source = function (origin) {
             origin.env.dash = origin.env.context.dashjs.MediaPlayer().create();
             break;
         case 'hls':
-            origin.env.hls = new origin.env.context.Hls(origin.options.hlsConfig);
+            origin.env.hls = new origin.env.context.Hls(origin.options.hlsConfig); 
             break;
         default:
         }
         ;
-        origin.event('julia.api-mode', origin.env.instance);
+        origin.event('modeSet.julia');
     };
     self.load = function () {
         origin.env.continuePlayback = true;
@@ -1483,9 +1635,10 @@ JuliaPlayer.prototype._Source = function (origin) {
                 }, true);
 
                 origin.env.dash.initialize(origin.env.api, source.file, origin.options.autoplay);
-                origin.env.dash.getDebug().setLogToBrowserConsole(origin.options.playbackDebug);
+                TTMLRenderingDiv = document.querySelector('#ttml-rendering-div-'+ origin.env.ID);
+                origin.env.dash.attachTTMLRenderingDiv(TTMLRenderingDiv);
                 origin.Events.dashLibEvents();
-                origin.event('julia.api-load', origin.env.instance);
+                origin.event('sourceSet.julia');
             } catch (err) {
                 origin.debug({ 'Error': err }, true);
                 self.recover(true);
@@ -1497,7 +1650,7 @@ JuliaPlayer.prototype._Source = function (origin) {
                 origin.env.hls.attachMedia(origin.env.api);
                 origin.Events.hlsLibEvents();
                 origin.env.hlsInitialized = true;
-                origin.event('julia.api-load', origin.env.instance);
+                origin.event('sourceSet.julia');
             } catch (err) {
                 origin.debug({ 'Error': err }, true);
                 self.recover(true);
@@ -1507,7 +1660,7 @@ JuliaPlayer.prototype._Source = function (origin) {
             try {
                 origin.env.api.src = source.file;
                 origin.env.api.load();
-                origin.event('julia.api-load', origin.env.instance);
+                origin.event('sourceSet.julia');
             } catch (err) {
                 origin.debug({ 'Error': err }, true);
                 self.recover(true);
@@ -1536,7 +1689,7 @@ JuliaPlayer.prototype._Source = function (origin) {
             }
 
             if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || force === true) {
-                //origin.Controls.press('stop');
+                origin.Controls.press('stop');
                 origin.Source.set();
             } else {
                 origin.env.errorRecoveryAttempts++;
@@ -1569,73 +1722,6 @@ JuliaPlayer.prototype._Source = function (origin) {
 
 /* *****************************************
 * JuliaPlayer HTML5 player
-* suggest playlist engine
-****************************************** */
-JuliaPlayer.prototype._Suggest = function (origin) {
-    var self = this;
-    self.run = function () {
-        origin.env.suggest.html('');
-        origin.env.suggestClicked = false;
-        origin.env.buttons.bigPlay.hide();
-        if (origin.options.suggest.length > 0) {
-            x = 0;
-            for (var i in origin.options.suggest) {
-                if (x < origin.options.suggestLimit && origin.options.suggest[i].played === false) {
-                    live = !!origin.options.suggest[i].live && origin.options.suggest[i].live === true ? true : false;
-                    file = !!origin.options.suggest[i].file ? origin.options.suggest[i].file : '';
-                    poster = !!origin.options.suggest[i].poster ? origin.options.suggest[i].poster : '';
-                    title = !!origin.options.suggest[i].title ? origin.options.suggest[i].title : '';
-                    link = !!origin.options.suggest[i].link ? origin.options.suggest[i].link : '';
-                    mode = !!origin.options.suggest[i].mode ? origin.options.suggest[i].mode : 'legacy';
-                    posterImage = poster.length > 0 ? '<img src="' + poster + '" width="100%" height="100%">' : '';
-                    suggestItemWidget = $('<div class="julia-suggest-item" data-item-poster="' + poster + '" data-item-file="' + file + '" data-item-link="' + link + '" data-mode="' + mode + '" data-item-title="' + title + '" data-index="' + i + '" data-item-mode="' + mode + '" data-item-live="' + live + '">' + posterImage + '<div class="julia-suggest-item-title">' + title + '</div>' + '</div>');
-                    suggestItemWidget.on('click', function (e) {
-                        origin.Ui.state(origin.env.preloader, '', 'on');
-                        if (origin.options.onSuggest !== false) {
-                            origin.Callback.fn(origin.options.onSuggest, i);
-                        }
-                        origin.Thumbs.shadowApi = false;
-                        origin.env.suggestClicked = true;
-                        origin.options.autoplay = true;
-                        origin.Source.set({
-                            file: $(this).data('item-file'),
-                            poster: $(this).data('item-poster'),
-                            title: $(this).data('item-title'),
-                            link: $(this).data('item-link'),
-                            mode: $(this).data('item-mode'),
-                            live: $(this).data('item-live')
-                        });
-                        origin.debug({
-                            suggestRemoveIndex: $(this).data('index'),
-                            suggestRemove: $(this).data('item-file')
-                        });
-                        origin.options.suggest[$(this).data('index')].played = true;
-                        origin.Ui.state(origin.env.suggest, 'on', '');    //origin.Controls.press('play');
-                    });
-                    origin.debug({ 'Suggest item': suggestItemWidget });
-                    origin.env.suggest.append(suggestItemWidget);
-                    x++;
-                }
-            }
-            if (x > 0) {
-                if (origin.options.suggestTimeout > 0) {
-                    origin.env.suggestTimer = setTimeout(function () {
-                        if (origin.env.suggestClicked === false) {
-                            origin.env.suggest.find('div.julia-suggest-item:first').click();
-                        }
-                    }, origin.options.suggestTimeout);
-                }
-                origin.Ui.state(origin.env.suggest, '', 'on');
-            }
-        } else {
-            origin.Fullscreen.off();
-        }
-        origin.debug({ 'Suggest': 'raised' + origin.options.suggest.length });
-    };
-};
-
-/* *****************************************
-* JuliaPlayer HTML5 player
 * Suppport utilities
 ****************************************** */
 JuliaPlayer.prototype._Support = function(origin) {
@@ -1657,13 +1743,16 @@ JuliaPlayer.prototype._Support = function(origin) {
         return Math.max(bites, 0.1).toFixed(1) + biteUnits[i];
     };
 
-
     self.forceReadyState = function() {
         if (/Firefox/i.test(navigator.userAgent) ) {
             return true;
         }
 
         return false;
+    };
+
+    self.hasAttr = function (obj, attr) {
+        return Object.keys(obj).indexOf(attr) > -1;
     };
 
 
@@ -1753,13 +1842,19 @@ JuliaPlayer.prototype._Support = function(origin) {
         }
 
         self.fixParentSize();
-        vmargin = 0;
+        var vmargin = 0;
+        var dimensions = [512,288];
 
         if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
             // no fullscreen
-            dimensions = origin.options.responsive === true ? self.getSize(): [origin.env.element.width(), origin.env.element.height()];
+            if (origin.options.responsive === true) {
+                dimensions = self.getSize();
+            } else {
+                var l = origin.options.dimensions.length > 0 ? origin.options.dimensions.length - 1: 0;
+                dimensions = [origin.options.dimensions[l][0], origin.options.dimensions[l][1]];
+            }
         }else{
-            a = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
+            var a = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
 
             if (a === 0 || origin.options.source.fixVideoAspect === true) {
                 a = self.aspect(dimensions[0], dimensions[1]);
@@ -1767,12 +1862,12 @@ JuliaPlayer.prototype._Support = function(origin) {
 
             if (a > 1) {
                 // portrait
-                dimensions = [screen.width,a*screen.width];
+                dimensions = [$(window).width(),a*$(window).width()];
             }else{
                 // landscape
-                dimensions = [screen.width,a*screen.width];
+                dimensions = [$(window).width(),a*$(window).width()];
             }
-            vmargin = (screen.height - dimensions[1])/2;
+            vmargin = ($(window).height() - dimensions[1])/2;
         }
 
         if (origin.options.source.fixVideoAspect === true) {
@@ -1794,16 +1889,20 @@ JuliaPlayer.prototype._Support = function(origin) {
         origin.env.dimensions.width = dimensions[0];
         origin.env.dimensions.height = dimensions[1];
 
+        origin.debug({'UI resize': [dimensions[0], dimensions[1]]});
+        
         // Small size fix, hide time info, BAD BOY!
         $('.julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-currentTime, .julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-duration')
         .css({
             'display': dimensions[0] < 360 ? 'none': 'block'
         });
+
+        origin.event('resize.julia');
     };
 
 
     self.fixParentSize = function() {
-        // Fix video wrapped in inline block, can not get size properlym if inline element detected
+        // Fix video wrapped in inline block, can not get size properly if inline element detected
         var parentBlock = origin.env.element.parent().css('display').toLowerCase();
         if( parentBlock == 'inline' ) {
             origin.env.element.parent().css({'display': 'block'});
@@ -1811,24 +1910,20 @@ JuliaPlayer.prototype._Support = function(origin) {
     };
 
 
-    self.getSize = function()
-    {
+    self.getSize = function() {
         var parentWidth = origin.env.element.parent().width();
         var dim = [Number(parentWidth),Number(parentWidth)*0.5625];
 
-        for( i in origin.options.dimensions )
-        {
-            dim = origin.options.dimensions[i];
-
-            if( parentWidth >= dim[0] )
-            {
-                dimensions = [dim[0],( dim[0]*self.aspect( dim[0], dim[1] ) )];
-                return dimensions;
+        if (origin.options.responsiveBreakpoints === true) {
+            for ( i in origin.options.dimensions ) {
+                dim = origin.options.dimensions[i];
+                if ( parentWidth >= dim[0] ) {
+                    dimensions = [dim[0],(dim[0]*self.aspect(dim[0], dim[1]))];
+                    return dimensions;
+                }
             }
         }
-
-        dimensions = [parentWidth, (parentWidth*self.aspect( dim[0], dim[1] ))];
-
+        dimensions = [parentWidth, (parentWidth*self.aspect(dim[0], dim[1]))];
         return dimensions;
     };
 };
@@ -1845,7 +1940,12 @@ JuliaPlayer.prototype._Subtitles = function (origin) {
         case 'dash':
             return origin.env.dash.setTextTrack(track);
             break;
-        default:    //---------
+        case 'hls':
+            origin.env.hls.subtitleTrack = track;
+            origin.env.hls.subtitleDisplay = true;
+            break;
+        default:
+            //---------
         };
     };
     self.textTracksCleaner = function () {
@@ -1901,14 +2001,15 @@ JuliaPlayer.prototype._Switcher = function (origin) {
         case 'hls':
             origin.env.hls.currentLevel = value;
             break;
-        default:    //---------
+        default:    
+            //---------
         }
     };
     // Automatic bitrate
     self.getAutoBitrate = function (type) {
         switch (origin.env.mode) {
         case 'dash':
-            return origin.env.dash.getAutoSwitchQualityFor(type);
+            return origin.env.dash.getSettings().streaming.abr.autoSwitchBitrate[type];
             break;
         case 'hls':
             return origin.env.hls.autoLevelEnabled;
@@ -1920,7 +2021,16 @@ JuliaPlayer.prototype._Switcher = function (origin) {
     self.setAutoBitrate = function (type, value) {
         switch (origin.env.mode) {
         case 'dash':
-            origin.env.dash.setAutoSwitchQualityFor(type, value);
+            var setting = {
+                'streaming': {
+                    'abr': {
+                        'autoSwitchBitrate': {}
+                    },
+                },
+            };
+            setting[type] = value;
+            origin.env.dash.updateSettings(setting);
+            //origin.env.dash.setAutoSwitchQualityFor(type, value);
             break;
         case 'hls':
             if (type == 'video' && value === true) {
@@ -1936,7 +2046,13 @@ JuliaPlayer.prototype._Switcher = function (origin) {
             return origin.env.dash.getTracksFor(type);
             break;
         case 'hls':
-            return origin.env.hls.audioTracks;
+            if (type === 'audio') {
+                return origin.env.hls.audioTracks;
+            }
+            if (type === 'text') {
+                return origin.env.hls.subtitleTracks;
+            }
+            
             break;
         default:    //---------
         }
@@ -1958,7 +2074,7 @@ JuliaPlayer.prototype._Switcher = function (origin) {
         active = typeof active !== 'number' ? 1 : active;
         switch (origin.env.mode) {
         case 'dash':
-            for (i in data) {
+            for (var i in data) {
                 menuData.push({
                     active: active,
                     value: i,
@@ -1967,7 +2083,7 @@ JuliaPlayer.prototype._Switcher = function (origin) {
             }
             break;
         case 'hls':
-            for (i in data) {
+            for (var i in data) {
                 menuData.push({
                     active: active,
                     value: i,
@@ -1977,14 +2093,14 @@ JuliaPlayer.prototype._Switcher = function (origin) {
             break;
         default:
         }
-        return menuData;
+        return self.uniqueMenuItems(menuData);
     };
     self.prepareBitrateMenu = function (data, menuData, active) {
         menuData = typeof menuData !== 'object' ? [] : menuData;
         active = typeof active !== 'number' ? 0 : active;
         switch (origin.env.mode) {
         case 'dash':
-            for (i in data) {
+            for (var i in data) {
                 menuData.push({
                     active: active,
                     value: data[i].qualityIndex,
@@ -1993,7 +2109,7 @@ JuliaPlayer.prototype._Switcher = function (origin) {
             }
             break;
         case 'hls':
-            for (i in data) {
+            for (var i in data) {
                 menuData.push({
                     active: active,
                     value: i,
@@ -2003,7 +2119,39 @@ JuliaPlayer.prototype._Switcher = function (origin) {
             break;
         default:
         }
+        return self.uniqueMenuItems(menuData);
+    };
+    self.translateItems = function (menuData, key, translation) {
+        if (translation.length > 0) {
+            for (var i in menuData) {
+                menuData[i] = self.mergeItem(menuData[i], key, translation);
+            }
+        }
         return menuData;
+    };
+    self.mergeItem = function (obj, key, translation) {
+        for (var i in translation) {
+            if (origin.Support.hasAttr(translation[i], 'key') === true 
+                && origin.Support.hasAttr(obj, translation[i]['key']) === true 
+                && origin.Support.hasAttr(translation[i], 'find') === true 
+                && origin.Support.hasAttr(translation[i], 'replace') === true 
+                && obj[translation[i]['key']] == translation[i]['find'] 
+            ) {
+                obj.title = translation[i]['replace'];
+                return obj;
+            }
+        }
+        return obj;
+    };
+    self.uniqueMenuItems = function (data) {
+        var u = [], ids = [];
+        for (var i in data) {
+            if (ids.indexOf(data[i].value) == -1) {
+                u.push(data[i]);
+                ids.push(data[i].value);
+            }
+        }
+        return u;
     };
 };
 
@@ -2111,55 +2259,55 @@ JuliaPlayer.prototype._Thumbs = function (origin) {
             self.shadowApi.width = width;
             self.shadowApi.height = height;
             self.shadowApi.preload = 'auto';
-            // ************************
-            // HLS library supported
-            // and HLS requested
-            // ************************
+            self.shadowApi.muted = true;
+            
             if (origin.env.mode === 'hls') {
-                self.hls = new Hls(origin.options.hlsConfig);    // ************************
-                                                                 // Dash
-                                                                 // ************************
-            } else if (origin.env.mode === 'dash') {
-            } else {
-                self.shadowApi.src = origin.options.source.file;
-            }
-            // ************************
-            // HLS library supported
-            // and HLS requested
-            // ************************
-            if (origin.env.mode === 'hls') {
+                // ************************
+                // HLS mode
+                // ************************
+                self.hls = new Hls(origin.options.hlsConfig);
                 self.hls.autoLevelCapping = -1;
                 self.hls.attachMedia(self.shadowApi);
-                self.hls.loadSource(origin.options.source.file);    // ************************
-                                                                    // Usig DASH library
-                                                                    // ************************
+                self.hls.loadSource(origin.options.source.file);
+                self.shadowApi.pause();
             } else if (origin.env.mode === 'dash') {
+                // ************************
+                // DASH mode
+                // ************************
                 self.dash = dashjs.MediaPlayer().create();
                 self.dash.initialize();
                 self.dash.attachView(self.shadowApi);
                 self.dash.attachSource(origin.options.source.file);
                 self.dash.setAutoPlay(false);
-                self.dash.getDebug().setLogToBrowserConsole(false);    // ************************
-                                                                       // Classic VOD file
-                                                                       // ************************
+                self.dash.pause();
+               
             } else {
+                // ************************
+                // Classic VOD file
+                // ************************
+                self.shadowApi.src = origin.options.source.file;
                 self.shadowApi.load();
+                self.shadowApi.pause();
             }
         }
         origin.env.thumbsOk = false;
         index = Math.floor(t);
-        if (index in self.imageCache) {
-            self.image(width, height, index);
-        } else {
-            self.shadowApi.currentTime = index;
-            self.image(width, height, index);
-        }
+        self.image(width, height, index);
     };
     self.image = function (width, height, index) {
         if (index in self.imageCache) {
+            origin.debug({
+                'Thumb from cache': index
+            });
+            
             self.imageThumb.src = self.imageCache[index];
             origin.env.thumbsOk = true;
         } else if (parseInt(self.shadowApi.readyState) == 4) {
+            origin.debug({
+                'Thumb create': index
+            });
+            
+            self.shadowApi.currentTime = index;
             self.context.drawImage(self.shadowApi, 0, 0, width, height);
             dataURL = self.canvas.toDataURL();
             if (dataURL != null && dataURL != undefined) {
@@ -2167,10 +2315,6 @@ JuliaPlayer.prototype._Thumbs = function (origin) {
                 self.imageThumb.src = dataURL;
             }
             origin.env.thumbsOk = true;
-        } else {
-            setTimeout(function () {
-                self.image(width, height, index);
-            }, 70);
         }
     };
     self.cache = function (index, data) {
@@ -2180,6 +2324,13 @@ JuliaPlayer.prototype._Thumbs = function (origin) {
             self.imageCache[index] = data;
         }
         return data;
+    };
+    self.reset = function() {
+        self.shadowApi = false;
+        self.canvas = false;
+        self.context = false;
+        self.imageThumb = false;
+        self.imageCache = {};
     };
 };
 
@@ -2198,25 +2349,23 @@ JuliaPlayer.prototype._Ui = function (origin) {
         // Main container
         origin.env.instance = $('<div class="julia-player off julia-fullscreen-off julia-' + origin.env.ID + ' ' + platformClass + '" id="julia-' + origin.env.ID + '"></div>');
         // Wrapper
-        origin.env.wrapper = $('<div class="julia-wrapper"><video class="julia-video" id="julia-api-' + origin.env.ID + '" preload="auto" '+ autoPlay +' webkit-playsinline playsinline></video></div>');
+        origin.env.wrapper = $('<div class="julia-wrapper"><video class="julia-video" id="julia-api-' + origin.env.ID + '" preload="auto" '+ autoPlay +' webkit-playsinline playsinline></video><div id="ttml-rendering-div-' + origin.env.ID + '"></div></div>');
         // Shield
         origin.env.shield = $('<div class="julia-shield" id="julia-shield-' + origin.env.ID + '"></div>');
         // Preloader
         origin.env.preloader = $('<div class="julia-preloader"></div>');
-        // Suggest
-        origin.env.suggest = $('<div class="julia-suggest" id="julia-suggest-' + origin.env.ID + '"></div>');
         // Toolbars
         origin.env.toolbarTop = $('<div class="julia-toolbar julia-toolbar-top" id="julia-toolbar-top-' + origin.env.ID + '"></div>');
         origin.env.toolbarBottom = $('<div class="julia-toolbar julia-toolbar-bottom" id="julia-toolbar-bottom-' + origin.env.ID + '"></div>');
         // Messaging layer
         origin.env.notifier = $('<div class="julia-notifier" id="julia-notifier-' + origin.env.ID + '"></div>');
         // Buttons
-        origin.env.buttons.bigPlay = $('<button class="julia-btn julia-big-play"><i class="julia-icon julia-play-circle"></i></button>');
+        origin.env.buttons.bigPlay = $('<button class="julia-btn julia-big-play"><i class="julia-icon julia-play"></i></button>');
         origin.env.buttons.play = $('<button class="julia-btn julia-play play">' + '    <i class="julia-icon julia-play"></i>' + '</button>');
         origin.env.buttons.next = $('<button class="julia-btn julia-next" title="' + origin.env.i18n.next + '">' + '    <i class="julia-icon julia-chevron-right"></i>' + '</button>');
         origin.env.buttons.previous = $('<button class="julia-btn julia-previous" title="' + origin.env.i18n.previous + '">' + '    <i class="julia-icon julia-chevron-left"></i>' + '</button>');
         origin.env.buttons.close = $('<button class="julia-btn julia-close" title="' + origin.env.i18n.close + '">' + '    <i class="julia-icon julia-close"></i>' + '</button>');
-        origin.env.buttons.fullscreen = $('<button class="julia-btn julia-fullscreen on">' + '    <i class="julia-icon julia-fullscreen"></i>' + '</button>');
+        origin.env.buttons.fullscreen = $('<div class="julia-btn julia-fullscreen on">' + '    <i class="julia-icon julia-fullscreen"></i>' + '</div>');
         origin.env.buttons.sound = $('<button class="julia-btn julia-sound on">' + '    <i class="julia-icon julia-sound-on"></i>' + '</button>');
         origin.env.buttons.settings = $('<button class="julia-btn julia-settings off">' + '    <i class="julia-icon julia-gear"></i>' + '</button>');
         // Range bars
@@ -2262,7 +2411,6 @@ JuliaPlayer.prototype._Ui = function (origin) {
         // Compose content DOM object
         origin.env.wrapper.append([
             origin.env.shield,
-            origin.env.suggest,
             origin.env.notifier,
             origin.env.buttons.bigPlay,
             origin.env.preloader,
@@ -2287,7 +2435,7 @@ JuliaPlayer.prototype._Ui = function (origin) {
             origin.debug({ 'Api object': 'julia-api-' + origin.env.ID });
             self.zIndexize();
             origin.Ui.state(origin.env.instance, '', 'on');
-            origin.event('julia.ui-created', origin.env.instance);
+            origin.event('uiCreated.julia');
         }, 250);
         //--odn-handle-stop--
     };
@@ -2364,7 +2512,6 @@ JuliaPlayer.prototype._Ui = function (origin) {
             origin.env.shield,
             origin.env.toolbarTop,
             origin.env.toolbarBottom,
-            origin.env.suggest,
             origin.env.menus.settings,
             origin.env.buttons.bigPlay,
             origin.env.notifier,
@@ -2389,7 +2536,7 @@ JuliaPlayer.prototype._Ui = function (origin) {
     });
 }($));
 // Build jQuery plugin
-jQuery.fn.juliaPlayer = function (options) {
+jQuery.fn.JuliaPlayer = function (options) {
     var collection = [];
     this.each(function () {
         // Return if this element already has an instance

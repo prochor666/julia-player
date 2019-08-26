@@ -102,7 +102,8 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
         if (['input'].lastIndexOf(self.elem.prop('tagName').toLowerCase()) > -1) {
             self.elem.val(self.value);
             if (eventPrevent === false) {
-                origin.event('julia.' + self.options.event, origin.env.instance, { 'percent': percent });
+                origin.env.eventBridge[self.options.event] = self.value;
+                origin.event(self.options.event+'.julia');
             }
         }
         // Fix final handle position on track
@@ -128,7 +129,7 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
         if (e.type == 'click') {
             self.slide(_position(e), false);
         }
-        if ((e.type == 'mouseover' || e.type == 'mousemove' || e.type == 'touchmove') && self.options.event == 'progress-change' && origin.env.started === true) {
+        if ((e.type == 'mouseover' || e.type == 'mousemove' || e.type == 'touchmove') && self.options.event == 'progressSliderChange' && origin.env.started === true) {
             pos = _position(e);
             pix = _pixels(e);
             if (origin.Support.isMobile() === false && origin.options.source.live === false && origin.options.thumbs === true) {
@@ -149,7 +150,7 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
                 'margin-left': -(origin.env.labels.goto.innerWidth() / 2) + 'px'
             });
         }
-        if (e.type == 'mouseout' && self.options.event == 'progress-change') {
+        if (e.type == 'mouseout' && self.options.event == 'progressSliderChange') {
             origin.Ui.state(origin.env.labels.goto, 'on', '');
         }
     });
@@ -167,7 +168,7 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
     });
     self.model.on('mousemove touchmove', function (e) {
         if (leftButtonDown === true) {
-            if (self.options.event != 'progress-change') {
+            if (self.options.event != 'progressSliderChange') {
                 self.slide(_position(e), false);
             }else{
                 self.slide(_position(e));

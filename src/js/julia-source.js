@@ -9,6 +9,7 @@ JuliaPlayer.prototype._Source = function (origin) {
         origin.env.errorRecoveryAttempts = 0;
         origin.Subtitles.textTracksCleaner();
         origin.Ui.reset();
+        origin.Thumbs.reset();
         origin.env.continuePlayback = false;
         if (origin.env.api.paused === false) {
             origin.env.api.pause();
@@ -55,7 +56,7 @@ JuliaPlayer.prototype._Source = function (origin) {
         }
         ;
         origin.Events.native();
-        $(document).off('julia.api-mode', '#julia-' + origin.env.ID).on('julia.api-mode', '#julia-' + origin.env.ID, function (e) {
+        $(document).off('modeSet.julia', '#julia-' + origin.env.ID).on('modeSet.julia', '#julia-' + origin.env.ID, function (e) {
             if ((origin.env.continuePlayback === true || origin.options.autoplay === true) && (origin.env.api.paused === true || origin.env.api.ended === true) && origin.env.started === false) {
                 origin.debug({ 'Trying to load source': origin.env.api.src });
                 origin.Source.load();
@@ -65,7 +66,7 @@ JuliaPlayer.prototype._Source = function (origin) {
             origin.Ui.notify('');
             origin.Source.mode();
         } else {
-            origin.Ui.notify(origin.options.i18n.messages.pluginError + ' - ' + source.mode);
+            origin.Ui.notify(origin.options.i18n.messages.pluginError + ' - ' + source.mode);  
         }
     };
     self.modeTest = function () {
@@ -100,12 +101,12 @@ JuliaPlayer.prototype._Source = function (origin) {
             origin.env.dash = origin.env.context.dashjs.MediaPlayer().create();
             break;
         case 'hls':
-            origin.env.hls = new origin.env.context.Hls(origin.options.hlsConfig);
+            origin.env.hls = new origin.env.context.Hls(origin.options.hlsConfig); 
             break;
         default:
         }
         ;
-        origin.event('julia.api-mode', origin.env.instance);
+        origin.event('modeSet.julia');
     };
     self.load = function () {
         origin.env.continuePlayback = true;
@@ -133,9 +134,10 @@ JuliaPlayer.prototype._Source = function (origin) {
                 }, true);
 
                 origin.env.dash.initialize(origin.env.api, source.file, origin.options.autoplay);
-                origin.env.dash.getDebug().setLogToBrowserConsole(origin.options.playbackDebug);
+                TTMLRenderingDiv = document.querySelector('#ttml-rendering-div-'+ origin.env.ID);
+                origin.env.dash.attachTTMLRenderingDiv(TTMLRenderingDiv);
                 origin.Events.dashLibEvents();
-                origin.event('julia.api-load', origin.env.instance);
+                origin.event('sourceSet.julia');
             } catch (err) {
                 origin.debug({ 'Error': err }, true);
                 self.recover(true);
@@ -147,7 +149,7 @@ JuliaPlayer.prototype._Source = function (origin) {
                 origin.env.hls.attachMedia(origin.env.api);
                 origin.Events.hlsLibEvents();
                 origin.env.hlsInitialized = true;
-                origin.event('julia.api-load', origin.env.instance);
+                origin.event('sourceSet.julia');
             } catch (err) {
                 origin.debug({ 'Error': err }, true);
                 self.recover(true);
@@ -157,7 +159,7 @@ JuliaPlayer.prototype._Source = function (origin) {
             try {
                 origin.env.api.src = source.file;
                 origin.env.api.load();
-                origin.event('julia.api-load', origin.env.instance);
+                origin.event('sourceSet.julia');
             } catch (err) {
                 origin.debug({ 'Error': err }, true);
                 self.recover(true);
@@ -186,7 +188,7 @@ JuliaPlayer.prototype._Source = function (origin) {
             }
 
             if (origin.env.errorRecoveryAttempts >= origin.env.errorRecoveryAttemptLimit || force === true) {
-                //origin.Controls.press('stop');
+                origin.Controls.press('stop');
                 origin.Source.set();
             } else {
                 origin.env.errorRecoveryAttempts++;

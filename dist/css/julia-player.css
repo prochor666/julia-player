@@ -1,3 +1,7 @@
+/* *************
+* Julia player 
+* main style 
+************** */
 @keyframes julia-preload-spin {
   100% {
     transform: rotate(360deg); } }
@@ -98,7 +102,7 @@ div.julia-player {
     margin: 0;
     cursor: pointer; }
     div.julia-player .julia-btn .julia-icon {
-      background-color: transparent;
+      background-color: rgba(0, 0, 0, 0);
       color: white;
       -webkit-transition: color 180ms ease-in-out 0s, text-shadow 180ms ease-in-out 0s;
       -moz-transition: color 180ms ease-in-out 0s, text-shadow 180ms ease-in-out 0s;
@@ -322,7 +326,8 @@ div.julia-player {
           display: table-row; }
       div.julia-player .julia-wrapper .julia-menu.julia-menu-settings {
         bottom: 55px;
-        right: 0; }
+        right: 0;
+        overflow-y: auto; }
         div.julia-player .julia-wrapper .julia-menu.julia-menu-settings.on {
           max-height: -webkit-calc( 100% - 100px);
           max-height: -moz-calc( 100% - 100px);
@@ -361,10 +366,10 @@ div.julia-player {
         bottom: -55px;
         left: 0;
         right: 0;
-        background: -webkit-linear-gradient(transparent, rgba(0, 0, 0, 0.95));
-        background: -o-linear-gradient(transparent, rgba(0, 0, 0, 0.95));
-        background: -moz-linear-gradient(transparent, rgba(0, 0, 0, 0.95));
-        background: linear-gradient(transparent, rgba(0, 0, 0, 0.95)); }
+        background: -webkit-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.95));
+        background: -o-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.95));
+        background: -moz-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.95));
+        background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.95)); }
         div.julia-player .julia-wrapper .julia-toolbar.julia-toolbar-bottom.julia-toolbar-visible {
           bottom: 0; }
         div.julia-player .julia-wrapper .julia-toolbar.julia-toolbar-bottom .julia-progress {
@@ -503,66 +508,12 @@ div.julia-player {
       min-height: 100%;
       width: 100vw;
       height: 100vh; }
-  div.julia-player .julia-suggest {
-    position: absolute;
-    top: 25%;
-    left: 50%;
-    width: 100%;
-    height: -webkit-calc( 100% - 1px);
-    height: -moz-calc( 100% - 1px);
-    height: calc( 100% - 1px);
-    -webkit-transform: scale(0);
-    -moz-transform: scale(0);
-    -ms-transform: scale(0);
-    transform: scale(0); }
-    div.julia-player .julia-suggest.on {
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
-      -webkit-transform: scale(1);
-      -moz-transform: scale(1);
-      -ms-transform: scale(1);
-      transform: scale(1);
-      background-color: black; }
-    div.julia-player .julia-suggest .julia-suggest-item {
-      cursor: pointer;
-      width: 50%;
-      height: -webkit-calc( 50% - 1px);
-      height: -moz-calc( 50% - 1px);
-      height: calc( 50% - 1px);
-      min-height: 80px;
-      font-size: 1.1em;
-      float: left;
-      margin: 0;
-      padding: 0;
-      position: relative;
-      overflow: hidden;
-      background-color: black; }
-      div.julia-player .julia-suggest .julia-suggest-item img {
-        position: absolute;
-        top: 0;
-        left: 0; }
-      div.julia-player .julia-suggest .julia-suggest-item .julia-suggest-item-title {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 10px;
-        text-align: left;
-        background-color: rgba(0, 0, 0, 0.7); }
-      div.julia-player .julia-suggest .julia-suggest-item:hover .julia-suggest-item-title {
-        color: deepskyblue; }
 
 div.julia-player,
 div.julia-player button.julia-btn,
 div.julia-player > .julia-wrapper > .julia-toolbar,
 div.julia-player > .julia-wrapper > .julia-toolbar.julia-toolbar-visible,
-div.julia-player .julia-menu,
-div.julia-player .julia-suggest,
-div.julia-player .julia-suggest.on,
-div.julia-player .julia-suggest.on .julia-suggest-item,
-div.julia-player .julia-suggest.on .julia-suggest-item-title {
+div.julia-player .julia-menu {
   -webkit-transition: all 180ms;
   -moz-transition: all 180ms;
   transition: all 180ms; }
