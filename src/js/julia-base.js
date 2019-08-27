@@ -186,7 +186,7 @@ JuliaPlayer = function (options) {
         menus: { settings: '' },
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.1.0'
+        version: '2.1.1'
     };
     // Console debug
     origin.debug = function (data, warn) {
