@@ -461,10 +461,6 @@ JuliaPlayer.prototype._Controls = function (origin) {
             origin.Support.pauseVideo();
             break;
         case 'stop':
-            origin.event('stop.julia', origin.env.instance, origin);
-            if (origin.options.onStop !== false) {
-                origin.Callback.fn(origin.options.onStop, 'onStop', data);
-            }
             origin.Support.stopVideo();
             origin.Ui.state(origin.env.buttons.play, 'pause', 'play');
             origin.Ui.icon(origin.env.buttons.play, 'julia-pause', 'julia-play');
@@ -1821,6 +1817,7 @@ JuliaPlayer.prototype._Support = function(origin) {
 
 
     self.stopVideo = function() {
+        origin.event('stop.julia', origin.env.instance, origin);
         self.pauseVideo();
         self.seekVideo(0);
     };

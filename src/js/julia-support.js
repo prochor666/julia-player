@@ -99,6 +99,7 @@ JuliaPlayer.prototype._Support = function(origin) {
 
 
     self.stopVideo = function() {
+        origin.event('stop.julia', origin.env.instance, origin);
         self.pauseVideo();
         self.seekVideo(0);
     };
