@@ -123,6 +123,7 @@ JuliaPlayer.prototype._Support = function(origin) {
         self.fixParentSize();
         var vmargin = 0;
         var dimensions = [512,288];
+        var realVideoWidth = 0, realVideoHeight = 0, playerWith = 0, playerHeight = 0, videoAspect = 1;
 
         if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
             // no fullscreen
@@ -132,48 +133,70 @@ JuliaPlayer.prototype._Support = function(origin) {
                 var l = origin.options.dimensions.length > 0 ? origin.options.dimensions.length - 1: 0;
                 dimensions = [origin.options.dimensions[l][0], origin.options.dimensions[l][1]];
             }
+
+            realVideoWidth = Math.ceil(dimensions[0]);
+            realVideoHeight = Math.ceil(dimensions[1]);
+            
         }else{
-            var a = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
+            // fullscreen
+            videoAspect = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
 
-            if (a === 0 || origin.options.source.fixVideoAspect === true) {
-                a = self.aspect(dimensions[0], dimensions[1]);
+            if (videoAspect === 0 || origin.options.source.fixVideoAspect === true) {
+                videoAspect = self.aspect(dimensions[0], dimensions[1]);
             }
 
-            if (a > 1) {
-                // portrait
-                dimensions = [$(window).width(),a*$(window).width()];
-            }else{
-                // landscape
-                dimensions = [$(window).width(),a*$(window).width()];
+            if (origin.Support.isMobile()) {
+                dimensions = [window.innerWidth, window.innerHeight];
+            } else {
+                dimensions = [window.innerWidth, window.innerHeight];
             }
-            vmargin = ($(window).height() - dimensions[1])/2;
+            
+
+            // landscape
+            console.log('Landscape');
+            realVideoHeight = dimensions[1];
+            realVideoWidth = realVideoHeight / videoAspect;
+
+            if (realVideoWidth > dimensions[0]) {
+                realVideoWidth = dimensions[0];
+                realVideoHeight = realVideoWidth * videoAspect;
+            }
+
+            // video margin top fix
+            vmargin = (window.innerHeight - realVideoHeight)/2;
         }
 
+        playerWith = Math.ceil(dimensions[0]);
+        playerHeight = Math.ceil(dimensions[1]);
+
+        videoAspect = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
+        var disaplayAspect = self.aspect(playerWith, playerHeight);
+        
         if (origin.options.source.fixVideoAspect === true) {
             origin.env.api.setAttribute('style', 'object-fit: fill;margin-top: '+vmargin+'px;');
-            origin.env.api.setAttribute('width', dimensions[0]);
-            origin.env.api.setAttribute('height', dimensions[1]);
+            origin.env.api.setAttribute('width', realVideoWidth);
+            origin.env.api.setAttribute('height', realVideoHeight);
         }else{
             origin.env.api.setAttribute('style', 'margin-top: '+vmargin+'px;');
-            origin.env.api.setAttribute('width', dimensions[0]);
-            origin.env.api.setAttribute('height', dimensions[1]);
+            origin.env.api.setAttribute('width', realVideoWidth);
+            origin.env.api.setAttribute('height', realVideoHeight);
         }
 
-        origin.env.instance.width(dimensions[0]);
-        origin.env.instance.height(dimensions[1]);
+        origin.env.instance.width(playerWith);
+        origin.env.instance.height(playerHeight);
 
-        origin.env.wrapper.width(dimensions[0]);
-        origin.env.wrapper.height(dimensions[1]);
+        origin.env.wrapper.width(playerWith);
+        origin.env.wrapper.height(playerHeight);
 
-        origin.env.dimensions.width = dimensions[0];
-        origin.env.dimensions.height = dimensions[1];
+        origin.env.dimensions.width = playerWith;
+        origin.env.dimensions.height = playerHeight;
 
-        origin.debug({'UI resize': [dimensions[0], dimensions[1]]});
+        origin.debug({'UI resize': [playerWith, playerHeight]});
         
         // Small size fix, hide time info, BAD BOY!
         $('.julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-currentTime, .julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-duration')
         .css({
-            'display': dimensions[0] < 360 ? 'none': 'block'
+            'display': playerWith < 360 ? 'none': 'block'
         });
 
         origin.event('resize.julia');

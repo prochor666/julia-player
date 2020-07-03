@@ -182,6 +182,7 @@ JuliaPlayer.prototype._Source = function (origin) {
 
             if (origin.env.errorRecoveryAttempts > 0) {
                 origin.Ui.state(origin.env.preloader, '', 'on');
+                origin.Ui.cursor(true);
                 //origin.env.toolbarBottom.removeClass('julia-toolbar-visible');
             }else{
                 origin.Ui.state(origin.env.preloader, 'on', '');

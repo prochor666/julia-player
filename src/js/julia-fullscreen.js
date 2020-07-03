@@ -41,6 +41,7 @@ JuliaPlayer.prototype._Fullscreen = function (origin) {
     };
     self.landscapeLock = function (lock) {
         if (origin.Support.isMobile()) {
+            var sor;
             if (screen.orientation) {
                 sor = screen.orientation;
             }

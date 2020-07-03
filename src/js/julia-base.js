@@ -121,8 +121,8 @@ JuliaPlayer = function (options) {
             poster: '',
             link: '',
             mode: 'legacy',
-            live: false,
-            fixVideoAspect: false, */
+            live: false, */
+            fixVideoAspect: false, 
         },
         thumbs: false,
         zIndexStart: 1,
@@ -186,7 +186,7 @@ JuliaPlayer = function (options) {
         menus: { settings: '' },
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.1.1'
+        version: '2.2.0'
     };
     // Console debug
     origin.debug = function (data, warn) {
