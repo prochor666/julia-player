@@ -11,11 +11,7 @@ JuliaPlayer.prototype._Thumbs = function (origin) {
     self.imageCache = {};
     // Create shadow api and grab thumbnail
     self.dim = function (i) {
-        var dim = [
-            origin.env.instance.width(),
-            origin.env.instance.height()
-        ];
-        var a = dim[1] / dim[0];
+        var a = origin.env.api.videoHeight / origin.env.api.videoWidth;
         var dimensions = [
             128,
             128 * a

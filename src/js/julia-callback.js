@@ -28,7 +28,7 @@ JuliaPlayer.prototype._Callback = function (origin) {
     self.onTime = function () {
         var currentTimeReadable = origin.Timecode.toHuman(origin.env.api.currentTime);
         if (origin.options.onTime && typeof origin.options.onTime === 'object' && Object.keys(origin.options.onTime).indexOf(currentTimeReadable) > -1 && origin.env.onTimeRised.indexOf(currentTimeReadable) == -1) {
-            f = origin.options.onTime[currentTimeReadable];
+            var f = origin.options.onTime[currentTimeReadable];
             origin.env.onTimeRised.push(currentTimeReadable);
             if ($.inArray(typeof f, [
                     'string',

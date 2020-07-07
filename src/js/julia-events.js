@@ -202,7 +202,7 @@ JuliaPlayer.prototype._Events = function (origin) {
         // Bind progressbar change
         $('#julia-' + origin.env.ID).off('progressSliderChange.julia').on('progressSliderChange.julia', function (e) {
             if (origin.env.started === true) {
-                seekTo = origin.Timecode.toSeconds(origin.env.eventBridge.progressSliderChange);
+                var seekTo = origin.Timecode.toSeconds(origin.env.eventBridge.progressSliderChange);
                 seekTo = seekTo >= origin.Support.getDuration() ? origin.Support.getDuration(): seekTo;
                 origin.Controls.press('goto', { currentTime: seekTo });
             }
@@ -413,7 +413,7 @@ JuliaPlayer.prototype._Events = function (origin) {
             origin.env.hls.on(origin.env.context.Hls.Events.MANIFEST_PARSED, function (event, data) {
                 var bitratesVideo = origin.Switcher.getBitrateList('video');
                 var tracksAudio = origin.Switcher.getTracks('audio');
-                var menuItems;
+                var menuItems, active = 0;
                 origin.debug({
                     'Stream is initialized and ready': event,
                     'Video bitrate list': bitratesVideo,
@@ -455,7 +455,8 @@ JuliaPlayer.prototype._Events = function (origin) {
             });
 
             origin.env.hls.on(origin.env.context.Hls.Events.LEVEL_LOADED, function (event, data) {
-                tracksAudio = origin.Switcher.getTracks('audio');
+                var tracksAudio = origin.Switcher.getTracks('audio');
+                var menuItems, active = 0;
                 origin.debug({ 'HLS audio track list': tracksAudio });
                 // Audio tracks
                 if (typeof tracksAudio === 'object' && tracksAudio && tracksAudio.length > 1) {
@@ -473,6 +474,7 @@ JuliaPlayer.prototype._Events = function (origin) {
             // Txt tracks
             origin.env.hls.on(origin.env.context.Hls.Events.SUBTITLE_TRACKS_UPDATED, function (event, data) {
                 var tracksText = origin.Switcher.getTracks('text');
+                var menuItems, active = 0;
                 origin.debug({ 'HLS text track list': tracksText });
                 if (typeof tracksText === 'object' && tracksText && tracksText.length > 0) {
                     origin.Ui.state(origin.env.menus.subtitles, '', 'on');
@@ -535,6 +537,7 @@ JuliaPlayer.prototype._Events = function (origin) {
         if (origin.env.mode == 'dash') {
             Object.keys(origin.env.context.dashjs.MediaPlayer.events).map(function (eventName, index) {
                 origin.env.dash.on(origin.env.context.dashjs.MediaPlayer.events[eventName], function (event) {
+                    var menuItems, active = 0;
                     switch (event.type) {
                     case origin.env.context.dashjs.MediaPlayer.events.ERROR:
                         origin.debug({
@@ -565,10 +568,10 @@ JuliaPlayer.prototype._Events = function (origin) {
                         }
                         break;
                     case origin.env.context.dashjs.MediaPlayer.events.STREAM_INITIALIZED:
-                        bitratesVideo = origin.Switcher.getBitrateList('video');
-                        bitratesAudio = origin.Switcher.getBitrateList('audio');
-                        tracksAudio = origin.Switcher.getTracks('audio');
-                        tracksText = origin.Switcher.getTracks('text');
+                        var bitratesVideo = origin.Switcher.getBitrateList('video');
+                        var bitratesAudio = origin.Switcher.getBitrateList('audio');
+                        var tracksAudio = origin.Switcher.getTracks('audio');
+                        var tracksText = origin.Switcher.getTracks('text');
                         origin.debug({
                             'Stream is initialized and ready': event,
                             'Video bitrate list': origin.Switcher.getBitrateList('video'),

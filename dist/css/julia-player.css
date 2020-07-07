@@ -257,7 +257,8 @@ div.julia-player {
     padding-left: 6px; } }
   div.julia-player .julia-wrapper {
     position: relative;
-    background: transparent; }
+    background: transparent;
+    text-align: center; }
     div.julia-player .julia-wrapper .julia-shield {
       position: absolute;
       top: 0;
@@ -281,18 +282,15 @@ div.julia-player {
         display: block; }
     div.julia-player .julia-wrapper .julia-btn.julia-big-play {
       width: 72px;
-      height: 72px;
-      line-height: 72px;
+      height: 80px;
+      line-height: 80px;
       text-align: center;
       position: absolute;
       bottom: 50%;
       left: 50%;
-      border-radius: 50%;
       font-size: 72px;
-      margin-left: -36px;
-      margin-bottom: -36px; }
-    div.julia-player .julia-wrapper video.julia-video {
-      margin: 0 auto; }
+      margin-left: -40px;
+      margin-bottom: -40px; }
     div.julia-player .julia-wrapper .julia-menu {
       height: 0;
       overflow-y: hidden;
@@ -507,7 +505,10 @@ div.julia-player {
       min-width: 100%;
       min-height: 100%;
       width: 100vw;
-      height: 100vh; }
+      height: 100vh;
+      text-align: center; }
+      div.julia-player.julia-fullscreen-on .julia-wrapper video.julia-video {
+        margin: 0 auto; }
 
 div.julia-player,
 div.julia-player button.julia-btn,

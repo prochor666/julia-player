@@ -120,40 +120,29 @@ JuliaPlayer.prototype._Support = function(origin) {
             origin.debug({'Resize event message': m});
         }
 
-        self.fixParentSize();
         var vmargin = 0;
         var dimensions = [512,288];
-        var realVideoWidth = 0, realVideoHeight = 0, playerWith = 0, playerHeight = 0, videoAspect = 1;
+        var realVideoWidth = 0, realVideoHeight = 0, playerWith = 0, playerHeight = 0, videoAspect = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
 
         if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
             // no fullscreen
             if (origin.options.responsive === true) {
                 dimensions = self.getSize();
             } else {
-                var l = origin.options.dimensions.length > 0 ? origin.options.dimensions.length - 1: 0;
-                dimensions = [origin.options.dimensions[l][0], origin.options.dimensions[l][1]];
+                dimensions = [Number(origin.options.width),Number(origin.options.width)*origin.options.aspectRatio];
             }
 
-            realVideoWidth = Math.ceil(dimensions[0]);
-            realVideoHeight = Math.ceil(dimensions[1]);
-            
+            realVideoHeight = dimensions[1];
+            realVideoWidth = realVideoHeight / videoAspect;
         }else{
             // fullscreen
-            videoAspect = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
-
-            if (videoAspect === 0 || origin.options.source.fixVideoAspect === true) {
-                videoAspect = self.aspect(dimensions[0], dimensions[1]);
-            }
-
             if (origin.Support.isMobile()) {
-                dimensions = [window.innerWidth, window.innerHeight];
+                dimensions = [window.outerWidth, window.outerHeight];
             } else {
                 dimensions = [window.innerWidth, window.innerHeight];
             }
-            
 
-            // landscape
-            console.log('Landscape');
+            // landscape orientation of wrapper
             realVideoHeight = dimensions[1];
             realVideoWidth = realVideoHeight / videoAspect;
 
@@ -170,17 +159,12 @@ JuliaPlayer.prototype._Support = function(origin) {
         playerHeight = Math.ceil(dimensions[1]);
 
         videoAspect = self.aspect(origin.env.api.videoWidth, origin.env.api.videoHeight);
-        var disaplayAspect = self.aspect(playerWith, playerHeight);
         
-        if (origin.options.source.fixVideoAspect === true) {
-            origin.env.api.setAttribute('style', 'object-fit: fill;margin-top: '+vmargin+'px;');
-            origin.env.api.setAttribute('width', realVideoWidth);
-            origin.env.api.setAttribute('height', realVideoHeight);
-        }else{
-            origin.env.api.setAttribute('style', 'margin-top: '+vmargin+'px;');
-            origin.env.api.setAttribute('width', realVideoWidth);
-            origin.env.api.setAttribute('height', realVideoHeight);
-        }
+        origin.env.api.setAttribute('style', 'object-fit: fill;margin-top: '+vmargin+'px;');
+        origin.env.api.setAttribute('width', realVideoWidth);
+        origin.env.api.setAttribute('height', realVideoHeight);
+        origin.env.api.setAttribute('marginLeft', 'auto');
+        origin.env.api.setAttribute('marginRight', 'auto');
 
         origin.env.instance.width(playerWith);
         origin.env.instance.height(playerHeight);
@@ -192,6 +176,7 @@ JuliaPlayer.prototype._Support = function(origin) {
         origin.env.dimensions.height = playerHeight;
 
         origin.debug({'UI resize': [playerWith, playerHeight]});
+        origin.debug({'UI resize video': [realVideoWidth, realVideoHeight]});
         
         // Small size fix, hide time info, BAD BOY!
         $('.julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-currentTime, .julia-toolbar-bottom-'+origin.env.ID+':not(.live) .julia-panel.julia-duration')
@@ -205,27 +190,11 @@ JuliaPlayer.prototype._Support = function(origin) {
 
     self.fixParentSize = function() {
         // Fix video wrapped in inline block, can not get size properly if inline element detected
-        var parentBlock = origin.env.element.parent().css('display').toLowerCase();
-        if( parentBlock == 'inline' ) {
-            origin.env.element.parent().css({'display': 'block'});
-        }
+        origin.env.element.parent().css({'display': 'block'});
     };
 
 
     self.getSize = function() {
-        var parentWidth = origin.env.element.parent().width();
-        var dim = [Number(parentWidth),Number(parentWidth)*0.5625];
-
-        if (origin.options.responsiveBreakpoints === true) {
-            for ( i in origin.options.dimensions ) {
-                dim = origin.options.dimensions[i];
-                if ( parentWidth >= dim[0] ) {
-                    dimensions = [dim[0],(dim[0]*self.aspect(dim[0], dim[1]))];
-                    return dimensions;
-                }
-            }
-        }
-        dimensions = [parentWidth, (parentWidth*self.aspect(dim[0], dim[1]))];
-        return dimensions;
+        return [Number(origin.env.element.parent().width()),Number(origin.env.element.parent().width())*origin.options.aspectRatio];
     };
 };

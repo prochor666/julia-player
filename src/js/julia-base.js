@@ -20,28 +20,8 @@ JuliaPlayer = function (options) {
         },
         volume: -1,
         muted: -1,
-        dimensions: [
-            [
-                1920,
-                1080
-            ],
-            [
-                1280,
-                720
-            ],
-            [
-                960,
-                540
-            ],
-            [
-                640,
-                360
-            ],
-            [
-                512,
-                288
-            ]
-        ],
+        width: 640,
+        aspectRatio: 0.5625,
         hlsConfig: { debug: false },
         i18n: {
             messages: { pluginError: 'Plugin error' },
@@ -113,7 +93,6 @@ JuliaPlayer = function (options) {
         playbackDebug: false,
         pluginMode: false,
         responsive: true,
-        responsiveBreakpoints: false,
         plugins: 'julia-player/dist/js/lib',
         skip: 5,
         source: {
@@ -122,7 +101,6 @@ JuliaPlayer = function (options) {
             link: '',
             mode: 'legacy',
             live: false, */
-            fixVideoAspect: false, 
         },
         thumbs: false,
         zIndexStart: 1,
@@ -186,7 +164,7 @@ JuliaPlayer = function (options) {
         menus: { settings: '' },
         preloader: $(),
         progressStep: 0.01, // Full sense: 100, so .01 is enough accurate
-        version: '2.2.0'
+        version: '2.3.0'
     };
     // Console debug
     origin.debug = function (data, warn) {

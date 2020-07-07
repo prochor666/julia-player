@@ -25,7 +25,6 @@ JuliaPlayer.prototype._Source = function (origin) {
         source.link = Object.keys(_source).indexOf('link') > -1 ? _source.link.toString() : source.link.toString();
         source.live = Object.keys(_source).indexOf('live') > -1 ? _source.live : source.live;
         source.live = typeof source.live === 'undefined' ? false : source.live;
-        source.fixVideoAspect = Object.keys(_source).indexOf('fixVideoAspect') > -1 ? _source.fixVideoAspect : source.fixVideoAspect;
         source.mode = typeof source.mode === 'undefined' ? 'legacy' : source.mode;
         if (source.mode === 'hls' && self.modeTest() && origin.env.context.Hls.isSupported() !== true) {
             source.mode = 'hlsnative';

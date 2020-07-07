@@ -6,7 +6,7 @@
 JuliaPlayer.prototype._Timecode = function (origin) {
     var self = this;
     self.toPercents = function (currentTime) {
-        duration = origin.env.api.duration;
+        var duration = origin.env.api.duration;
         if (isNaN(duration) || typeof Number(duration) !== 'number') {
             duration = 0;
         }
@@ -16,7 +16,7 @@ JuliaPlayer.prototype._Timecode = function (origin) {
         return duration > 0 ? currentTime / duration * 100 : 0;
     };
     self.toSeconds = function (percent) {
-        duration = origin.env.api.duration;
+        var duration = origin.env.api.duration;
         if (isNaN(duration) || typeof Number(duration) !== 'number') {
             duration = 0;
         }
@@ -28,10 +28,10 @@ JuliaPlayer.prototype._Timecode = function (origin) {
     self.toNum = function (human) {
         human = human.split(':');
         human.reverse();
-        s = parseInt(human[0]);
-        m = human.length > 1 ? parseInt(human[1]) : 0;
-        h = human.length > 2 ? parseInt(human[3]) : 0;
-        t = s + m * 60 + h * 60 * 60;
+        var s = parseInt(human[0]);
+        var m = human.length > 1 ? parseInt(human[1]) : 0;
+        var h = human.length > 2 ? parseInt(human[3]) : 0;
+        var t = s + m * 60 + h * 60 * 60;
         return t;
     };
     self.toHuman = function (time) {
@@ -39,14 +39,14 @@ JuliaPlayer.prototype._Timecode = function (origin) {
             time = 0;
         }
         time = time.toString().split('.');
-        s = time[0];
-        H = Math.floor(s / 3600);
-        M = Math.floor((s - H * 3600) / 60);
-        S = Math.floor(s - H * 3600 - M * 60);
-        H = ('0' + H.toString()).slice(-2);
-        M = ('0' + M.toString()).slice(-2);
-        S = ('0' + S.toString()).slice(-2);
-        str = H > 0 ? H + ':' + M + ':' + S : M + ':' + S;
+        var s = time[0];
+        var H = Math.floor(s / 3600);
+        var M = Math.floor((s - H * 3600) / 60);
+        var S = Math.floor(s - H * 3600 - M * 60);
+        var H = ('0' + H.toString()).slice(-2);
+        var M = ('0' + M.toString()).slice(-2);
+        var S = ('0' + S.toString()).slice(-2);
+        var str = H > 0 ? H + ':' + M + ':' + S : M + ':' + S;
         return str;
     };
 };

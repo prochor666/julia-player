@@ -71,8 +71,8 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
         self.model.find('.julia-buffer-sequence').remove();
         for (var i = 0; i < b.length; i++) {
             var sequenceModel = self.model.find('.julia-buffer-sequence-' + i);
-            _percent1 = _normalize(origin.Timecode.toPercents(b.start(i)));
-            _percent2 = _normalize(origin.Timecode.toPercents(b.end(i)));
+            var _percent1 = _normalize(origin.Timecode.toPercents(b.start(i)));
+            var _percent2 = _normalize(origin.Timecode.toPercents(b.end(i)));
             var pos1 = self.track.innerWidth() / 100 * _percent1;
             var pos2 = self.track.innerWidth() / 100 * _percent2;
             if (sequenceModel.length == 0) {
@@ -130,15 +130,15 @@ JuliaPlayer.prototype._Slider = function (origin, options) {
             self.slide(_position(e), false);
         }
         if ((e.type == 'mouseover' || e.type == 'mousemove' || e.type == 'touchmove') && self.options.event == 'progressSliderChange' && origin.env.started === true) {
-            pos = _position(e);
-            pix = _pixels(e);
+            var pos = _position(e);
+            var pix = _pixels(e);
             if (origin.Support.isMobile() === false && origin.options.source.live === false && origin.options.thumbs === true) {
                 origin.Thumbs.thumb(origin.Timecode.toSeconds(pos));
             }
             origin.Ui.state(origin.env.labels.goto, '', 'on');
             origin.Ui.panel(origin.env.labels.goto, origin.Timecode.toHuman(origin.Timecode.toSeconds(pos)));
-            left = pix + 'px';
-            border = origin.env.labels.goto.innerWidth() / 2;
+            var left = pix + 'px';
+            var border = origin.env.labels.goto.innerWidth() / 2;
             if (pix < border) {
                 left = border + 10 + 'px';
             }

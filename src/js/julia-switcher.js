@@ -97,7 +97,7 @@ JuliaPlayer.prototype._Switcher = function (origin) {
     self.setTrack = function (type, track) {
         switch (origin.env.mode) {
         case 'dash':
-            t = origin.Switcher.getTracks(type);
+            var t = origin.Switcher.getTracks(type);
             origin.env.dash.setCurrentTrack(t[track]);
             break;
         case 'hls':

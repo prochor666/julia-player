@@ -19,9 +19,9 @@ JuliaPlayer.prototype._Subtitles = function (origin) {
         };
     };
     self.textTracksCleaner = function () {
-        var tracks = origin.env.api.textTracks;
+        var tracks = origin.env.api.textTracks, track = {};
         if (tracks && tracks.length && tracks.length > 0 && tracks.length > 0) {
-            for (i in tracks) {
+            for (var i in tracks) {
                 track = tracks[i];
                 if (track && track.kind && (track.kind == 'subtitles' || track.kind == 'captions')) {
                     track.mode = 'disabled';
